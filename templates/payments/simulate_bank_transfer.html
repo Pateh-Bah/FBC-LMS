@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Simulate Bank Transfer Payment{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Simulate Bank Transfer Payment</h2>
+    <p>Please enter your bank details for the transfer.</p>
+    <p><strong>Amount to Pay:</strong> GMD {{ amount }}</p>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post" action="{% url 'fbc_payments:complete_simulated_payment' %}">
+        {% csrf_token %}
+        <input type="hidden" name="payment_id" value="{{ payment_id }}">
+        <input type="hidden" name="payment_method" value="bank_transfer">
+
+        <div class="mb-3">
+            <label for="bank_name" class="form-label">Bank Name</label>
+            <select class="form-select" id="bank_name" name="bank_name" required>
+                <option value="" selected disabled>Select your bank</option>
+                <option value="eco_bank">Eco Bank</option>
+                <option value="gt_bank">GT Bank</option>
+                <option value="first_international_bank">First International Bank</option>
+                <option value="rokel_commercial_bank">Rokel Commercial Bank</option>
+                <option value="sierra_leone_commercial_bank">Sierra Leone Commercial Bank</option>
+                <option value="united_bank_africa">United Bank for Africa</option>
+                <option value="access_bank">Access Bank</option>
+                <option value="other">Other</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="account_number" class="form-label">Account Number</label>
+            <input type="text" class="form-control" id="account_number" name="account_number" placeholder="Enter your account number" required pattern="\d{10,15}" title="Enter a valid account number (10-15 digits).">
+        </div>
+
+        <div class="mb-3">
+            <label for="account_holder_name" class="form-label">Account Holder Name</label>
+            <input type="text" class="form-control" id="account_holder_name" name="account_holder_name" value="{{ request.user.get_full_name|default:request.user.username }}" placeholder="Enter account holder name" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="deposit_slip_reference" class="form-label">Deposit Slip Reference (Simulated)</label>
+            <input type="text" class="form-control" id="deposit_slip_reference" name="deposit_slip_reference" placeholder="Enter any reference number for simulation" required>
+            <div class="form-text">In a real scenario, you would upload a deposit slip image.</div>
+        </div>
+
+        <button type="submit" class="btn btn-success">Complete Bank Transfer</button>
+        <a href="{% url 'fbc_payments:process_payment' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

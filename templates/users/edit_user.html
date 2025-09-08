@@ -1,0 +1,554 @@
+{% extends "admin/admin_base.html" %}
+{% load static %}
+
+{% block page_title %}Edit Library Member - {{ user.get_full_name|default:user.username }}{% endblock %}
+
+{% block content %}
+<!-- Permission Check Warning for Staff -->
+{% if request.user.user_type == 'staff' and user.user_type == 'admin' %}
+<div class="bg-red-50 border border-red-200 rounded-xl p-6 mb-6 animate-fade-in">
+    <div class="flex items-center">
+        <div class="flex-shrink-0">
+            <i class="fas fa-exclamation-triangle text-2xl text-red-600"></i>
+        </div>
+        <div class="ml-4">
+            <h3 class="text-lg font-serif font-bold text-red-900">Access Restricted</h3>
+            <p class="text-red-700 font-body mt-1">Staff members cannot edit administrator accounts. Please contact an administrator for assistance.</p>
+        </div>
+    </div>
+    <div class="mt-4">
+        <a href="{% url 'fbc_users:manage_users' %}" 
+           class="btn-secondary inline-flex items-center space-x-2 px-4 py-2 rounded-lg">
+            <i class="fas fa-arrow-left"></i>
+            <span>Back to User Management</span>
+        </a>
+    </div>
+</div>
+{% endif %}
+
+<div class="bg-white rounded-xl shadow-lg p-8 animate-fade-in">
+    <!-- Header Section -->
+    <div class="mb-8">
+        <div class="flex items-center space-x-4 mb-4">
+            <a href="{% url 'fbc_users:manage_users' %}" 
+               class="text-fbc-green-600 hover:text-fbc-green-800 p-2 rounded-lg hover:bg-fbc-green-50 transition-all duration-200">
+                <i class="fas fa-arrow-left text-xl"></i>
+            </a>
+            <div class="flex-1">
+                <h1 class="text-3xl font-serif font-bold text-fbc-navy-900 mb-2">Edit Library Member</h1>
+                <p class="text-fbc-gray-600 font-body">Update member information for {{ user.get_full_name|default:user.username }}</p>
+            </div>
+            <div class="text-right">
+                <div class="text-sm text-fbc-gray-500 font-body">Member ID: {{ user.id }}</div>
+                <div class="text-sm text-fbc-gray-500 font-body">Joined: {{ user.date_joined|date:"M d, Y" }}</div>
+            </div>
+        </div>
+        
+        <!-- Progress Indicator -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                    <i class="fas fa-edit"></i>
+                </div>
+                <div class="flex-1 h-2 bg-blue-200 rounded-full relative">
+                    <div class="h-full bg-blue-500 rounded-full" style="width: 100%;"></div>
+                </div>
+                <span class="text-blue-700 font-body font-medium">Member Information Update</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Form -->
+    <form method="post" enctype="multipart/form-data" class="space-y-8" id="editUserForm" {% if request.user.user_type == 'staff' and user.user_type == 'admin' %}style="pointer-events: none; opacity: 0.6;"{% endif %}>
+        {% csrf_token %}
+        
+        <!-- Disable form for staff editing admin -->
+        {% if request.user.user_type == 'staff' and user.user_type == 'admin' %}
+        <input type="hidden" name="restricted_edit" value="true">
+        {% endif %}
+        
+        <!-- Current Profile Section -->
+        <div class="bg-fbc-green-25 border border-fbc-green-200 rounded-xl p-6">
+            <h3 class="text-xl font-serif font-bold text-fbc-navy-900 mb-6 flex items-center">
+                <i class="fas fa-user-circle text-fbc-green-600 mr-3"></i>
+                Current Profile
+            </h3>
+            
+            <div class="flex items-start space-x-6">
+                <div class="flex-shrink-0">
+                    {% if user.profile_image %}
+                    <img class="h-24 w-24 rounded-full object-cover border-4 border-fbc-green-200" 
+                         src="{{ user.profile_image.url }}" 
+                         alt="{{ user.get_full_name }}"
+                         id="currentProfileImage">
+                    {% else %}
+                    <div class="h-24 w-24 rounded-full bg-fbc-green-100 flex items-center justify-center border-4 border-fbc-green-200" id="currentProfileImage">
+                        <i class="fas fa-user text-3xl text-fbc-green-600"></i>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="flex-1">
+                    <h4 class="text-lg font-serif font-semibold text-fbc-navy-900">{{ user.get_full_name|default:user.username }}</h4>
+                    <p class="text-fbc-gray-600 font-body">{{ user.email }}</p>
+                    <div class="flex items-center space-x-4 mt-2">
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium 
+                            {% if user.user_type == 'admin' %}bg-red-100 text-red-800
+                            {% elif user.user_type == 'staff' %}bg-blue-100 text-blue-800
+                            {% elif user.user_type == 'lecturer' %}bg-purple-100 text-purple-800
+                            {% else %}bg-fbc-green-100 text-fbc-green-800{% endif %}">
+                            {{ user.get_user_type_display }}
+                        </span>
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium 
+                            {% if not user.is_suspended %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                            {% if not user.is_suspended %}Active{% else %}Suspended{% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Personal Information Section -->
+        <div class="bg-blue-25 border border-blue-200 rounded-xl p-6">
+            <h3 class="text-xl font-serif font-bold text-fbc-navy-900 mb-6 flex items-center">
+                <i class="fas fa-user text-blue-600 mr-3"></i>
+                Personal Information
+            </h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="first_name" class="block text-sm font-sans font-medium text-fbc-navy-900 mb-2">
+                        First Name <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" 
+                           id="first_name" 
+                           name="first_name" 
+                           required 
+                           value="{{ user.first_name }}"
+                           class="w-full px-4 py-3 border border-fbc-green-300 rounded-lg focus:ring-2 focus:ring-fbc-green-500 focus:border-fbc-green-500 transition-all duration-300 font-body"
+                           placeholder="Enter first name">
+                </div>
+                
+                <div>
+                    <label for="last_name" class="block text-sm font-sans font-medium text-fbc-navy-900 mb-2">
+                        Last Name <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" 
+                           id="last_name" 
+                           name="last_name" 
+                           required 
+                           value="{{ user.last_name }}"
+                           class="w-full px-4 py-3 border border-fbc-green-300 rounded-lg focus:ring-2 focus:ring-fbc-green-500 focus:border-fbc-green-500 transition-all duration-300 font-body"
+                           placeholder="Enter last name">
+                </div>
+                
+                <div>
+                    <label for="username" class="block text-sm font-sans font-medium text-fbc-navy-900 mb-2">
+                        Username <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" 
+                           id="username" 
+                           name="username" 
+                           required 
+                           value="{{ user.username }}"
+                           class="w-full px-4 py-3 border border-fbc-green-300 rounded-lg focus:ring-2 focus:ring-fbc-green-500 focus:border-fbc-green-500 transition-all duration-300 font-body"
+                           placeholder="Enter username">
+                    <p class="text-xs text-fbc-gray-500 mt-1">Must be unique and contain only letters, numbers, and underscores</p>
+                </div>
+                
+                <div>
+                    <label for="university_id" class="block text-sm font-sans font-medium text-fbc-navy-900 mb-2">
+                        University/Staff ID
+                    </label>
+                    <input type="text" 
+                           id="university_id" 
+                           name="university_id" 
+                           value="{{ user.university_id|default:'' }}"
+                           class="w-full px-4 py-3 border border-fbc-green-300 rounded-lg focus:ring-2 focus:ring-fbc-green-500 focus:border-fbc-green-500 transition-all duration-300 font-body"
+                           placeholder="Enter ID number">
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Information Section -->
+        <div class="bg-purple-25 border border-purple-200 rounded-xl p-6">
+            <h3 class="text-xl font-serif font-bold text-fbc-navy-900 mb-6 flex items-center">
+                <i class="fas fa-envelope text-purple-600 mr-3"></i>
+                Contact Information
+            </h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="email" class="block text-sm font-sans font-medium text-fbc-navy-900 mb-2">
+                        Email Address <span class="text-red-500">*</span>
+                    </label>
+                    <input type="email" 
+                           id="email" 
+                           name="email" 
+                           required 
+                           value="{{ user.email }}"
+                           class="w-full px-4 py-3 border border-fbc-green-300 rounded-lg focus:ring-2 focus:ring-fbc-green-500 focus:border-fbc-green-500 transition-all duration-300 font-body"
+                           placeholder="Enter email address">
+                </div>
+                
+                <div>
+                    <label for="phone_number" class="block text-sm font-sans font-medium text-fbc-navy-900 mb-2">
+                        Phone Number
+                    </label>
+                    <input type="tel" 
+                           id="phone_number" 
+                           name="phone_number" 
+                           value="{{ user.phone_number|default:'' }}"
+                           class="w-full px-4 py-3 border border-fbc-green-300 rounded-lg focus:ring-2 focus:ring-fbc-green-500 focus:border-fbc-green-500 transition-all duration-300 font-body"
+                           placeholder="Enter phone number">
+                </div>
+            </div>
+        </div>
+
+        <!-- Account Settings Section -->
+        <div class="bg-orange-25 border border-orange-200 rounded-xl p-6">
+            <h3 class="text-xl font-serif font-bold text-fbc-navy-900 mb-6 flex items-center">
+                <i class="fas fa-cog text-orange-600 mr-3"></i>
+                Account Settings
+            </h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="user_type" class="block text-sm font-sans font-medium text-fbc-navy-900 mb-2">
+                        User Type <span class="text-red-500">*</span>
+                    </label>
+                    <select id="user_type" 
+                            name="user_type" 
+                            required 
+                            {% if user.id == request.user.id %}disabled{% endif %}
+                            class="w-full px-4 py-3 border border-fbc-green-300 rounded-lg focus:ring-2 focus:ring-fbc-green-500 focus:border-fbc-green-500 transition-all duration-300 font-body">
+                        <option value="student" {% if user.user_type == 'student' %}selected{% endif %}>Student</option>
+                        <option value="lecturer" {% if user.user_type == 'lecturer' %}selected{% endif %}>Lecturer</option>
+                        {% if request.user.user_type == 'admin' %}
+                        <option value="staff" {% if user.user_type == 'staff' %}selected{% endif %}>Staff</option>
+                        <option value="admin" {% if user.user_type == 'admin' %}selected{% endif %}>Administrator</option>
+                        {% elif request.user.user_type == 'staff' and user.user_type != 'admin' %}
+                        <option value="staff" {% if user.user_type == 'staff' %}selected{% endif %}>Staff</option>
+                        {% endif %}
+                    </select>
+                    {% if user.id == request.user.id %}
+                    <p class="text-xs text-orange-600 mt-1">You cannot change your own user type</p>
+                    {% endif %}
+                </div>
+                
+                <div>
+                    <label for="profile_image" class="block text-sm font-sans font-medium text-fbc-navy-900 mb-2">
+                        Profile Image
+                    </label>
+                    <input type="file" 
+                           id="profile_image" 
+                           name="profile_image" 
+                           accept="image/*"
+                           onchange="previewImage(this)"
+                           class="w-full px-4 py-3 border border-fbc-green-300 rounded-lg focus:ring-2 focus:ring-fbc-green-500 focus:border-fbc-green-500 transition-all duration-300 font-body">
+                    <p class="text-xs text-fbc-gray-500 mt-1">Optional. JPG, PNG, or GIF. Max 5MB.</p>
+                </div>
+            </div>
+
+            <!-- Account Status -->
+            {% if request.user.user_type == 'admin' and user.id != request.user.id %}
+            <div class="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <h4 class="text-sm font-sans font-medium text-yellow-800 mb-3">Account Status</h4>
+                <div class="flex items-center space-x-6">
+                    <label class="flex items-center">
+                        <input type="radio" 
+                               name="is_suspended" 
+                               value="false" 
+                               {% if not user.is_suspended %}checked{% endif %}
+                               class="text-fbc-green-600 focus:ring-fbc-green-500">
+                        <span class="ml-2 text-sm font-body text-fbc-navy-900">Active</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="radio" 
+                               name="is_suspended" 
+                               value="true" 
+                               {% if user.is_suspended %}checked{% endif %}
+                               class="text-red-600 focus:ring-red-500">
+                        <span class="ml-2 text-sm font-body text-fbc-navy-900">Suspended</span>
+                    </label>
+                </div>
+                <p class="text-xs text-yellow-700 mt-2">Suspended users cannot log in or access library services.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Password Reset Section -->
+        <div class="bg-red-25 border border-red-200 rounded-xl p-6">
+            <h3 class="text-xl font-serif font-bold text-fbc-navy-900 mb-6 flex items-center">
+                <i class="fas fa-lock text-red-600 mr-3"></i>
+                Password Management
+            </h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="new_password" class="block text-sm font-sans font-medium text-fbc-navy-900 mb-2">
+                        New Password
+                    </label>
+                    <div class="relative">
+                        <input type="password" 
+                               id="new_password" 
+                               name="new_password" 
+                               minlength="8"
+                               class="w-full px-4 py-3 pr-12 border border-fbc-green-300 rounded-lg focus:ring-2 focus:ring-fbc-green-500 focus:border-fbc-green-500 transition-all duration-300 font-body"
+                               placeholder="Leave blank to keep current password">
+                        <button type="button" 
+                                onclick="togglePassword('new_password')"
+                                class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                            <i class="fas fa-eye text-fbc-gray-400 hover:text-fbc-gray-600" id="new_password-toggle"></i>
+                        </button>
+                    </div>
+                    <p class="text-xs text-fbc-gray-500 mt-1">Leave blank to keep current password</p>
+                </div>
+                
+                <div>
+                    <label for="confirm_new_password" class="block text-sm font-sans font-medium text-fbc-navy-900 mb-2">
+                        Confirm New Password
+                    </label>
+                    <div class="relative">
+                        <input type="password" 
+                               id="confirm_new_password" 
+                               name="confirm_new_password" 
+                               class="w-full px-4 py-3 pr-12 border border-fbc-green-300 rounded-lg focus:ring-2 focus:ring-fbc-green-500 focus:border-fbc-green-500 transition-all duration-300 font-body"
+                               placeholder="Confirm new password">
+                        <button type="button" 
+                                onclick="togglePassword('confirm_new_password')"
+                                class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                            <i class="fas fa-eye text-fbc-gray-400 hover:text-fbc-gray-600" id="confirm_new_password-toggle"></i>
+                        </button>
+                    </div>
+                    <div class="mt-2 text-xs" id="password-match"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-4 sm:space-y-0 pt-6 border-t border-fbc-green-200">
+            <a href="{% url 'fbc_books:manage_users' %}" 
+               class="px-6 py-3 border border-fbc-gray-300 rounded-lg text-fbc-gray-700 hover:bg-fbc-gray-50 transition-all duration-300 text-center font-body font-medium">
+                <i class="fas fa-times mr-2"></i>Cancel
+            </a>
+            
+            <div class="flex space-x-3">
+                <a href="{% url 'fbc_users:user_details' user.id %}" 
+                   class="px-6 py-3 bg-fbc-gray-100 text-fbc-gray-700 rounded-lg hover:bg-fbc-gray-200 transition-all duration-300 font-body font-medium">
+                    <i class="fas fa-eye mr-2"></i>View Details
+                </a>
+                
+                <button type="submit" 
+                        id="submitBtn"
+                        class="btn-fbc px-8 py-3 rounded-lg font-body font-medium flex items-center space-x-2">
+                    <i class="fas fa-save"></i>
+                    <span>Update Member</span>
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Success Modal -->
+<div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4 animate-bounce-in">
+        <div class="text-center">
+            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-check text-2xl text-green-600"></i>
+            </div>
+            <h3 class="text-xl font-serif font-bold text-fbc-navy-900 mb-2">Member Updated Successfully!</h3>
+            <p class="text-fbc-gray-600 font-body mb-6">The member information has been updated successfully.</p>
+            <div class="flex space-x-3">
+                <button onclick="location.href='{% url 'fbc_books:manage_users' %}'" 
+                        class="flex-1 btn-fbc px-4 py-2 rounded-lg font-body">
+                    View All Members
+                </button>
+                <button onclick="location.href='{% url 'fbc_users:user_details' user.id %}'" 
+                        class="flex-1 px-4 py-2 border border-fbc-green-300 rounded-lg text-fbc-green-700 hover:bg-fbc-green-50 transition-colors duration-200 font-body">
+                    View Details
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Form validation and enhancement
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('editUserForm');
+    const newPasswordInput = document.getElementById('new_password');
+    const confirmNewPasswordInput = document.getElementById('confirm_new_password');
+    
+    // Password match checking
+    newPasswordInput.addEventListener('input', function() {
+        checkPasswordMatch();
+    });
+    
+    confirmNewPasswordInput.addEventListener('input', function() {
+        checkPasswordMatch();
+    });
+    
+    // Form submission
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        if (validateForm()) {
+            submitForm();
+        }
+    });
+});
+
+function togglePassword(fieldId) {
+    const field = document.getElementById(fieldId);
+    const toggle = document.getElementById(fieldId + '-toggle');
+    
+    if (field.type === 'password') {
+        field.type = 'text';
+        toggle.classList.remove('fa-eye');
+        toggle.classList.add('fa-eye-slash');
+    } else {
+        field.type = 'password';
+        toggle.classList.remove('fa-eye-slash');
+        toggle.classList.add('fa-eye');
+    }
+}
+
+function checkPasswordMatch() {
+    const newPassword = document.getElementById('new_password').value;
+    const confirmNewPassword = document.getElementById('confirm_new_password').value;
+    const matchDiv = document.getElementById('password-match');
+    
+    if (newPassword.length > 0 || confirmNewPassword.length > 0) {
+        if (newPassword === confirmNewPassword) {
+            matchDiv.innerHTML = '<i class="fas fa-check-circle text-green-500 mr-1"></i><span class="text-green-600">Passwords match</span>';
+        } else {
+            matchDiv.innerHTML = '<i class="fas fa-times-circle text-red-500 mr-1"></i><span class="text-red-600">Passwords do not match</span>';
+        }
+    } else {
+        matchDiv.innerHTML = '';
+    }
+}
+
+function previewImage(input) {
+    const file = input.files[0];
+    const preview = document.getElementById('currentProfileImage');
+    
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            if (preview.tagName === 'IMG') {
+                preview.src = e.target.result;
+            } else {
+                // Replace div with img
+                const img = document.createElement('img');
+                img.className = 'h-24 w-24 rounded-full object-cover border-4 border-fbc-green-200';
+                img.src = e.target.result;
+                img.id = 'currentProfileImage';
+                preview.parentNode.replaceChild(img, preview);
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+function validateForm() {
+    const newPassword = document.getElementById('new_password').value;
+    const confirmNewPassword = document.getElementById('confirm_new_password').value;
+    
+    // If password is being changed, validate it
+    if (newPassword.length > 0) {
+        if (newPassword.length < 8) {
+            showNotification('New password must be at least 8 characters long.', 'error');
+            return false;
+        }
+        
+        if (newPassword !== confirmNewPassword) {
+            showNotification('New passwords do not match.', 'error');
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+function submitForm() {
+    const submitBtn = document.getElementById('submitBtn');
+    const form = document.getElementById('editUserForm');
+    
+    // Show loading state
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner animate-spin mr-2"></i>Updating Member...';
+    
+    // Submit form
+    const formData = new FormData(form);
+    
+    fetch(form.action || window.location.href, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'X-Requested-With': 'XMLHttpRequest',
+        },
+    })
+    .then(response => {
+        if (response.ok) {
+            return response.json();
+        }
+        return response.json().then(data => {
+            throw new Error(data.message || 'Update failed');
+        });
+    })
+    .then(data => {
+        if (data.status === 'success') {
+            showNotification(data.message, 'success');
+            // Show success modal
+            document.getElementById('successModal').classList.remove('hidden');
+        } else {
+            throw new Error(data.message || 'Update failed');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification(error.message || 'Failed to update member. Please try again.', 'error');
+        
+        // Reset button
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-save mr-2"></i>Update Member';
+    });
+}
+
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transform translate-x-full transition-transform duration-300 ${
+        type === 'success' ? 'bg-green-500 text-white' : 
+        type === 'error' ? 'bg-red-500 text-white' : 
+        'bg-blue-500 text-white'
+    }`;
+    notification.innerHTML = `
+        <div class="flex items-center space-x-2">
+            <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
+            <span class="font-body">${message}</span>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Slide in
+    setTimeout(() => {
+        notification.classList.remove('translate-x-full');
+    }, 100);
+    
+    // Auto remove after 4 seconds
+    setTimeout(() => {
+        notification.classList.add('translate-x-full');
+        setTimeout(() => {
+            if (document.body.contains(notification)) {
+                document.body.removeChild(notification);
+            }
+        }, 300);
+    }, 4000);
+}
+</script>
+{% endblock %}

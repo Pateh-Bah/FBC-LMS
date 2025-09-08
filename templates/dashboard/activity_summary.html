@@ -1,0 +1,203 @@
+{% load static %}
+
+<!-- Stats Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    {% if user.user_type == 'admin' %}
+        <!-- Admin Stats -->
+        <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200 hover:shadow-lg transition-all duration-300">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-3xl font-bold text-blue-900 mb-2">{{ total_users }}</h3>
+                    <p class="text-blue-700 font-medium">Total Users</p>
+                </div>
+                <div class="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-users text-white text-xl"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-gradient-to-br from-red-50 to-red-100 rounded-xl p-6 border border-red-200 hover:shadow-lg transition-all duration-300">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-3xl font-bold text-red-900 mb-2">{{ total_fines }}</h3>
+                    <p class="text-red-700 font-medium">Active Fines</p>
+                </div>
+                <div class="w-12 h-12 bg-red-600 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-money-bill text-white text-xl"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 border border-green-200 hover:shadow-lg transition-all duration-300">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-3xl font-bold text-green-900 mb-2">{{ total_borrowed }}</h3>
+                    <p class="text-green-700 font-medium">Current Borrowings</p>
+                </div>
+                <div class="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-book-reader text-white text-xl"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 border border-purple-200 hover:shadow-lg transition-all duration-300">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-3xl font-bold text-purple-900 mb-2">{{ active_subscriptions }}</h3>
+                    <p class="text-purple-700 font-medium">Active Subscriptions</p>
+                </div>
+                <div class="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-check-circle text-white text-xl"></i>
+                </div>
+            </div>
+        </div>
+        
+    {% elif user.user_type == 'staff' %}
+        <!-- Staff Stats -->
+        <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200 hover:shadow-lg transition-all duration-300">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-3xl font-bold text-blue-900 mb-2">{{ total_books }}</h3>
+                    <p class="text-blue-700 font-medium">Total Books</p>
+                </div>
+                <div class="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-book text-white text-xl"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 border border-green-200 hover:shadow-lg transition-all duration-300">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-3xl font-bold text-green-900 mb-2">{{ daily_borrows }}</h3>
+                    <p class="text-green-700 font-medium">Today's Borrowings</p>
+                </div>
+                <div class="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-calendar-day text-white text-xl"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-6 border border-orange-200 hover:shadow-lg transition-all duration-300">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-3xl font-bold text-orange-900 mb-2">{{ pending_returns }}</h3>
+                    <p class="text-orange-700 font-medium">Pending Returns</p>
+                </div>
+                <div class="w-12 h-12 bg-orange-600 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-clock text-white text-xl"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 border border-purple-200 hover:shadow-lg transition-all duration-300">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-3xl font-bold text-purple-900 mb-2">{{ library_visitors }}</h3>
+                    <p class="text-purple-700 font-medium">Today's Visitors</p>
+                </div>
+                <div class="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-users text-white text-xl"></i>
+                </div>
+            </div>
+        </div>
+        
+    {% else %}
+        <!-- Student/Lecturer Stats -->
+        <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200 hover:shadow-lg transition-all duration-300">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-3xl font-bold text-blue-900 mb-2">{{ active_borrowings.count }}</h3>
+                    <p class="text-blue-700 font-medium">Current Borrowings</p>
+                </div>
+                <div class="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-book text-white text-xl"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-gradient-to-br from-red-50 to-red-100 rounded-xl p-6 border border-red-200 hover:shadow-lg transition-all duration-300">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-3xl font-bold text-red-900 mb-2">{{ total_fines }}</h3>
+                    <p class="text-red-700 font-medium">Active Fines</p>
+                </div>
+                <div class="w-12 h-12 bg-red-600 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-money-bill text-white text-xl"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 border border-green-200 hover:shadow-lg transition-all duration-300">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-3xl font-bold text-green-900 mb-2">{{ books_returned }}</h3>
+                    <p class="text-green-700 font-medium">Books Returned</p>
+                </div>
+                <div class="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-check-circle text-white text-xl"></i>
+                </div>
+            </div>
+        </div>
+        
+        {% if user.user_type == 'student' %}
+        <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 border border-purple-200 hover:shadow-lg transition-all duration-300">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-3xl font-bold text-purple-900 mb-2">{{ subscription_days_left }}</h3>
+                    <p class="text-purple-700 font-medium">Days Left in Subscription</p>
+                </div>
+                <div class="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-calendar-alt text-white text-xl"></i>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    {% endif %}
+</div>
+
+<!-- Recent Activities Section -->
+{% if recent_activities %}
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <div class="bg-gradient-to-r from-blue-600 to-green-600 px-6 py-4">
+        <h2 class="text-xl font-bold text-white flex items-center">
+            <i class="fas fa-history mr-3"></i>
+            Recent Activities
+        </h2>
+    </div>
+    <div class="divide-y divide-gray-200">
+        {% for activity in recent_activities %}
+        <div class="p-6 hover:bg-gray-50 transition-colors duration-200">
+            <div class="flex items-start justify-between">
+                <div class="flex-1">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ activity.title }}</h3>
+                    <p class="text-gray-600 leading-relaxed">{{ activity.description }}</p>
+                </div>
+                <div class="ml-4 flex-shrink-0">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                        <i class="fas fa-clock mr-1 text-xs"></i>
+                        {{ activity.timestamp|timesince }} ago
+                    </span>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="p-8 text-center">
+            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-inbox text-gray-400 text-2xl"></i>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">No Recent Activities</h3>
+            <p class="text-gray-500">Activities will appear here as they occur.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% else %}
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
+    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <i class="fas fa-inbox text-gray-400 text-2xl"></i>
+    </div>
+    <h3 class="text-lg font-medium text-gray-900 mb-2">No Recent Activities</h3>
+    <p class="text-gray-500">Activities will appear here as they occur.</p>
+</div>
+{% endif %}

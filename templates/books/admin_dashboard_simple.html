@@ -1,0 +1,395 @@
+{% extends "admin/admin_base.html" %}
+{% load static %}
+{% load admin_tags %}
+
+{% block page_title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<!-- Welcome Banner -->
+<div class="mb-8 animate-fade-in">
+    <div class="bg-gradient-to-r from-fbc-green-600 to-fbc-green-700 rounded-2xl p-8 text-white shadow-2xl relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full transform translate-x-32 -translate-y-32"></div>
+        <div class="absolute bottom-0 left-0 w-32 h-32 bg-white opacity-10 rounded-full transform -translate-x-16 translate-y-16"></div>
+        <div class="relative z-10 flex items-center justify-between">
+            <div>
+                <h1 class="text-4xl font-serif font-bold mb-3 animate-slide-in">
+                    <i class="fas fa-shield-alt mr-3 text-fbc-green-200"></i>
+                    Welcome to Admin Dashboard
+                </h1>
+                <p class="text-xl text-fbc-green-100 font-body">Complete system oversight and management capabilities</p>
+                <div class="mt-4 text-sm text-fbc-green-200">
+                    <i class="fas fa-user mr-2"></i>{{ user.get_full_name|default:user.username }}
+                </div>
+            </div>
+            <div class="text-right">
+                <div class="glass-effect px-6 py-4 rounded-xl backdrop-blur-md bg-white bg-opacity-20 border border-white border-opacity-30">
+                    <div class="text-sm text-fbc-green-100 mb-1">Last Login</div>
+                    <div class="text-lg font-bold">{{ user.last_login|date:"M d, Y" }}</div>
+                    <div class="text-sm text-fbc-green-200">{{ user.last_login|date:"H:i" }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 animate-bounce-in">
+    <!-- Total Books Card -->
+    <a href="{% url 'fbc_books:manage_books' %}" class="group block transform transition-all duration-500 hover:scale-105">
+        <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 shadow-lg hover:shadow-2xl border border-blue-200 relative overflow-hidden admin-card text-white">
+            <div class="absolute top-0 right-0 w-24 h-24 bg-white bg-opacity-10 rounded-full transform translate-x-8 -translate-y-8"></div>
+            <div class="relative z-10">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-16 h-16 bg-white bg-opacity-20 rounded-xl flex items-center justify-center group-hover:bg-opacity-30 transition-all duration-300">
+                        <i class="fas fa-book text-2xl text-white"></i>
+                    </div>
+                    <i class="fas fa-arrow-right text-white opacity-70 group-hover:opacity-100 transition-opacity duration-300"></i>
+                </div>
+                <div class="text-3xl font-bold text-white mb-1 drop-shadow">{{ total_books|default:0 }}</div>
+                <div class="text-blue-100 font-medium text-lg">Total Books</div>
+                <div class="text-sm text-blue-200 mt-2">Manage library collection</div>
+            </div>
+        </div>
+    </a>
+    
+    <!-- Total Users Card -->
+    <a href="{% url 'fbc_books:manage_users' %}" class="group block transform transition-all duration-500 hover:scale-105">
+        <div class="bg-gradient-to-br from-fbc-green-500 to-fbc-green-600 rounded-2xl p-6 shadow-lg hover:shadow-2xl border border-fbc-green-200 relative overflow-hidden admin-card text-white">
+            <div class="absolute top-0 right-0 w-24 h-24 bg-white bg-opacity-10 rounded-full transform translate-x-8 -translate-y-8"></div>
+            <div class="relative z-10">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-16 h-16 bg-white bg-opacity-20 rounded-xl flex items-center justify-center group-hover:bg-opacity-30 transition-all duration-300">
+                        <i class="fas fa-users text-2xl text-white"></i>
+                    </div>
+                    <i class="fas fa-arrow-right text-white opacity-70 group-hover:opacity-100 transition-opacity duration-300"></i>
+                </div>
+                <div class="text-3xl font-bold text-white mb-1 drop-shadow">{{ total_users|default:0 }}</div>
+                <div class="text-fbc-green-100 font-medium text-lg">Total Users</div>
+                <div class="text-sm text-fbc-green-200 mt-2">Manage user accounts</div>
+            </div>
+        </div>
+    </a>
+    
+    <!-- Active Borrowings Card -->
+    <a href="{% url 'fbc_books:manage_borrowings' %}" class="group block transform transition-all duration-500 hover:scale-105">
+        <div class="bg-gradient-to-br from-amber-500 to-amber-600 rounded-2xl p-6 shadow-lg hover:shadow-2xl border border-amber-200 relative overflow-hidden admin-card text-white">
+            <div class="absolute top-0 right-0 w-24 h-24 bg-white bg-opacity-10 rounded-full transform translate-x-8 -translate-y-8"></div>
+            <div class="relative z-10">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-16 h-16 bg-white bg-opacity-20 rounded-xl flex items-center justify-center group-hover:bg-opacity-30 transition-all duration-300">
+                        <i class="fas fa-exchange-alt text-2xl text-white"></i>
+                    </div>
+                    <i class="fas fa-arrow-right text-white opacity-70 group-hover:opacity-100 transition-opacity duration-300"></i>
+                </div>
+                <div class="text-3xl font-bold text-white mb-1 drop-shadow">{{ active_borrowings|default:0 }}</div>
+                <div class="text-amber-100 font-medium text-lg">Active Borrowings</div>
+                <div class="text-sm text-amber-200 mt-2">Track current loans</div>
+            </div>
+        </div>
+    </a>
+    
+    <!-- Overdue Books Card -->
+    <a href="{% url 'fbc_fines:manage_fines' %}" class="group block transform transition-all duration-500 hover:scale-105">
+        <div class="bg-gradient-to-br from-red-500 to-red-600 rounded-2xl p-6 shadow-lg hover:shadow-2xl border border-red-200 relative overflow-hidden admin-card text-white">
+            <div class="absolute top-0 right-0 w-24 h-24 bg-white bg-opacity-10 rounded-full transform translate-x-8 -translate-y-8"></div>
+            <div class="relative z-10">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-16 h-16 bg-white bg-opacity-20 rounded-xl flex items-center justify-center group-hover:bg-opacity-30 transition-all duration-300">
+                        <i class="fas fa-clock text-2xl text-white"></i>
+                    </div>
+                    <i class="fas fa-arrow-right text-white opacity-70 group-hover:opacity-100 transition-opacity duration-300"></i>
+                </div>
+                <div class="text-3xl font-bold text-white mb-1 drop-shadow">{{ overdue_books|default:0 }}</div>
+                <div class="text-red-100 font-medium text-lg">Overdue Books</div>
+                <div class="text-sm text-red-200 mt-2">Manage overdue items</div>
+            </div>
+        </div>
+    </a>
+</div>
+
+<!-- Quick Actions Grid -->
+<div class="mb-8 animate-fade-in">
+    <div class="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+        <h2 class="text-2xl font-serif font-bold text-gray-800 mb-6 flex items-center">
+            <i class="fas fa-bolt mr-3 text-fbc-green-600"></i>
+            Quick Actions
+        </h2>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <a href="{% url 'fbc_books:manage_books' %}" class="group p-4 bg-gray-50 hover:bg-blue-50 rounded-xl transition-all duration-300 hover:shadow-md border border-transparent hover:border-blue-200">
+                <div class="text-center">
+                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:bg-blue-200 transition-colors duration-300">
+                        <i class="fas fa-book text-blue-600 text-lg"></i>
+                    </div>
+                    <div class="font-semibold text-gray-700 text-sm mb-1">Manage Books</div>
+                    <div class="text-xs text-gray-500">Add, edit, remove</div>
+                </div>
+            </a>
+            
+            <a href="{% url 'fbc_books:manage_users' %}" class="group p-4 bg-gray-50 hover:bg-fbc-green-50 rounded-xl transition-all duration-300 hover:shadow-md border border-transparent hover:border-fbc-green-200">
+                <div class="text-center">
+                    <div class="w-12 h-12 bg-fbc-green-100 rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:bg-fbc-green-200 transition-colors duration-300">
+                        <i class="fas fa-users text-fbc-green-600 text-lg"></i>
+                    </div>
+                    <div class="font-semibold text-gray-700 text-sm mb-1">Manage Users</div>
+                    <div class="text-xs text-gray-500">User accounts</div>
+                </div>
+            </a>
+            
+            <a href="{% url 'fbc_books:manage_borrowings' %}" class="group p-4 bg-gray-50 hover:bg-cyan-50 rounded-xl transition-all duration-300 hover:shadow-md border border-transparent hover:border-cyan-200">
+                <div class="text-center">
+                    <div class="w-12 h-12 bg-cyan-100 rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:bg-cyan-200 transition-colors duration-300">
+                        <i class="fas fa-exchange-alt text-cyan-600 text-lg"></i>
+                    </div>
+                    <div class="font-semibold text-gray-700 text-sm mb-1">Borrowings</div>
+                    <div class="text-xs text-gray-500">Track loans</div>
+                </div>
+            </a>
+            
+            <a href="{% url 'fbc_fines:manage_fines' %}" class="group p-4 bg-gray-50 hover:bg-amber-50 rounded-xl transition-all duration-300 hover:shadow-md border border-transparent hover:border-amber-200">
+                <div class="text-center">
+                    <div class="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:bg-amber-200 transition-colors duration-300">
+                        <i class="fas fa-money-bill-wave text-amber-600 text-lg"></i>
+                    </div>
+                    <div class="font-semibold text-gray-700 text-sm mb-1">Fines</div>
+                    <div class="text-xs text-gray-500">Manage penalties</div>
+                </div>
+            </a>
+            
+            <a href="{% url 'fbc_payments:payment_history' %}" class="group p-4 bg-gray-50 hover:bg-purple-50 rounded-xl transition-all duration-300 hover:shadow-md border border-transparent hover:border-purple-200">
+                <div class="text-center">
+                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:bg-purple-200 transition-colors duration-300">
+                        <i class="fas fa-credit-card text-purple-600 text-lg"></i>
+                    </div>
+                    <div class="font-semibold text-gray-700 text-sm mb-1">Payments</div>
+                    <div class="text-xs text-gray-500">Transaction history</div>
+                </div>
+            </a>
+            
+            {% if user.is_superuser %}
+                {% safe_admin_url 'admin:index' as admin_url %}
+                {% if admin_url %}
+                    <a href="{{ admin_url }}" class="group p-4 bg-gray-50 hover:bg-gray-100 rounded-xl transition-all duration-300 hover:shadow-md border border-transparent hover:border-gray-300">
+                {% else %}
+                    <a href="/admin/" class="group p-4 bg-gray-50 hover:bg-gray-100 rounded-xl transition-all duration-300 hover:shadow-md border border-transparent hover:border-gray-300">
+                {% endif %}
+                    <div class="text-center">
+                        <div class="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:bg-gray-300 transition-colors duration-300">
+                            <i class="fas fa-cog text-gray-600 text-lg"></i>
+                        </div>
+                        <div class="font-semibold text-gray-700 text-sm mb-1">Django Admin</div>
+                        <div class="text-xs text-gray-500">System settings</div>
+                    </div>
+                </a>
+            {% else %}
+                <a href="{% url 'fbc_users:system_settings' %}" class="group p-4 bg-gray-50 hover:bg-gray-100 rounded-xl transition-all duration-300 hover:shadow-md border border-transparent hover:border-gray-300">
+                    <div class="text-center">
+                        <div class="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:bg-gray-300 transition-colors duration-300">
+                            <i class="fas fa-cog text-gray-600 text-lg"></i>
+                        </div>
+                        <div class="font-semibold text-gray-700 text-sm mb-1">Settings</div>
+                        <div class="text-xs text-gray-500">System settings</div>
+                    </div>
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 animate-fade-in">
+    <!-- Recent Borrowings -->
+    <div class="lg:col-span-2">
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+            <div class="bg-gradient-to-r from-blue-50 to-blue-100 px-6 py-4 border-b border-blue-200">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-blue-800 flex items-center">
+                        <i class="fas fa-clock mr-3 text-blue-600"></i>
+                        Recent Borrowings
+                    </h3>
+                    <a href="{% url 'fbc_books:manage_borrowings' %}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-300 flex items-center">
+                        <i class="fas fa-eye mr-2"></i>View All
+                    </a>
+                </div>
+            </div>
+            <div class="p-0">
+                {% if recent_borrowings %}
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Book</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Due Date</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                {% for borrowing in recent_borrowings %}
+                                <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-semibold mr-3">
+                                                {{ borrowing.user.get_full_name|default:borrowing.user.username|first|upper }}
+                                            </div>
+                                            <div>
+                                                <div class="font-medium text-gray-900">{{ borrowing.user.get_full_name|default:borrowing.user.username }}</div>
+                                                <div class="text-sm text-gray-500">{{ borrowing.user.email }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="font-medium text-gray-900">{{ borrowing.book.title }}</div>
+                                        <div class="text-sm text-gray-500">{{ borrowing.book.isbn }}</div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="font-medium text-gray-900">{{ borrowing.due_date|date:"M d, Y" }}</div>
+                                        <div class="text-sm text-gray-500">{{ borrowing.due_date|timeuntil }}</div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        {% if borrowing.due_date < today %}
+                                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Overdue</span>
+                                        {% else %}
+                                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">On Time</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-12">
+                        <i class="fas fa-inbox text-4xl text-gray-300 mb-4"></i>
+                        <p class="text-gray-500 font-medium">No recent borrowings found.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Fines -->
+    <div>
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+            <div class="bg-gradient-to-r from-amber-50 to-amber-100 px-6 py-4 border-b border-amber-200">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-amber-800 flex items-center">
+                        <i class="fas fa-money-bill-wave mr-3 text-amber-600"></i>
+                        Recent Fines
+                    </h3>
+                    <a href="{% url 'fbc_fines:manage_fines' %}" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-300 flex items-center">
+                        <i class="fas fa-eye mr-2"></i>View All
+                    </a>
+                </div>
+            </div>
+            <div class="p-0">
+                {% if recent_fines %}
+                    <div class="divide-y divide-gray-200">
+                        {% for fine in recent_fines %}
+                        <div class="p-4 hover:bg-gray-50 transition-colors duration-200">
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="font-medium text-gray-900">{{ fine.user.get_full_name|default:fine.user.username }}</div>
+                                <div class="font-bold text-amber-600">Le {{ fine.amount|floatformat:2 }}</div>
+                            </div>
+                            <div class="text-sm text-gray-500 mb-2">{{ fine.get_fine_type_display }}</div>
+                            <div class="flex items-center justify-between">
+                                <div class="text-xs text-gray-400">{{ fine.date_issued|date:"M d, Y" }}</div>
+                                {% if fine.status == 'paid' %}
+                                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">{{ fine.get_status_display }}</span>
+                                {% elif fine.status == 'pending' %}
+                                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-amber-100 text-amber-800">{{ fine.get_status_display }}</span>
+                                {% else %}
+                                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">{{ fine.get_status_display }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-12">
+                        <i class="fas fa-hand-holding-usd text-4xl text-gray-300 mb-4"></i>
+                        <p class="text-gray-500 font-medium">No recent fines found.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Enhanced System Overview -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-in">
+    <!-- System Health -->
+    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+        <h3 class="text-xl font-serif font-bold text-gray-800 mb-6 flex items-center">
+            <i class="fas fa-heartbeat mr-3 text-red-600"></i>
+            System Health
+        </h3>
+        <div class="grid grid-cols-2 gap-4">
+            <div class="text-center p-4 bg-green-50 rounded-xl border border-green-200">
+                <div class="text-2xl font-bold text-green-600 mb-1">98%</div>
+                <div class="text-sm text-green-700 font-medium">System Uptime</div>
+            </div>
+            <div class="text-center p-4 bg-blue-50 rounded-xl border border-blue-200">
+                <div class="text-2xl font-bold text-blue-600 mb-1">{{ total_books|default:0 }}</div>
+                <div class="text-sm text-blue-700 font-medium">Total Books</div>
+            </div>
+            <div class="text-center p-4 bg-amber-50 rounded-xl border border-amber-200">
+                <div class="text-2xl font-bold text-amber-600 mb-1">{{ active_borrowings|default:0 }}</div>
+                <div class="text-sm text-amber-700 font-medium">Active Loans</div>
+            </div>
+            <div class="text-center p-4 bg-fbc-green-50 rounded-xl border border-fbc-green-200">
+                <div class="text-2xl font-bold text-fbc-green-600 mb-1">{{ total_users|default:0 }}</div>
+                <div class="text-sm text-fbc-green-700 font-medium">Registered Users</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Statistics -->
+    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+        <h3 class="text-xl font-serif font-bold text-gray-800 mb-6 flex items-center">
+            <i class="fas fa-chart-bar mr-3 text-purple-600"></i>
+            Library Insights
+        </h3>
+        <div class="space-y-4">
+            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div class="flex items-center">
+                    <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-exclamation-triangle text-red-600 text-sm"></i>
+                    </div>
+                    <span class="font-medium text-gray-700">Overdue Items</span>
+                </div>
+                <span class="text-xl font-bold text-red-600">{{ overdue_books|default:0 }}</span>
+            </div>
+            
+            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div class="flex items-center">
+                    <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-wallet text-purple-600 text-sm"></i>
+                    </div>
+                    <span class="font-medium text-gray-700">Pending Fines</span>
+                </div>
+                <span class="text-xl font-bold text-purple-600">{{ pending_fines_count|default:0 }}</span>
+            </div>
+            
+            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div class="flex items-center">
+                    <div class="w-8 h-8 bg-cyan-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-calendar-day text-cyan-600 text-sm"></i>
+                    </div>
+                    <span class="font-medium text-gray-700">Today's Returns</span>
+                </div>
+                <span class="text-xl font-bold text-cyan-600">{{ todays_returns|default:0 }}</span>
+            </div>
+            
+            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div class="flex items-center">
+                    <div class="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-book-open text-emerald-600 text-sm"></i>
+                    </div>
+                    <span class="font-medium text-gray-700">Available Books</span>
+                </div>
+                <span class="text-xl font-bold text-emerald-600">{{ available_books|default:0 }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

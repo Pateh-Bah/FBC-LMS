@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="card">
+        <div class="card-header">
+            <h2>Pay Fine</h2>
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h4>Fine Details</h4>
+                    <p><strong>Book:</strong> {{ fine.book.title }}</p>
+                    <p><strong>Fine Type:</strong> {{ fine.get_fine_type_display }}</p>
+                    <p><strong>Amount Due:</strong> ${{ fine.amount }}</p>
+                    <p><strong>Due Date:</strong> {{ fine.due_date|date:"M d, Y" }}</p>
+                </div>
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="mb-3">
+                    <label class="form-label">Select Payment Method</label>
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <div class="card text-center payment-option">
+                                <div class="card-body">
+                                    <input type="radio" name="payment_method" value="paypal" id="paypal" class="payment-radio">
+                                    <label for="paypal">
+                                        <i class="fab fa-paypal fa-2x mb-2"></i>
+                                        <div>PayPal</div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card text-center payment-option">
+                                <div class="card-body">
+                                    <input type="radio" name="payment_method" value="orange_money" id="orange_money" class="payment-radio">
+                                    <label for="orange_money">
+                                        <i class="fas fa-mobile-alt fa-2x mb-2"></i>
+                                        <div>Orange Money</div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card text-center payment-option">
+                                <div class="card-body">
+                                    <input type="radio" name="payment_method" value="afri_money" id="afri_money" class="payment-radio">
+                                    <label for="afri_money">
+                                        <i class="fas fa-money-bill-wave fa-2x mb-2"></i>
+                                        <div>Afri Money</div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card text-center payment-option">
+                                <div class="card-body">
+                                    <input type="radio" name="payment_method" value="qmoney" id="qmoney" class="payment-radio">
+                                    <label for="qmoney">
+                                        <i class="fas fa-dollar-sign fa-2x mb-2"></i>
+                                        <div>QMoney</div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="payment_reference" class="form-label">Payment Reference (Optional)</label>
+                    <input type="text" class="form-control" id="payment_reference" name="payment_reference" placeholder="Enter transaction reference if available">
+                </div>
+
+                <div class="d-flex gap-2">
+                    <a href="{% url 'fbc_fines:fine_detail' fine.pk %}" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-success">Proceed to Payment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% block extra_css %}
+<style>
+.payment-option {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.payment-option:hover {
+    border-color: #0d6efd;
+}
+
+.payment-radio {
+    display: none;
+}
+
+.payment-radio:checked + label {
+    color: #0d6efd;
+}
+
+.payment-radio:checked + label i {
+    transform: scale(1.1);
+}
+
+.payment-option label {
+    cursor: pointer;
+    display: block;
+    margin: 0;
+}
+</style>
+{% endblock %}
+{% endblock %}

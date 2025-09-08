@@ -1,0 +1,887 @@
+{% extends "admin/admin_base.html" %}
+{% load static %}
+
+{% block page_title %}Circulation Management{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Custom scrollbar for modal */
+    #modalContent {
+        scrollbar-width: thin;
+        scrollbar-color: #22c55e #f1f5f9;
+    }
+    
+    #modalContent::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    #modalContent::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 3px;
+    }
+    
+    #modalContent::-webkit-scrollbar-thumb {
+        background: #22c55e;
+        border-radius: 3px;
+    }
+    
+    #modalContent::-webkit-scrollbar-thumb:hover {
+        background: #16a34a;
+    }
+    
+    /* Smooth animations */
+    .modal-animate-in {
+        animation: modalSlideIn 0.3s ease-out;
+    }
+    
+    @keyframes modalSlideIn {
+        from {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+    
+    /* Responsive improvements */
+    @media (max-width: 768px) {
+        #detailsModal .max-w-4xl {
+            max-width: 95vw;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+{% csrf_token %}
+<!-- Enhanced Circulation Management Page -->
+<div class="content-area p-6 animate-fade-in">
+    <!-- Header Section -->
+    <div class="mb-8">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+            <div>
+                <h1 class="text-3xl font-serif font-bold text-fbc-navy-800 mb-2">Circulation Management</h1>
+                <p class="text-fbc-navy-600 font-body text-lg">Monitor and manage book borrowings across the library system</p>
+            </div>
+            <div class="flex items-center space-x-4 mt-4 md:mt-0">
+                <div class="flex items-center space-x-2 bg-fbc-green-100 rounded-full px-4 py-2">
+                    <i class="fas fa-calendar-check text-fbc-green-600"></i>
+                    <span class="text-sm font-medium text-fbc-green-800">Real-time Tracking</span>
+                </div>
+                <div class="flex items-center space-x-2 bg-fbc-green-100 rounded-full px-4 py-2">
+                    <i class="fas fa-clock text-fbc-green-600"></i>
+                    <span class="text-sm font-medium text-fbc-green-800">Due Date Monitoring</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Dashboard -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <!-- Active Borrowings Card -->
+        <div class="admin-card bg-gradient-to-br from-fbc-green-500 to-fbc-green-600 rounded-xl p-6 text-white shadow-lg">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-fbc-green-100 text-sm font-medium mb-1">Active Borrowings</p>
+                    <p class="text-3xl font-bold">{{ total_borrowings|default:"0" }}</p>
+                    <p class="text-fbc-green-200 text-xs mt-1">
+                        <i class="fas fa-arrow-up mr-1"></i>Currently circulating
+                    </p>
+                </div>
+                <div class="bg-white bg-opacity-20 rounded-full p-3">
+                    <i class="fas fa-book-reader text-2xl"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Overdue Books Card -->
+        <div class="admin-card bg-gradient-to-br from-red-500 to-red-600 rounded-xl p-6 text-white shadow-lg">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-red-100 text-sm font-medium mb-1">Overdue Books</p>
+                    <p class="text-3xl font-bold">{{ overdue_books|default:"0" }}</p>
+                    <p class="text-red-200 text-xs mt-1">
+                        <i class="fas fa-exclamation-triangle mr-1"></i>Requires attention
+                    </p>
+                </div>
+                <div class="bg-white bg-opacity-20 rounded-full p-3">
+                    <i class="fas fa-clock text-2xl"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Today's Returns Card -->
+        <div class="admin-card bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-lg">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-blue-100 text-sm font-medium mb-1">Today's Returns</p>
+                    <p class="text-3xl font-bold">{{ todays_returns|default:"0" }}</p>
+                    <p class="text-blue-200 text-xs mt-1">
+                        <i class="fas fa-check mr-1"></i>Completed today
+                    </p>
+                </div>
+                <div class="bg-white bg-opacity-20 rounded-full p-3">
+                    <i class="fas fa-undo text-2xl"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Collections Card -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 group">
+            <div class="bg-gradient-to-br from-purple-500 to-purple-600 p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-purple-100 text-sm font-medium uppercase tracking-wide">Total Collections</p>
+                        <p class="text-3xl font-bold text-white mt-2">{{ total_books|default:"0" }}</p>
+                    </div>
+                    <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                        <i class="fas fa-books text-2xl text-white"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="p-4 bg-purple-50">
+                <div class="flex items-center text-purple-700">
+                    <i class="fas fa-database text-sm mr-2"></i>
+                    <span class="text-sm font-medium">Available items</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        <!-- Total Loans Card -->
+        <div class="admin-card bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-6 text-white shadow-lg">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-purple-100 text-sm font-medium mb-1">Total Loans</p>
+                    <p class="text-3xl font-bold">{{ total_loans|default:"0" }}</p>
+                    <p class="text-purple-200 text-xs mt-1">
+                        <i class="fas fa-chart-line mr-1"></i>All time
+                    </p>
+                </div>
+                <div class="bg-white bg-opacity-20 rounded-full p-3">
+                    <i class="fas fa-chart-bar text-2xl"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter and Search Section -->
+    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 mb-8">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+            <div class="flex-1">
+                <h3 class="text-xl font-serif font-bold text-fbc-navy-800 mb-4">Filter & Search Borrowings</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Search Input -->
+                    <div class="relative">
+                        <input type="text" 
+                               id="searchBorrowings" 
+                               class="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-fbc-green-500 focus:border-fbc-green-500 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                               placeholder="Search borrowings...">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-search text-gray-400"></i>
+                        </div>
+                    </div>
+
+                    <!-- Status Filter -->
+                    <div>
+                        <select id="statusFilter" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-fbc-green-500 focus:border-fbc-green-500 bg-gray-50 focus:bg-white transition-all duration-200">
+                            <option value="">All Status</option>
+                            <option value="active">Active</option>
+                            <option value="returned">Returned</option>
+                            <option value="overdue">Overdue</option>
+                        </select>
+                    </div>
+
+                    <!-- Date Range Filter -->
+                    <div>
+                        <select id="dateFilter" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-fbc-green-500 focus:border-fbc-green-500 bg-gray-50 focus:bg-white transition-all duration-200">
+                            <option value="">All Dates</option>
+                            <option value="today">Today</option>
+                            <option value="week">This Week</option>
+                            <option value="month">This Month</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex items-center space-x-4">
+                <button class="btn-fbc flex items-center space-x-2">
+                    <i class="fas fa-download"></i>
+                    <span>Export Report</span>
+                </button>
+                <button class="inline-flex items-center px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-xl transition-colors duration-200">
+                    <i class="fas fa-refresh mr-2"></i>Refresh
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Borrowings Table -->
+    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+        <div class="bg-gradient-to-r from-fbc-green-50 to-fbc-green-100 p-6 border-b border-fbc-green-200">
+            <div class="flex items-center justify-between">
+                <h3 class="text-xl font-serif font-bold text-fbc-navy-800">Circulation Records</h3>
+                <div class="flex items-center space-x-2 text-fbc-green-600">
+                    <i class="fas fa-database"></i>
+                    <span class="font-medium">{{ borrowings|length }} Records</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full" id="borrowingsTable">
+                <thead class="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">User</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Book Details</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Dates</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    {% for borrowing in borrowings %}
+                    <tr class="hover:bg-gray-50 transition-colors duration-200 borrowing-row" data-status="{{ borrowing.status }}">
+                        <!-- User Information -->
+                        <td class="px-6 py-4">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-fbc-green-100 rounded-full flex items-center justify-center mr-3">
+                                    <i class="fas fa-user text-fbc-green-600"></i>
+                                </div>
+                                <div>
+                                    <div class="text-sm font-medium text-gray-900">{{ borrowing.user.get_full_name|default:borrowing.user.username }}</div>
+                                    <div class="text-sm text-gray-500">{{ borrowing.user.email }}</div>
+                                </div>
+                            </div>
+                        </td>
+
+                        <!-- Book Information -->
+                        <td class="px-6 py-4">
+                            <div class="flex items-center">
+                                <div class="w-12 h-16 bg-gradient-to-br from-fbc-green-100 to-emerald-100 rounded-lg flex items-center justify-center mr-3">
+                                    <i class="fas fa-book text-fbc-green-600"></i>
+                                </div>
+                                <div>
+                                    <div class="text-sm font-medium text-gray-900 max-w-xs truncate">{{ borrowing.book.title }}</div>
+                                    <div class="text-sm text-gray-500">by {{ borrowing.book.author }}</div>
+                                    <div class="text-xs text-gray-400 mt-1">ISBN: {{ borrowing.book.isbn|default:"N/A" }}</div>
+                                </div>
+                            </div>
+                        </td>
+
+                        <!-- Date Information -->
+                        <td class="px-6 py-4">
+                            <div class="space-y-1">
+                                <div class="flex items-center text-sm text-gray-900">
+                                    <i class="fas fa-calendar-plus text-fbc-green-500 mr-2"></i>
+                                    <span class="font-medium">{{ borrowing.borrowed_date|date:"M d, Y" }}</span>
+                                </div>
+                                <div class="flex items-center text-sm {% if borrowing.is_overdue %}text-red-600{% else %}text-gray-600{% endif %}">
+                                    <i class="fas fa-calendar-times {% if borrowing.is_overdue %}text-red-500{% else %}text-gray-400{% endif %} mr-2"></i>
+                                    <span>{{ borrowing.due_date|date:"M d, Y" }}</span>
+                                </div>
+                                {% if borrowing.returned_date %}
+                                <div class="flex items-center text-sm text-blue-600">
+                                    <i class="fas fa-calendar-check text-blue-500 mr-2"></i>
+                                    <span>{{ borrowing.returned_date|date:"M d, Y" }}</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </td>
+
+                        <!-- Status -->
+                        <td class="px-6 py-4">
+                            {% if borrowing.status == 'active' %}
+                                {% if borrowing.is_overdue %}
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                                        <i class="fas fa-exclamation-triangle mr-1"></i>Overdue
+                                    </span>
+                                {% else %}
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-fbc-green-100 text-fbc-green-800">
+                                        <i class="fas fa-check-circle mr-1"></i>Active
+                                    </span>
+                                {% endif %}
+                            {% else %}
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                                    <i class="fas fa-undo mr-1"></i>Returned
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        <!-- Actions -->
+                        <td class="px-6 py-4">
+                            <div class="flex items-center space-x-2">
+                                {% if borrowing.status == 'active' and request.user.user_type in 'admin,staff' %}
+                                    <button onclick="returnBook({{ borrowing.id }})" 
+                                            class="inline-flex items-center px-3 py-2 bg-fbc-green-600 hover:bg-fbc-green-700 text-white text-sm font-medium rounded-lg transition-colors duration-200">
+                                        <i class="fas fa-undo mr-1"></i>Return
+                                    </button>
+                                {% endif %}
+                                
+                                <button onclick="viewDetails({{ borrowing.id }})" 
+                                        class="inline-flex items-center px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors duration-200">
+                                    <i class="fas fa-eye mr-1"></i>Details
+                                </button>
+                                
+                                {% if borrowing.is_overdue and request.user.user_type in 'admin,staff' %}
+                                    <button onclick="sendReminder({{ borrowing.id }})" 
+                                            class="inline-flex items-center px-3 py-2 bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-medium rounded-lg transition-colors duration-200">
+                                        <i class="fas fa-bell mr-1"></i>Remind
+                                    </button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="px-6 py-12 text-center">
+                            <div class="max-w-md mx-auto">
+                                <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <i class="fas fa-search text-gray-400 text-3xl"></i>
+                                </div>
+                                <h3 class="text-lg font-semibold text-gray-900 mb-2">No Borrowings Found</h3>
+                                <p class="text-gray-600">No circulation records match your current filters.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if borrowings.has_other_pages %}
+        <div class="bg-gray-50 px-6 py-4 border-t border-gray-200">
+            <div class="flex items-center justify-between">
+                <div class="text-sm text-gray-700">
+                    Showing {{ borrowings.start_index }} to {{ borrowings.end_index }} of {{ borrowings.paginator.count }} results
+                </div>
+                <div class="flex items-center space-x-2">
+                    {% if borrowings.has_previous %}
+                        <a href="?page={{ borrowings.previous_page_number }}" class="px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors duration-200">
+                            Previous
+                        </a>
+                    {% endif %}
+                    
+                    <span class="px-3 py-2 bg-fbc-green-600 text-white rounded-lg text-sm font-medium">
+                        {{ borrowings.number }}
+                    </span>
+                    
+                    {% if borrowings.has_next %}
+                        <a href="?page={{ borrowings.next_page_number }}" class="px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors duration-200">
+                            Next
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Enhanced Details Modal -->
+<div id="detailsModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+        <div class="bg-gradient-to-r from-fbc-green-600 to-fbc-green-600 p-6 text-white flex-shrink-0">
+            <div class="flex items-center justify-between">
+                <h3 class="text-2xl font-serif font-bold">Borrowing Details</h3>
+                <button onclick="closeModal()" class="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-colors duration-200">
+                    <i class="fas fa-times text-white"></i>
+                </button>
+            </div>
+        </div>
+        <div class="flex-1 overflow-y-auto p-6" id="modalContent">
+            <!-- Content will be populated by JavaScript -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Enhanced search and filter functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchBorrowings');
+    const statusFilter = document.getElementById('statusFilter');
+    const dateFilter = document.getElementById('dateFilter');
+    const table = document.getElementById('borrowingsTable');
+    const rows = table.querySelectorAll('.borrowing-row');
+
+    // Search functionality
+    searchInput.addEventListener('keyup', function() {
+        filterTable();
+    });
+
+    // Status filter
+    statusFilter.addEventListener('change', function() {
+        filterTable();
+    });
+
+    // Date filter
+    dateFilter.addEventListener('change', function() {
+        filterTable();
+    });
+
+    function filterTable() {
+        const searchText = searchInput.value.toLowerCase();
+        const selectedStatus = statusFilter.value.toLowerCase();
+        const selectedDate = dateFilter.value;
+
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            const status = row.getAttribute('data-status').toLowerCase();
+            
+            let showRow = true;
+
+            // Search filter
+            if (searchText && !text.includes(searchText)) {
+                showRow = false;
+            }
+
+            // Status filter
+            if (selectedStatus && status !== selectedStatus) {
+                showRow = false;
+            }
+
+            // Date filter (simplified - would need server-side implementation for full functionality)
+            if (selectedDate) {
+                // This would typically require server-side filtering
+                // For now, we'll just show all rows
+            }
+
+            row.style.display = showRow ? '' : 'none';
+        });
+
+        // Update results counter
+        const visibleRows = Array.from(rows).filter(row => row.style.display !== 'none');
+        const counter = document.querySelector('.text-fbc-green-600 span');
+        if (counter) {
+            counter.textContent = `${visibleRows.length} Records`;
+        }
+    }
+
+    // Auto-refresh functionality
+    const refreshButton = document.querySelector('button:has(.fa-refresh)');
+    if (refreshButton) {
+        refreshButton.addEventListener('click', function() {
+            location.reload();
+        });
+    }
+
+    // Export functionality
+    const exportButton = document.querySelector('button:has(.fa-download)');
+    if (exportButton) {
+        exportButton.addEventListener('click', function() {
+            // This would typically trigger a server-side export
+            alert('Export functionality would be implemented here');
+        });
+    }
+});
+
+// Return book functionality
+{% if request.user.user_type in 'admin,staff' %}
+function returnBook(borrowingId) {
+    // Show confirmation modal instead of basic confirm
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4';
+    modal.innerHTML = `
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+            <div class="text-center">
+                <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-question-circle text-3xl text-yellow-600"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Confirm Book Return</h3>
+                <p class="text-gray-600 mb-6">Are you sure you want to mark this book as returned?</p>
+                <div class="flex items-center justify-center space-x-4">
+                    <button onclick="cancelReturn()" class="px-6 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-lg transition-colors duration-200">
+                        Cancel
+                    </button>
+                    <button onclick="confirmReturn(${borrowingId})" class="px-6 py-2 bg-fbc-green-600 hover:bg-fbc-green-700 text-white font-medium rounded-lg transition-colors duration-200">
+                        Confirm Return
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+}
+
+function cancelReturn() {
+    const modal = document.querySelector('.fixed.inset-0');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+function confirmReturn(borrowingId) {
+    const modal = document.querySelector('.fixed.inset-0');
+    
+    fetch(`/manage/borrowing/${borrowingId}/return/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => {
+        if (response.ok) {
+            // Show success notification
+            showNotification('Book returned successfully!', 'success');
+            setTimeout(() => {
+                location.reload();
+            }, 1500);
+        } else {
+            showNotification('Error returning book. Please try again.', 'error');
+        }
+    })
+    .catch(error => {
+        showNotification('Network error. Please try again.', 'error');
+        console.error('Error:', error);
+    });
+    
+    if (modal) {
+        modal.remove();
+    }
+}
+
+// Send reminder functionality
+function sendReminder(borrowingId) {
+    const button = event.target.closest('button');
+    const originalText = button.innerHTML;
+    
+    button.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Sending...';
+    button.disabled = true;
+    
+    fetch(`/manage/borrowing/${borrowingId}/remind/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => {
+        if (response.ok) {
+            showNotification('Reminder sent successfully!', 'success');
+        } else {
+            showNotification('Error sending reminder. Please try again.', 'error');
+        }
+    })
+    .catch(error => {
+        showNotification('Network error. Please try again.', 'error');
+        console.error('Error:', error);
+    })
+    .finally(() => {
+        button.innerHTML = originalText;
+        button.disabled = false;
+    });
+}
+{% endif %}
+
+// View details functionality
+function viewDetails(borrowingId) {
+    console.log('ViewDetails called for borrowing ID:', borrowingId);
+    const modal = document.getElementById('detailsModal');
+    const content = document.getElementById('modalContent');
+    const modalInner = modal.querySelector('.bg-white');
+    
+    // Show loading state
+    content.innerHTML = `
+        <div class="flex items-center justify-center py-12">
+            <div class="text-center">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-fbc-green-600 mx-auto mb-4"></div>
+                <p class="text-gray-600">Loading details...</p>
+            </div>
+        </div>
+    `;
+    
+    // Show modal with animation
+    modal.classList.remove('hidden');
+    modalInner.classList.add('modal-animate-in');
+    
+    // Reset scroll position
+    content.scrollTop = 0;
+    
+    // Fetch borrowing details
+    console.log('Fetching borrowing details...');
+    fetch(`/manage/borrowing/${borrowingId}/`, {
+        method: 'GET',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        },
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Received data:', data);
+        content.innerHTML = `
+            <div class="space-y-6">
+                <!-- Status Overview -->
+                <div class="bg-gradient-to-r ${data.is_overdue ? 'from-red-50 to-red-100 border border-red-200' : 'from-blue-50 to-blue-100 border border-blue-200'} rounded-xl p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h4 class="text-lg font-semibold ${data.is_overdue ? 'text-red-900' : 'text-blue-900'}">
+                                ${data.is_overdue ? '⚠️ Overdue Borrowing' : '✅ Active Borrowing'}
+                            </h4>
+                            <p class="text-sm ${data.is_overdue ? 'text-red-700' : 'text-blue-700'} mt-1">
+                                Status: ${data.status.charAt(0).toUpperCase() + data.status.slice(1)}
+                            </p>
+                        </div>
+                        <div class="text-right">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${data.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}">
+                                ${data.status === 'active' ? 'Currently Borrowed' : 'Returned'}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Main Information Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- User Information -->
+                    <div class="bg-white border border-gray-200 rounded-xl p-6">
+                        <h4 class="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-3 mb-4 flex items-center">
+                            <i class="fas fa-user-circle text-fbc-green-600 mr-2"></i>
+                            User Information
+                        </h4>
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-start">
+                                <div class="flex-1">
+                                    <label class="block text-sm font-medium text-gray-600 mb-1">Full Name</label>
+                                    <div class="text-gray-900 font-medium">${data.user.full_name || data.user.username}</div>
+                                </div>
+                            </div>
+                            <div class="flex justify-between items-start">
+                                <div class="flex-1">
+                                    <label class="block text-sm font-medium text-gray-600 mb-1">Email</label>
+                                    <div class="text-gray-900">${data.user.email}</div>
+                                </div>
+                            </div>
+                            <div class="flex justify-between items-start">
+                                <div class="flex-1">
+                                    <label class="block text-sm font-medium text-gray-600 mb-1">User Type</label>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-fbc-green-100 text-fbc-green-800">
+                                        ${data.user.user_type}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Book Information -->
+                    <div class="bg-white border border-gray-200 rounded-xl p-6">
+                        <h4 class="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-3 mb-4 flex items-center">
+                            <i class="fas fa-book text-fbc-green-600 mr-2"></i>
+                            Book Information
+                        </h4>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600 mb-1">Title</label>
+                                <div class="text-gray-900 font-medium">${data.book.title}</div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600 mb-1">Author</label>
+                                <div class="text-gray-900">${data.book.author}</div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600 mb-1">ISBN</label>
+                                <div class="text-gray-900 font-mono text-sm">${data.book.isbn || 'N/A'}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Borrowing Timeline -->
+                <div class="bg-white border border-gray-200 rounded-xl p-6">
+                    <h4 class="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-3 mb-4 flex items-center">
+                        <i class="fas fa-calendar-alt text-fbc-green-600 mr-2"></i>
+                        Borrowing Timeline
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="text-center">
+                            <div class="bg-fbc-green-50 rounded-lg p-4">
+                                <i class="fas fa-calendar-plus text-fbc-green-600 text-xl mb-2"></i>
+                                <label class="block text-sm font-medium text-gray-600 mb-1">Borrowed Date</label>
+                                <div class="text-gray-900 font-medium">${data.borrowed_date}</div>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <div class="bg-${data.is_overdue ? 'red' : 'yellow'}-50 rounded-lg p-4">
+                                <i class="fas fa-calendar-times text-${data.is_overdue ? 'red' : 'yellow'}-600 text-xl mb-2"></i>
+                                <label class="block text-sm font-medium text-gray-600 mb-1">Due Date</label>
+                                <div class="text-gray-900 font-medium">${data.due_date}</div>
+                                ${data.is_overdue ? '<div class="text-red-600 text-xs mt-1 font-medium">OVERDUE</div>' : ''}
+                            </div>
+                        </div>
+                        ${data.returned_date ? `
+                            <div class="text-center">
+                                <div class="bg-blue-50 rounded-lg p-4">
+                                    <i class="fas fa-calendar-check text-blue-600 text-xl mb-2"></i>
+                                    <label class="block text-sm font-medium text-gray-600 mb-1">Returned Date</label>
+                                    <div class="text-gray-900 font-medium">${data.returned_date}</div>
+                                </div>
+                            </div>
+                        ` : `
+                            <div class="text-center">
+                                <div class="bg-gray-50 rounded-lg p-4">
+                                    <i class="fas fa-calendar-question text-gray-400 text-xl mb-2"></i>
+                                    <label class="block text-sm font-medium text-gray-600 mb-1">Returned Date</label>
+                                    <div class="text-gray-500">Not yet returned</div>
+                                </div>
+                            </div>
+                        `}
+                    </div>
+                </div>
+                
+                <!-- Fine Information -->
+                ${data.fine_amount > 0 ? `
+                    <div class="bg-${data.fine_paid ? 'green' : 'red'}-50 border border-${data.fine_paid ? 'green' : 'red'}-200 rounded-xl p-6">
+                        <h4 class="text-lg font-semibold text-${data.fine_paid ? 'green' : 'red'}-900 border-b border-${data.fine_paid ? 'green' : 'red'}-200 pb-3 mb-4 flex items-center">
+                            <i class="fas fa-dollar-sign text-${data.fine_paid ? 'green' : 'red'}-600 mr-2"></i>
+                            Fine Information
+                        </h4>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <label class="block text-sm font-medium text-${data.fine_paid ? 'green' : 'red'}-700 mb-1">Fine Amount</label>
+                                <div class="text-2xl font-bold text-${data.fine_paid ? 'green' : 'red'}-900">$${data.fine_amount.toFixed(2)}</div>
+                            </div>
+                            <div class="text-right">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${data.fine_paid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                                    ${data.fine_paid ? '✅ Paid' : '❌ Unpaid'}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                ` : ''}
+            </div>
+        `;
+    })
+    .catch(error => {
+        console.error('Error loading borrowing details:', error);
+        content.innerHTML = `
+            <div class="text-center py-12">
+                <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-exclamation-triangle text-2xl text-red-600"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Error Loading Details</h3>
+                <p class="text-gray-600">Unable to load borrowing details. Please try again.</p>
+                <p class="text-red-500 text-sm mt-2">Error: ${error.message}</p>
+            </div>
+        `;
+    });
+}
+
+// Close modal functionality
+function closeModal() {
+    const modal = document.getElementById('detailsModal');
+    const modalInner = modal.querySelector('.bg-white');
+    
+    // Add fade out animation
+    modalInner.style.animation = 'modalSlideOut 0.3s ease-in forwards';
+    
+    setTimeout(() => {
+        modal.classList.add('hidden');
+        modalInner.style.animation = '';
+        modalInner.classList.remove('modal-animate-in');
+    }, 300);
+}
+
+// Add the slide out animation to the existing styles
+const slideOutKeyframes = `
+    @keyframes modalSlideOut {
+        from {
+            opacity: 1;
+            transform: scale(1);
+        }
+        to {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+    }
+`;
+
+// Inject the animation into the page
+if (!document.querySelector('#modal-animations')) {
+    const style = document.createElement('style');
+    style.id = 'modal-animations';
+    style.textContent = slideOutKeyframes;
+    document.head.appendChild(style);
+}
+
+// Click outside modal to close
+document.getElementById('detailsModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeModal();
+    }
+});
+
+// Notification system
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `fixed top-4 right-4 z-50 max-w-sm w-full bg-white rounded-lg shadow-lg border-l-4 ${
+        type === 'success' ? 'border-fbc-green-500' : 
+        type === 'error' ? 'border-red-500' : 
+        type === 'warning' ? 'border-yellow-500' : 'border-blue-500'
+    } p-4 transition-all duration-300 transform translate-x-full`;
+    
+    notification.innerHTML = `
+        <div class="flex items-start">
+            <div class="flex-shrink-0">
+                <i class="fas fa-${
+                    type === 'success' ? 'check-circle text-fbc-green-500' : 
+                    type === 'error' ? 'exclamation-circle text-red-500' : 
+                    type === 'warning' ? 'exclamation-triangle text-yellow-500' : 'info-circle text-blue-500'
+                } text-lg"></i>
+            </div>
+            <div class="ml-3 flex-1">
+                <p class="text-sm font-medium text-gray-900">${message}</p>
+            </div>
+            <button onclick="this.parentElement.parentElement.remove()" class="ml-4 flex-shrink-0 text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Animate in
+    setTimeout(() => {
+        notification.classList.remove('translate-x-full');
+    }, 100);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        notification.classList.add('translate-x-full');
+        setTimeout(() => {
+            if (notification.parentElement) {
+                notification.remove();
+            }
+        }, 300);
+    }, 5000);
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    // Escape key to close modal
+    if (e.key === 'Escape') {
+        closeModal();
+        cancelReturn();
+    }
+    
+    // Ctrl/Cmd + F to focus search
+    if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+        e.preventDefault();
+        document.getElementById('searchBorrowings').focus();
+    }
+});
+</script>
+{% endblock %}

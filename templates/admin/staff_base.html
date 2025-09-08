@@ -1,0 +1,122 @@
+{% extends 'admin/admin_base.html' %}
+
+{% block extra_head %}
+{{ block.super }}
+<style>
+/* Staff-specific styles to hide admin-only elements */
+.admin-only {
+    display: none !important;
+}
+
+/* Staff badge styling */
+.staff-badge {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+</style>
+{% endblock %}
+
+{% block sidebar_content %}
+<!-- Override sidebar to show staff-specific navigation -->
+<div class="bg-library-navy min-h-screen w-64 fixed left-0 top-0 z-20 shadow-2xl">
+    <div class="flex flex-col h-full">
+        <!-- Header -->
+        <div class="flex items-center justify-between p-6 border-b border-library-green-400 border-opacity-20">
+            <div class="flex items-center space-x-3">
+                {% if system_logo %}
+                <img src="{{ system_logo }}" alt="{{ system_name }}" class="h-8 w-auto">
+                {% else %}
+                <div class="w-8 h-8 bg-library-gold rounded-lg flex items-center justify-center">
+                    <i class="fas fa-university text-library-navy"></i>
+                </div>
+                {% endif %}
+                <div>
+                    <h1 class="text-xl font-serif font-bold tracking-tight text-contrast">{{ system_name|default:"FBC Library" }}</h1>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex-1 px-4 py-6 space-y-2">
+            <!-- Dashboard -->
+            <div class="mb-6">
+                <a href="{% url 'fbc_users:staff_dashboard_beautiful' %}" 
+                   class="flex items-center px-3 py-3 text-library-cream hover:bg-library-green-600 hover:bg-opacity-20 rounded-lg transition-all duration-200 group">
+                    <i class="fas fa-tachometer-alt text-lg text-fbc-green-400 group-hover:text-fbc-green-300"></i>
+                    <span class="ml-3 font-medium">Staff Dashboard</span>
+                </a>
+            </div>
+
+            <!-- Library Management -->
+            <div class="mb-6">
+                <h3 class="text-xs font-sans font-semibold text-fbc-green-300 uppercase tracking-wider px-3 mb-3">Library Management</h3>
+                <div class="space-y-1">
+                    <a href="{% url 'fbc_books:book_list' %}" 
+                       class="flex items-center px-3 py-2 text-library-cream hover:bg-library-green-600 hover:bg-opacity-20 rounded-lg transition-all duration-200 group">
+                        <i class="fas fa-book text-library-green-400 group-hover:text-library-green-300"></i>
+                        <span class="ml-3">View Books</span>
+                    </a>
+                    
+                    <a href="{% url 'fbc_books:manage_books' %}" 
+                       class="flex items-center px-3 py-2 text-library-cream hover:bg-library-green-600 hover:bg-opacity-20 rounded-lg transition-all duration-200 group">
+                        <i class="fas fa-edit text-library-green-400 group-hover:text-library-green-300"></i>
+                        <span class="ml-3">Manage Books</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <a href="{% url 'fbc_books:manage_borrowings' %}" 
+                   class="flex items-center px-3 py-2 text-library-cream hover:bg-library-green-600 hover:bg-opacity-20 rounded-lg transition-all duration-200 group">
+                    <i class="fas fa-exchange-alt text-library-green-400 group-hover:text-library-green-300"></i>
+                    <span class="ml-3">Manage Borrowings</span>
+                </a>
+            </div>
+
+            <!-- Fines Management -->
+            <div class="mb-6">
+                <a href="{% url 'fbc_fines:fine_list' %}" 
+                   class="flex items-center px-3 py-2 text-library-cream hover:bg-library-green-600 hover:bg-opacity-20 rounded-lg transition-all duration-200 group">
+                    <i class="fas fa-receipt text-library-green-400 group-hover:text-library-green-300"></i>
+                    <span class="ml-3">Manage Fines</span>
+                </a>
+            </div>
+
+            <!-- Restricted Access Notice -->
+            <div class="bg-amber-900 bg-opacity-30 border border-amber-600 border-opacity-40 rounded-lg p-3 mb-6">
+                <div class="flex items-start">
+                    <i class="fas fa-shield-alt text-amber-400 mt-0.5 mr-2 flex-shrink-0"></i>
+                    <div>
+                        <h4 class="text-amber-300 font-semibold text-sm mb-1">Staff Access</h4>
+                        <p class="text-amber-200 text-xs">User management and system settings require administrator privileges.</p>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- User Info -->
+        <div class="px-4 py-4 border-t border-library-green-400 border-opacity-20">
+            <div class="flex items-center">
+                <div class="w-10 h-10 bg-library-gold rounded-full flex items-center justify-center">
+                    <i class="fas fa-user-tie text-library-navy"></i>
+                </div>
+                <div class="ml-3 flex-1">
+                    <p class="text-library-cream font-medium text-sm">{{ user.get_full_name|default:user.username }}</p>
+                    <p class="text-library-green-300 text-xs">Staff Member</p>
+                </div>
+                <a href="{% url 'fbc_users:logout' %}" 
+                   class="text-library-green-400 hover:text-library-green-300 transition-colors">
+                    <i class="fas fa-sign-out-alt"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

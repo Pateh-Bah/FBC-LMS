@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}FAQ - FBC Library{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <h2 class="mb-4">Library FAQ</h2>
+    
+    <div class="accordion" id="faqAccordion">
+        <!-- Library Fines -->
+        <div class="accordion-item">
+            <h3 class="accordion-header">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#finesFaq">
+                    Library Fines
+                </button>
+            </h3>
+            <div id="finesFaq" class="accordion-collapse collapse show">
+                <div class="accordion-body">
+                    <h4>Fine Rates</h4>
+                    <ul class="list-unstyled">
+                        <li>📚 Overdue books: Le 5,000 per day</li>
+                        <li>🔨 Damaged books: Up to full replacement cost</li>
+                        <li>❌ Lost books: Full replacement cost plus Le 50,000 processing fee</li>
+                    </ul>
+                    
+                    <h4 class="mt-4">Fine Policies</h4>
+                    <ul class="list-unstyled">
+                        <li>⏰ Fines begin accumulating the day after the due date</li>
+                        <li>💰 Maximum fine per item: Le 50,000</li>
+                        <li>⚠️ Borrowing privileges are suspended when fines exceed Le 25,000</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Methods -->
+        <div class="accordion-item">
+            <h3 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#paymentsFaq">
+                    Payment Methods
+                </button>
+            </h3>
+            <div id="paymentsFaq" class="accordion-collapse collapse">
+                <div class="accordion-body">
+                    <div class="row g-4">
+                        <!-- Mobile Money -->
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="mb-0">Mobile Money</h5>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item">
+                                            <strong>Orange Money:</strong> Dial *144#
+                                            <br><small class="text-muted">Merchant ID: FBC-LIB-01</small>
+                                        </li>
+                                        <li class="list-group-item">
+                                            <strong>Africell Money:</strong> Dial *161#
+                                            <br><small class="text-muted">Merchant ID: FBC-LIB-02</small>
+                                        </li>
+                                        <li class="list-group-item">
+                                            <strong>QMoney:</strong> Dial *360#
+                                            <br><small class="text-muted">Merchant ID: FBC-LIB-03</small>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- International Payments -->
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-header bg-success text-white">
+                                    <h5 class="mb-0">International Payments</h5>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item">
+                                            <strong>PayPal</strong>
+                                            <br><small class="text-muted">payments@fbc-library.edu.sl</small>
+                                        </li>
+                                        <li class="list-group-item">
+                                            <strong>Credit/Debit Cards</strong>
+                                            <br><small class="text-muted">Visa, Mastercard, American Express</small>
+                                        </li>
+                                        <li class="list-group-item">
+                                            <strong>Bank Transfer</strong>
+                                            <br><small class="text-muted">Account details provided upon request</small>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

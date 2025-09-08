@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <h1>Your Fines</h1>
+    
+    {% if fines %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Book</th>
+                        <th>Type</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Due Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for fine in fines %}
+                    <tr>
+                        <td>{{ fine.book.title }}</td>
+                        <td>{{ fine.get_fine_type_display }}</td>
+                        <td>${{ fine.amount }}</td>
+                        <td>
+                            <span class="badge {% if fine.status == 'paid' %}bg-success{% elif fine.status == 'pending' %}bg-warning{% else %}bg-secondary{% endif %}">
+                                {{ fine.get_status_display }}
+                            </span>
+                        </td>
+                        <td>{{ fine.due_date|date:"M d, Y" }}</td>
+                        <td>
+                            <a href="{% url 'fbc_fines:fine_detail' fine.pk %}" class="btn btn-sm btn-info">View</a>
+                            {% if fine.status == 'pending' %}
+                            <a href="{% url 'fbc_fines:pay_fine' fine.pk %}" class="btn btn-sm btn-success">Pay</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            You have no outstanding fines.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

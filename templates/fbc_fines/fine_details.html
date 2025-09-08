@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Fine Details - FBC Library{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">Fine Details</h1>
+                    <p class="text-sm text-gray-600 mt-1">Detailed information about this fine</p>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <a href="{% url 'fbc_fines:my_fines' %}" class="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-200">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Back to My Fines
+                    </a>
+                    {% if fine.status == 'pending' %}
+                    <a href="{% url 'fbc_payments:process_payment' %}?fine_id={{ fine.id }}" class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-600 transition-colors duration-200">
+                        <i class="fas fa-credit-card mr-2"></i>
+                        Pay Now
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fine Details Card -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-900">Fine Information</h2>
+        </div>
+        <div class="px-6 py-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Book Information -->
+                <div class="space-y-4">
+                    <h3 class="text-sm font-medium text-gray-900 uppercase tracking-wider">Book Information</h3>
+                    <div class="flex items-start space-x-4">
+                        {% if fine.book.cover_image %}
+                        <img class="h-24 w-18 object-cover rounded shadow-sm" src="{{ fine.book.cover_image.url }}" alt="{{ fine.book.title }}">
+                        {% else %}
+                        <div class="h-24 w-18 bg-gray-200 rounded shadow-sm flex items-center justify-center">
+                            <i class="fas fa-book text-gray-400 text-xl"></i>
+                        </div>
+                        {% endif %}
+                        <div class="flex-1">
+                            <h4 class="text-lg font-semibold text-gray-900">{{ fine.book.title }}</h4>
+                            <p class="text-gray-600">by {{ fine.book.author }}</p>
+                            <p class="text-sm text-gray-500 mt-1">ISBN: {{ fine.book.isbn|default:"N/A" }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fine Status -->
+                <div class="space-y-4">
+                    <h3 class="text-sm font-medium text-gray-900 uppercase tracking-wider">Fine Status</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-600">Status:</span>
+                            {% if fine.status == 'pending' %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                                <i class="fas fa-exclamation-circle mr-1"></i>
+                                Pending
+                            </span>
+                            {% elif fine.status == 'paid' %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                <i class="fas fa-check-circle mr-1"></i>
+                                Paid
+                            </span>
+                            {% elif fine.status == 'cancelled' %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+                                <i class="fas fa-times-circle mr-1"></i>
+                                Cancelled
+                            </span>
+                            {% endif %}
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-600">Amount:</span>
+                            <span class="text-xl font-bold text-gray-900">Le {{ fine.amount|floatformat:2 }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Timeline Card -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-900">Timeline</h2>
+        </div>
+        <div class="px-6 py-6">
+            <div class="space-y-6">
+                <!-- Fine Type -->
+                <div class="flex items-start space-x-4">
+                    <div class="flex-shrink-0">
+                        <div class="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-{% if fine.fine_type == 'overdue' %}clock{% elif fine.fine_type == 'damage' %}exclamation-triangle{% elif fine.fine_type == 'lost' %}times-circle{% else %}info-circle{% endif %} text-yellow-600"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="text-sm font-medium text-gray-900">Fine Type</h4>
+                        <p class="text-gray-600">{{ fine.get_fine_type_display }}</p>
+                        <p class="text-sm text-gray-500">{{ fine.date_issued|date:"F j, Y g:i A" }}</p>
+                    </div>
+                </div>
+
+                <!-- Due Date -->
+                <div class="flex items-start space-x-4">
+                    <div class="flex-shrink-0">
+                        <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-calendar text-blue-600"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="text-sm font-medium text-gray-900">Due Date</h4>
+                        <p class="text-gray-600">{{ fine.due_date|date:"F j, Y" }}</p>
+                        {% if fine.due_date < today and fine.status == 'pending' %}
+                        <p class="text-sm text-red-600 font-medium">This fine is overdue</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Payment Info (if paid) -->
+                {% if fine.status == 'paid' and fine.payment_date %}
+                <div class="flex items-start space-x-4">
+                    <div class="flex-shrink-0">
+                        <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-check text-green-600"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="text-sm font-medium text-gray-900">Payment Completed</h4>
+                        <p class="text-gray-600">{{ fine.payment_date|date:"F j, Y g:i A" }}</p>
+                        {% if fine.payment_method %}
+                        <p class="text-sm text-gray-500">Method: {{ fine.payment_method }}</p>
+                        {% endif %}
+                        {% if fine.payment_reference %}
+                        <p class="text-sm text-gray-500">Reference: {{ fine.payment_reference }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Notes (if any) -->
+        {% if fine.notes %}
+        <div class="px-6 py-4 border-t border-gray-200 bg-gray-50">
+            <h4 class="text-sm font-medium text-gray-900 mb-2">Additional Notes</h4>
+            <p class="text-gray-600 text-sm">{{ fine.notes }}</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

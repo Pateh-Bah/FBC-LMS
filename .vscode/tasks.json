@@ -1,0 +1,19 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Run Django Development Server",
+			"type": "shell",
+			"command": "./run.ps1 dev",
+			"group": "build",
+			"isBackground": true,
+			"options": {
+				"shell": {
+					"executable": "pwsh",
+					"args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command"]
+				}
+			},
+			"problemMatcher": []
+		}
+	]
+}

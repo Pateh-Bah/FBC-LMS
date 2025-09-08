@@ -1,0 +1,427 @@
+{% extends 'admin/admin_base.html' %}
+{% load static %}
+
+{% block title %}Admin Dashboard - {{ system_name|default:"FBC Library System" }}{% endblock %}
+
+{% block page_title %}Administrative Dashboard{% endblock %}
+
+{% block content %}
+<!-- Classic Library Header -->
+<div class="relative bg-gradient-to-r from-library-navy via-library-burgundy to-library-navy rounded-none shadow-2xl mb-12">
+    <div class="absolute inset-0 bg-black opacity-10"></div>
+    <div class="absolute inset-0" style="background-image: url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1000 100\" fill=\"none\"><path d=\"M0,50 Q250,20 500,50 T1000,50 L1000,100 L0,100 Z\" fill=\"%23ffffff\" fill-opacity=\"0.03\"/></svg>');"></div>
+    
+    <div class="relative z-10 px-8 py-16">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-6">
+                    <!-- Classical Library Icon -->
+                    <div class="w-20 h-20 bg-library-gold rounded-full flex items-center justify-center shadow-lg animate-glow">
+                        <i class="fas fa-university text-2xl text-library-navy"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-serif text-5xl font-bold text-white mb-2 tracking-wide">
+                            Administrative 
+                            <span class="text-library-gold">Dashboard</span>
+                        </h1>
+                        <p class="text-library-cream text-xl font-body italic">
+                            "Knowledge is the treasure of a wise man" - Welcome, {{ user.get_full_name|default:user.username }}
+                        </p>
+                        <div class="flex items-center space-x-6 mt-4">
+                            <div class="flex items-center space-x-2 bg-white bg-opacity-10 rounded-lg px-4 py-2 backdrop-blur-sm">
+                                <i class="fas fa-crown text-library-gold"></i>
+                                <span class="text-library-cream font-semibold">Administrator</span>
+                            </div>
+                            <div class="flex items-center space-x-2 bg-white bg-opacity-10 rounded-lg px-4 py-2 backdrop-blur-sm">
+                                <i class="fas fa-calendar-alt text-library-gold"></i>
+                                <span class="text-library-cream">{% now "F j, Y" %}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Classical Decorative Element -->
+                <div class="hidden xl:block">
+                    <div class="w-40 h-40 relative">
+                        <div class="absolute inset-0 border-4 border-library-gold rounded-full animate-float opacity-30"></div>
+                        <div class="absolute inset-4 border-2 border-library-cream rounded-full animate-float opacity-50" style="animation-delay: 1s;"></div>
+                        <div class="absolute inset-8 bg-library-gold rounded-full flex items-center justify-center shadow-xl">
+                            <i class="fas fa-scroll text-3xl text-library-navy"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Classical Statistics Section -->
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-12">
+    <!-- Total Users Card -->
+    <div class="group relative bg-white rounded-2xl shadow-xl border-l-4 border-library-navy overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
+        <div class="absolute top-0 right-0 w-20 h-20 bg-library-navy opacity-5 rounded-bl-full"></div>
+        <div class="relative p-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <div class="w-12 h-12 bg-library-navy bg-opacity-10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-opacity-20 transition-colors">
+                        <i class="fas fa-users text-xl text-library-navy"></i>
+                    </div>
+                    <h3 class="font-serif text-3xl font-bold text-library-navy mb-2">{{ total_users|default:0 }}</h3>
+                    <p class="text-gray-600 font-body">Registered Scholars</p>
+                    <div class="mt-3 flex items-center text-green-600 text-sm font-semibold">
+                        <i class="fas fa-arrow-up mr-1"></i>
+                        <span>{{ active_users|default:0 }} Active Today</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Total Books Card -->
+    <div class="group relative bg-white rounded-2xl shadow-xl border-l-4 border-library-burgundy overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
+        <div class="absolute top-0 right-0 w-20 h-20 bg-library-burgundy opacity-5 rounded-bl-full"></div>
+        <div class="relative p-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <div class="w-12 h-12 bg-library-burgundy bg-opacity-10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-opacity-20 transition-colors">
+                        <i class="fas fa-book text-xl text-library-burgundy"></i>
+                    </div>
+                    <h3 class="font-serif text-3xl font-bold text-library-burgundy mb-2">{{ total_books|default:0 }}</h3>
+                    <p class="text-gray-600 font-body">Literary Collection</p>
+                    <div class="mt-3 flex items-center text-green-600 text-sm font-semibold">
+                        <i class="fas fa-check-circle mr-1"></i>
+                        <span>{{ available_books|default:0 }} Available</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Borrowings Card -->
+    <div class="group relative bg-white rounded-2xl shadow-xl border-l-4 border-library-gold overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
+        <div class="absolute top-0 right-0 w-20 h-20 bg-library-gold opacity-5 rounded-bl-full"></div>
+        <div class="relative p-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <div class="w-12 h-12 bg-library-gold bg-opacity-10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-opacity-20 transition-colors">
+                        <i class="fas fa-exchange-alt text-xl text-yellow-700"></i>
+                    </div>
+                    <h3 class="font-serif text-3xl font-bold text-yellow-700 mb-2">{{ borrowed_books|default:0 }}</h3>
+                    <p class="text-gray-600 font-body">Books in Circulation</p>
+                    <div class="mt-3 flex items-center text-blue-600 text-sm font-semibold">
+                        <i class="fas fa-sync mr-1"></i>
+                        <span>Active Loans</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Revenue Card -->
+    <div class="group relative bg-white rounded-2xl shadow-xl border-l-4 border-library-sage overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
+        <div class="absolute top-0 right-0 w-20 h-20 bg-library-sage opacity-5 rounded-bl-full"></div>
+        <div class="relative p-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <div class="w-12 h-12 bg-library-sage bg-opacity-10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-opacity-20 transition-colors">
+                        <i class="fas fa-coins text-xl text-library-sage"></i>
+                    </div>
+                    <h3 class="font-serif text-3xl font-bold text-library-sage mb-2">${{ total_payments|default:0 }}</h3>
+                    <p class="text-gray-600 font-body">Library Revenue</p>
+                    <div class="mt-3 flex items-center text-orange-600 text-sm font-semibold">
+                        <i class="fas fa-exclamation-circle mr-1"></i>
+                        <span>${{ total_fines|default:0 }} Pending</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content Grid -->
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-8 mb-12">
+    <!-- Recent Library Activities -->
+    <div class="xl:col-span-2 bg-white rounded-2xl shadow-xl overflow-hidden">
+        <!-- Classical Header -->
+        <div class="bg-gradient-to-r from-library-parchment to-library-cream border-b border-warm-gray-200 p-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="w-14 h-14 bg-library-navy rounded-xl flex items-center justify-center shadow-lg">
+                        <i class="fas fa-scroll text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-serif text-2xl font-bold text-library-navy">Recent Library Activities</h3>
+                        <p class="text-warm-gray-600 font-body italic">Latest transactions and updates</p>
+                    </div>
+                </div>
+                <a href="#" class="inline-flex items-center px-4 py-2 bg-library-navy text-white rounded-lg hover:bg-opacity-90 transition-colors font-semibold">
+                    <i class="fas fa-archive mr-2"></i>
+                    View Archives
+                </a>
+            </div>
+        </div>
+        
+        <!-- Activity List -->
+        <div class="p-8">
+            <div class="space-y-6 max-h-96 overflow-y-auto custom-scrollbar">
+                {% for borrowing in recent_borrowings|slice:":6" %}
+                <div class="flex items-center space-x-6 p-6 bg-library-parchment rounded-xl hover:bg-library-cream transition-all duration-300 border border-warm-gray-100">
+                    <div class="w-12 h-12 bg-library-burgundy rounded-full flex items-center justify-center flex-shrink-0 shadow-md">
+                        <i class="fas fa-book-open text-white text-sm"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h4 class="font-serif font-semibold text-library-navy text-lg truncate">{{ borrowing.book.title }}</h4>
+                        <p class="text-warm-gray-600 font-body">Borrowed by {{ borrowing.user.get_full_name|default:borrowing.user.username }}</p>
+                        <div class="flex items-center space-x-4 mt-2">
+                            <span class="text-xs text-warm-gray-500 font-semibold uppercase tracking-wide">{{ borrowing.borrowed_date|timesince }} ago</span>
+                            <span class="inline-flex px-3 py-1 text-xs font-bold rounded-full {% if borrowing.status == 'active' %}bg-green-100 text-green-800{% else %}bg-warm-gray-100 text-warm-gray-800{% endif %}">
+                                {{ borrowing.status|title }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center py-16">
+                    <div class="w-20 h-20 bg-warm-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-book-dead text-warm-gray-400 text-2xl"></i>
+                    </div>
+                    <h4 class="font-serif text-xl font-semibold text-warm-gray-700 mb-2">No Recent Activities</h4>
+                    <p class="text-warm-gray-500 font-body italic">The library awaits your next transaction</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Administrative Actions & System Status -->
+    <div class="space-y-8">
+        <!-- Quick Administrative Actions -->
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+            <div class="bg-gradient-to-r from-library-navy to-library-burgundy p-6">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-library-gold rounded-lg flex items-center justify-center shadow-md">
+                        <i class="fas fa-crown text-library-navy text-sm"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-serif text-lg font-bold text-white">Administrative Actions</h3>
+                        <p class="text-library-cream text-sm font-body italic">Executive privileges</p>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6 space-y-4">
+                <a href="{% url 'fbc_books:manage_books' %}" class="group flex items-center p-4 rounded-xl hover:bg-library-parchment transition-all duration-300 border border-transparent hover:border-library-gold">
+                    <div class="w-10 h-10 bg-library-burgundy bg-opacity-10 rounded-lg flex items-center justify-center group-hover:bg-opacity-20 transition-colors">
+                        <i class="fas fa-plus text-library-burgundy text-sm"></i>
+                    </div>
+                    <span class="ml-4 font-body font-semibold text-library-navy group-hover:text-library-burgundy transition-colors">Catalogue New Books</span>
+                    <i class="fas fa-chevron-right text-warm-gray-400 ml-auto group-hover:text-library-gold transition-colors"></i>
+                </a>
+                
+                <a href="{% url 'fbc_books:manage_users' %}" class="group flex items-center p-4 rounded-xl hover:bg-library-parchment transition-all duration-300 border border-transparent hover:border-library-gold">
+                    <div class="w-10 h-10 bg-library-sage bg-opacity-10 rounded-lg flex items-center justify-center group-hover:bg-opacity-20 transition-colors">
+                        <i class="fas fa-user-plus text-library-sage text-sm"></i>
+                    </div>
+                    <span class="ml-4 font-body font-semibold text-library-navy group-hover:text-library-sage transition-colors">Register New Members</span>
+                    <i class="fas fa-chevron-right text-warm-gray-400 ml-auto group-hover:text-library-gold transition-colors"></i>
+                </a>
+                
+                <a href="{% url 'fbc_fines:manage_fines' %}" class="group flex items-center p-4 rounded-xl hover:bg-library-parchment transition-all duration-300 border border-transparent hover:border-library-gold">
+                    <div class="w-10 h-10 bg-yellow-600 bg-opacity-10 rounded-lg flex items-center justify-center group-hover:bg-opacity-20 transition-colors">
+                        <i class="fas fa-gavel text-yellow-700 text-sm"></i>
+                    </div>
+                    <span class="ml-4 font-body font-semibold text-library-navy group-hover:text-yellow-700 transition-colors">Manage Penalties</span>
+                    <i class="fas fa-chevron-right text-warm-gray-400 ml-auto group-hover:text-library-gold transition-colors"></i>
+                </a>
+                
+                <a href="{% url 'fbc_users:system_settings' %}" class="group flex items-center p-4 rounded-xl hover:bg-library-parchment transition-all duration-300 border border-transparent hover:border-library-gold">
+                    <div class="w-10 h-10 bg-library-navy bg-opacity-10 rounded-lg flex items-center justify-center group-hover:bg-opacity-20 transition-colors">
+                        <i class="fas fa-cogs text-library-navy text-sm"></i>
+                    </div>
+                    <span class="ml-4 font-body font-semibold text-library-navy group-hover:text-library-navy transition-colors">System Configuration</span>
+                    <i class="fas fa-chevron-right text-warm-gray-400 ml-auto group-hover:text-library-gold transition-colors"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- System Health Monitor -->
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+            <div class="bg-gradient-to-r from-library-sage to-library-navy p-6">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-library-gold rounded-lg flex items-center justify-center shadow-md">
+                        <i class="fas fa-heartbeat text-library-navy text-sm"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-serif text-lg font-bold text-white">Library System Status</h3>
+                        <p class="text-library-cream text-sm font-body italic">Operational monitoring</p>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6 space-y-6">
+                <div class="flex items-center justify-between p-4 bg-library-parchment rounded-xl">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                            <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                        </div>
+                        <span class="font-body font-semibold text-library-navy">Server Status</span>
+                    </div>
+                    <span class="text-green-600 font-bold font-serif">Operational</span>
+                </div>
+                
+                <div class="flex items-center justify-between p-4 bg-library-parchment rounded-xl">
+                    <span class="font-body font-semibold text-library-navy">Today's Registrations</span>
+                    <span class="text-library-burgundy font-bold font-serif text-lg">{{ daily_logins|default:0 }}</span>
+                </div>
+                
+                <div class="flex items-center justify-between p-4 bg-library-parchment rounded-xl">
+                    <span class="font-body font-semibold text-library-navy">Active Sessions</span>
+                    <span class="text-library-sage font-bold font-serif text-lg">{{ active_users|default:0 }}</span>
+                </div>
+                
+                <div class="flex items-center justify-between p-4 bg-library-parchment rounded-xl">
+                    <span class="font-body font-semibold text-library-navy">Archive Storage</span>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-20 h-2 bg-warm-gray-200 rounded-full overflow-hidden">
+                            <div class="w-3/4 h-full bg-library-gold rounded-full"></div>
+                        </div>
+                        <span class="text-library-navy font-bold font-serif text-sm">75%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- User Type Analytics -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div class="bg-gradient-to-br from-library-navy to-blue-900 rounded-2xl p-8 text-white shadow-xl transform hover:scale-105 transition-all duration-300">
+        <div class="flex items-center justify-between">
+            <div>
+                <div class="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center mb-4">
+                    <i class="fas fa-user-shield text-xl"></i>
+                </div>
+                <h4 class="text-white text-sm font-body uppercase tracking-wide mb-2">Administrators</h4>
+                <p class="text-3xl font-serif font-bold">{{ admin_users|default:0 }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bg-gradient-to-br from-library-burgundy to-red-900 rounded-2xl p-8 text-white shadow-xl transform hover:scale-105 transition-all duration-300">
+        <div class="flex items-center justify-between">
+            <div>
+                <div class="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center mb-4">
+                    <i class="fas fa-user-tie text-xl"></i>
+                </div>
+                <h4 class="text-white text-sm font-body uppercase tracking-wide mb-2">Library Staff</h4>
+                <p class="text-3xl font-serif font-bold">{{ staff_users|default:0 }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bg-gradient-to-br from-library-sage to-green-700 rounded-2xl p-8 text-white shadow-xl transform hover:scale-105 transition-all duration-300">
+        <div class="flex items-center justify-between">
+            <div>
+                <div class="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center mb-4">
+                    <i class="fas fa-chalkboard-teacher text-xl"></i>
+                </div>
+                <h4 class="text-white text-sm font-body uppercase tracking-wide mb-2">Lecturers</h4>
+                <p class="text-3xl font-serif font-bold">{{ lecturer_users|default:0 }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bg-gradient-to-br from-library-gold to-yellow-600 rounded-2xl p-8 text-white shadow-xl transform hover:scale-105 transition-all duration-300">
+        <div class="flex items-center justify-between">
+            <div>
+                <div class="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center mb-4">
+                    <i class="fas fa-user-graduate text-xl"></i>
+                </div>
+                <h4 class="text-white text-sm font-body uppercase tracking-wide mb-2">Students</h4>
+                <p class="text-3xl font-serif font-bold">{{ student_users|default:0 }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Additional Classical Styling */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: #f7f3e9;
+    border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #8b4513;
+    border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #654321;
+}
+
+.animate-glow {
+    animation: glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+    from {
+        box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+    }
+    to {
+        box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+    }
+}
+
+.animate-float {
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-20px);
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Enhanced dashboard interactions
+document.addEventListener('DOMContentLoaded', function() {
+    // Animated counters with classical easing
+    const counters = document.querySelectorAll('.font-serif.text-3xl.font-bold');
+    counters.forEach(counter => {
+        const target = parseInt(counter.textContent);
+        let current = 0;
+        const increment = target / 50; // Slower, more elegant animation
+        const timer = setInterval(() => {
+            current += increment;
+            if (current >= target) {
+                counter.textContent = target;
+                clearInterval(timer);
+            } else {
+                counter.textContent = Math.ceil(current);
+            }
+        }, 80); // Slower interval for classical feel
+    });
+    
+    // Add elegant hover effects to cards
+    const cards = document.querySelectorAll('.group');
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-8px) scale(1.02)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0) scale(1)';
+        });
+    });
+});
+</script>
+{% endblock %}

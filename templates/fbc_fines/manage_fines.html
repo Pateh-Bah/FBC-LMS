@@ -1,0 +1,435 @@
+{% extends "admin/admin_base.html" %}
+{% load static %}
+
+{% block page_title %}Manage Fines{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto space-y-8">
+    <!-- Header Section -->
+    <div class="bg-gradient-to-r from-fbc-green-500 to-fbc-green-600 rounded-xl shadow-lg text-white p-8">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <div class="flex items-center justify-center w-16 h-16 bg-white bg-opacity-20 rounded-xl">
+                    <i class="fas fa-money-bill text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-3xl font-serif font-bold">Manage Fines</h1>
+                    <p class="text-fbc-green-100 mt-2 font-body">Track and manage library fines and penalties</p>
+                </div>
+            </div>
+            <button onclick="openAddFineModal()" 
+                    class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white font-medium py-3 px-6 rounded-lg transition-all duration-300 flex items-center space-x-2">
+                <i class="fas fa-plus"></i>
+                <span>Add Fine</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-red-500">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600 uppercase tracking-wider">Total Outstanding</p>
+                    <p class="text-3xl font-bold text-red-600">Le {{ total_outstanding|default:"0.00" }}</p>
+                </div>
+                <div class="flex items-center justify-center w-12 h-12 bg-red-100 rounded-full">
+                    <i class="fas fa-money-bill text-red-600"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-green-500">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600 uppercase tracking-wider">Total Collected</p>
+                    <p class="text-3xl font-bold text-green-600">Le {{ total_collected|default:"0.00" }}</p>
+                </div>
+                <div class="flex items-center justify-center w-12 h-12 bg-green-100 rounded-full">
+                    <i class="fas fa-check-circle text-green-600"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-yellow-500">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600 uppercase tracking-wider">Pending Fines</p>
+                    <p class="text-3xl font-bold text-yellow-600">{{ pending_count|default:"0" }}</p>
+                </div>
+                <div class="flex items-center justify-center w-12 h-12 bg-yellow-100 rounded-full">
+                    <i class="fas fa-clock text-yellow-600"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-500">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600 uppercase tracking-wider">Total Fines</p>
+                    <p class="text-3xl font-bold text-blue-600">{{ total_fines|default:"0" }}</p>
+                </div>
+                <div class="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-full">
+                    <i class="fas fa-list text-blue-600"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters and Search -->
+    <div class="bg-white rounded-xl shadow-lg p-6">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+            <div class="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-4">
+                <div class="relative">
+                    <input type="text" id="searchFines" placeholder="Search fines..." 
+                           class="w-full md:w-80 px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fbc-green-500 focus:border-fbc-green-500">
+                    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                </div>
+                <select id="statusFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fbc-green-500 focus:border-fbc-green-500">
+                    <option value="">All Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="paid">Paid</option>
+                    <option value="overdue">Overdue</option>
+                </select>
+            </div>
+            <button onclick="exportFines()" 
+                    class="bg-fbc-green-500 hover:bg-fbc-green-600 text-white font-medium py-2 px-6 rounded-lg transition-all duration-300 flex items-center space-x-2">
+                <i class="fas fa-download"></i>
+                <span>Export</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Fines Table -->
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200 bg-fbc-green-50">
+            <h3 class="text-lg font-serif font-bold text-fbc-navy-900">Fines List</h3>
+            <p class="text-fbc-gray-600 font-body text-sm mt-1">Manage all library fines and penalties</p>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-fbc-navy-800 text-white">
+                    <tr>
+                        <th class="px-6 py-4 text-left text-sm font-medium uppercase tracking-wider">User</th>
+                        <th class="px-6 py-4 text-left text-sm font-medium uppercase tracking-wider">Type</th>
+                        <th class="px-6 py-4 text-left text-sm font-medium uppercase tracking-wider">Book</th>
+                        <th class="px-6 py-4 text-left text-sm font-medium uppercase tracking-wider">Amount</th>
+                        <th class="px-6 py-4 text-left text-sm font-medium uppercase tracking-wider">Date Issued</th>
+                        <th class="px-6 py-4 text-left text-sm font-medium uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-4 text-left text-sm font-medium uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    {% for fine in fines %}
+                    <tr class="hover:bg-gray-50 transition-colors duration-200">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center space-x-3">
+                                <div class="flex items-center justify-center w-10 h-10 bg-fbc-green-100 text-fbc-green-600 rounded-full">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900">{{ fine.user.get_full_name|default:fine.user.username }}</p>
+                                    <p class="text-sm text-gray-500">{{ fine.user.email }}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium 
+                                {% if fine.fine_type == 'overdue' %}bg-yellow-100 text-yellow-800
+                                {% elif fine.fine_type == 'damage' %}bg-orange-100 text-orange-800
+                                {% elif fine.fine_type == 'lost' %}bg-red-100 text-red-800
+                                {% else %}bg-blue-100 text-blue-800{% endif %}">
+                                {{ fine.get_fine_type_display }}
+                            </span>
+                            {% if fine.reason %}
+                                <div class="text-xs text-gray-500 mt-1">{{ fine.reason|truncatechars:30 }}</div>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4">
+                            {% if fine.book %}
+                                <div class="text-sm text-gray-900 font-medium">{{ fine.book.title }}</div>
+                                <div class="text-sm text-gray-500">{{ fine.book.author|default:"" }}</div>
+                            {% else %}
+                                <span class="text-sm text-gray-400 italic">General Fine</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="text-lg font-bold text-red-600">Le {{ fine.amount }}</span>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-900">
+                            {{ fine.date_issued|date:"M d, Y" }}
+                        </td>
+                        <td class="px-6 py-4">
+                            {% if fine.status == 'paid' %}
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    <i class="fas fa-check mr-1"></i>
+                                    Paid
+                                </span>
+                            {% elif fine.status == 'overdue' %}
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                    <i class="fas fa-exclamation-triangle mr-1"></i>
+                                    Overdue
+                                </span>
+                            {% else %}
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                    <i class="fas fa-clock mr-1"></i>
+                                    Pending
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center space-x-2">
+                                {% if fine.status != 'paid' %}
+                                <button onclick="markAsPaid({{ fine.id }})" 
+                                        class="bg-green-500 hover:bg-green-600 text-white text-xs font-medium py-1 px-3 rounded transition-colors duration-200 flex items-center space-x-1">
+                                    <i class="fas fa-check"></i>
+                                    <span>Mark Paid</span>
+                                </button>
+                                {% endif %}
+                                <button onclick="editFine({{ fine.id }})" 
+                                        class="bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium py-1 px-3 rounded transition-colors duration-200 flex items-center space-x-1">
+                                    <i class="fas fa-edit"></i>
+                                    <span>Edit</span>
+                                </button>
+                                <button onclick="deleteFine({{ fine.id }})" 
+                                        class="bg-red-500 hover:bg-red-600 text-white text-xs font-medium py-1 px-3 rounded transition-colors duration-200 flex items-center space-x-1">
+                                    <i class="fas fa-trash"></i>
+                                    <span>Delete</span>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="px-6 py-12 text-center">
+                            <div class="flex flex-col items-center justify-center space-y-4">
+                                <i class="fas fa-money-bill text-6xl text-gray-300"></i>
+                                <div>
+                                    <h3 class="text-lg font-medium text-gray-900">No fines found</h3>
+                                    <p class="text-gray-500">No fines have been issued yet.</p>
+                                </div>
+                                <button onclick="openAddFineModal()" 
+                                        class="bg-fbc-green-500 hover:bg-fbc-green-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center space-x-2">
+                                    <i class="fas fa-plus"></i>
+                                    <span>Add First Fine</span>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if fines.has_other_pages %}
+        <div class="px-6 py-4 border-t border-gray-200 bg-gray-50">
+            <div class="flex items-center justify-between">
+                <div class="text-sm text-gray-700">
+                    Showing {{ fines.start_index }} to {{ fines.end_index }} of {{ fines.paginator.count }} results
+                </div>
+                <div class="flex items-center space-x-2">
+                    {% if fines.has_previous %}
+                        <a href="?page={{ fines.previous_page_number }}" 
+                           class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                            Previous
+                        </a>
+                    {% endif %}
+
+                    {% for num in fines.paginator.page_range %}
+                        {% if fines.number == num %}
+                            <span class="px-3 py-2 text-sm font-medium text-fbc-green-600 bg-fbc-green-50 border border-fbc-green-300 rounded-md">
+                                {{ num }}
+                            </span>
+                        {% elif num > fines.number|add:'-3' and num < fines.number|add:'3' %}
+                            <a href="?page={{ num }}" 
+                               class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                                {{ num }}
+                            </a>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if fines.has_next %}
+                        <a href="?page={{ fines.next_page_number }}" 
+                           class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                            Next
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Add Fine Modal -->
+<div id="addFineModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+    <div class="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-serif font-bold text-gray-900">Add New Fine</h3>
+                <button onclick="closeAddFineModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        <form id="addFineForm" method="post" action="{% url 'fbc_fines:manage_fines' %}" class="px-6 py-4 space-y-4">
+            {% csrf_token %}
+            <div>
+                <label for="user" class="block text-sm font-medium text-gray-700 mb-2">User *</label>
+                <select name="user" id="user" required 
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fbc-green-500 focus:border-fbc-green-500">
+                    <option value="">Select User</option>
+                    {% for user in users %}
+                    <option value="{{ user.id }}">{{ user.get_full_name|default:user.username }} ({{ user.email }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label for="fine_type" class="block text-sm font-medium text-gray-700 mb-2">Fine Type *</label>
+                <select name="fine_type" id="fine_type" required 
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fbc-green-500 focus:border-fbc-green-500">
+                    <option value="general">General Fine</option>
+                    <option value="overdue">Overdue Book</option>
+                    <option value="damage">Book Damage</option>
+                    <option value="lost">Lost Book</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            <div>
+                <label for="book" class="block text-sm font-medium text-gray-700 mb-2">Book (Optional)</label>
+                <select name="book" id="book" 
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fbc-green-500 focus:border-fbc-green-500">
+                    <option value="">Select Book (if applicable)</option>
+                    {% for book in books %}
+                    <option value="{{ book.id }}">{{ book.title }} - {{ book.author }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label for="amount" class="block text-sm font-medium text-gray-700 mb-2">Amount (Le) *</label>
+                <input type="number" name="amount" id="amount" step="0.01" min="0.01" required 
+                       placeholder="0.00"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fbc-green-500 focus:border-fbc-green-500">
+            </div>
+            <div>
+                <label for="reason" class="block text-sm font-medium text-gray-700 mb-2">Reason/Description</label>
+                <textarea name="reason" id="reason" rows="3" 
+                          placeholder="Describe the reason for this fine..."
+                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fbc-green-500 focus:border-fbc-green-500"></textarea>
+            </div>
+            <div class="flex justify-end space-x-3 pt-4">
+                <button type="button" onclick="closeAddFineModal()" 
+                        class="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors duration-200">
+                    Cancel
+                </button>
+                <button type="submit" 
+                        class="px-4 py-2 bg-fbc-green-500 text-white rounded-lg hover:bg-fbc-green-600 transition-colors duration-200">
+                    Add Fine
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// Modal functions
+function openAddFineModal() {
+    document.getElementById('addFineModal').classList.remove('hidden');
+}
+
+function closeAddFineModal() {
+    document.getElementById('addFineModal').classList.add('hidden');
+    document.getElementById('addFineForm').reset();
+}
+
+// Fine management functions
+function markAsPaid(fineId) {
+    if (confirm('Mark this fine as paid?')) {
+        fetch(`/fines/mark-paid/${fineId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error marking fine as paid');
+            }
+        });
+    }
+}
+
+function editFine(fineId) {
+    // Implement edit functionality
+    console.log('Edit fine:', fineId);
+}
+
+function deleteFine(fineId) {
+    if (confirm('Are you sure you want to delete this fine?')) {
+        fetch(`/fines/ajax-delete/${fineId}/`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error deleting fine');
+            }
+        });
+    }
+}
+
+function exportFines() {
+    window.open('/fines/export/', '_blank');
+}
+
+// Search and filter functionality
+document.getElementById('searchFines').addEventListener('input', function() {
+    const searchTerm = this.value.toLowerCase();
+    const rows = document.querySelectorAll('tbody tr:not(.no-results)');
+    
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        if (text.includes(searchTerm)) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+});
+
+document.getElementById('statusFilter').addEventListener('change', function() {
+    const status = this.value.toLowerCase();
+    const rows = document.querySelectorAll('tbody tr:not(.no-results)');
+    
+    rows.forEach(row => {
+        const statusCell = row.querySelector('td:nth-child(5)');
+        if (statusCell) {
+            const rowStatus = statusCell.textContent.toLowerCase();
+            if (status === '' || rowStatus.includes(status)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        }
+    });
+});
+
+// Close modal when clicking outside
+document.getElementById('addFineModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeAddFineModal();
+    }
+});
+</script>
+{% endblock %}

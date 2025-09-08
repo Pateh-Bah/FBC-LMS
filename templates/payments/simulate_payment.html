@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Process Payment - FBC Library{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'profile' %}">Profile</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Process Payment</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title mb-0">Payment Details</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Payment Information -->
+                    <div class="mb-4">
+                        <h5 class="mb-3">Transaction Information</h5>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <p class="mb-1"><strong>Transaction ID:</strong></p>
+                                <p class="font-monospace">{{ payment.transaction_id }}</p>
+                            </div>
+                            <div class="col-sm-6">
+                                <p class="mb-1"><strong>Amount:</strong></p>
+                                <p class="h4 text-primary">{{ payment.amount }} Le</p>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-sm-6">
+                                <p class="mb-1"><strong>Payment Type:</strong></p>
+                                <p>{{ payment.get_payment_type_display }}</p>
+                            </div>
+                            <div class="col-sm-6">
+                                <p class="mb-1"><strong>Date:</strong></p>
+                                <p>{{ payment.created_at|date:"F j, Y H:i" }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Method Selection -->
+                    <div class="mb-4">
+                        <h5 class="mb-3">Select Payment Method</h5>
+                        <div class="row g-3">
+                            {% for method_code, method_name in payment_methods %}
+                                <div class="col-md-6">
+                                    <div class="payment-option card {% if payment.payment_method == method_code %}border-primary{% endif %}"
+                                         data-method="{{ method_code }}">
+                                        <div class="card-body">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="payment_method"
+                                                       id="method{{ method_code }}" value="{{ method_code }}"
+                                                       {% if payment.payment_method == method_code %}checked{% endif %}>
+                                                <label class="form-check-label w-100" for="method{{ method_code }}">
+                                                    <div class="d-flex align-items-center">
+                                                        <img src="{% static 'img/payment/'|add:method_code|add:'.png' %}"
+                                                             alt="{{ method_name }}" class="payment-logo me-3"
+                                                             onerror="this.src='{% static 'img/payment/default.png' %}'">
+                                                        <span>{{ method_name }}</span>
+                                                    </div>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Simulation Controls -->
+                    <div class="mb-4">
+                        <h5 class="mb-3">Payment Simulation</h5>
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            This is a simulated payment system for demonstration purposes.
+                            In a real system, you would be redirected to the actual payment gateway.
+                        </div>
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'complete_payment' payment.payment_type %}?transaction_id={{ payment.transaction_id }}"
+                               class="btn btn-success">
+                                <i class="fas fa-check-circle me-2"></i>Simulate Successful Payment
+                            </a>
+                            <a href="{% url 'cancel_payment' payment.payment_type %}?transaction_id={{ payment.transaction_id }}"
+                               class="btn btn-danger">
+                                <i class="fas fa-times-circle me-2"></i>Simulate Failed Payment
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Additional Information -->
+                    {% if payment.details.exists %}
+                        <div class="mt-4">
+                            <h5 class="mb-3">Payment Details</h5>
+                            {% for detail in payment.details.all %}
+                                <div class="card mb-2">
+                                    <div class="card-body">
+                                        <p class="mb-1"><strong>Reference:</strong> {{ detail.reference }}</p>
+                                        {% if detail.borrowing %}
+                                            <p class="mb-0">
+                                                <strong>Related Book:</strong>
+                                                <a href="{% url 'book_detail' detail.borrowing.book.pk %}">
+                                                    {{ detail.borrowing.book.title }}
+                                                </a>
+                                            </p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Cancel Button -->
+            <div class="text-center mt-3">
+                <a href="{% url 'profile' %}" class="btn btn-link text-muted">
+                    <i class="fas fa-arrow-left me-2"></i>Return to Profile
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .payment-logo {
+        height: 30px;
+        width: auto;
+        object-fit: contain;
+    }
+
+    .payment-option {
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .payment-option:hover {
+        border-color: var(--bs-primary);
+    }
+
+    .payment-option .form-check-input {
+        cursor: pointer;
+    }
+
+    .payment-option .form-check-label {
+        cursor: pointer;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Make entire payment option card clickable
+    document.querySelectorAll('.payment-option').forEach(function(option) {
+        option.addEventListener('click', function() {
+            const radio = this.querySelector('input[type="radio"]');
+            radio.checked = true;
+            
+            // Remove border from all options
+            document.querySelectorAll('.payment-option').forEach(function(opt) {
+                opt.classList.remove('border-primary');
+            });
+            
+            // Add border to selected option
+            this.classList.add('border-primary');
+        });
+    });
+});
+</script>
+{% endblock %}
+

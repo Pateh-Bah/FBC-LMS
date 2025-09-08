@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ system_name|default:"FBC Library System" }}{% endblock %}</title>
+    
+    {% if system_favicon %}
+    <link rel="icon" href="{{ system_favicon }}" type="image/x-icon">
+    {% endif %}
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'fbc-green': {
+                            50: '#f0fdf4',
+                            100: '#dcfce7', 
+                            200: '#bbf7d0',
+                            300: '#86efac',
+                            400: '#4ade80',
+                            500: '#22c55e', // Primary FBC Green
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                        },
+                        'library': {
+                            'cream': '#fdf6e3',
+                            'parchment': '#f7f3e9',
+                            'leather': '#8b4513',
+                            'gold': '#ffd700',
+                            'burgundy': '#800020',
+                            'navy': '#1a365d',
+                            'sage': '#9caf88'
+                        },
+                        'warm-gray': {
+                            50: '#fafaf9',
+                            100: '#f5f5f4',
+                            200: '#e7e5e4',
+                            300: '#d6d3d1',
+                            400: '#a8a29e',
+                            500: '#78716c',
+                            600: '#57534e',
+                            700: '#44403c',
+                            800: '#292524',
+                            900: '#1c1917'
+                        }
+                    },
+                    fontFamily: {
+                        'serif': ['Playfair Display', 'serif'],
+                        'sans': ['Inter', 'sans-serif'],
+                        'body': ['Crimson Text', 'serif'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.8s ease-out',
+                        'float': 'float 6s ease-in-out infinite',
+                        'glow': 'glow 2s ease-in-out infinite alternate',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Google Fonts - Premium Classical Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/style.css">
+    {% block extra_css %}{% endblock %}    <style>
+    /* Alert Animations */
+    .alert-enter {
+        animation: slideInDown 0.3s ease-out;
+    }
+     
+    .alert-exit {
+        animation: slideOutUp 0.3s ease-in;
+    }
+    
+    @keyframes slideInDown {
+        from {
+            transform: translateY(-20px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes slideOutUp {
+        from {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateY(-20px);
+            opacity: 0;
+        }
+    }
+    
+    /* Sidebar and Layout Styles */
+    #main-content {
+        transition: margin-left 0.3s ease-in-out;
+    }
+    
+    #content-wrapper {
+        transition: margin-left 0.3s ease-in-out;
+    }
+    
+    footer {
+        transition: margin-left 0.3s ease-in-out;
+    }
+    
+    /* Sidebar specific styles */
+    #user-sidebar {
+        /* Ensure sidebar doesn't extend below viewport */
+        max-height: calc(100vh - 4rem);
+        overflow-y: auto;
+        /* Prevent sidebar from covering footer */
+        z-index: 30;
+    }
+    
+    /* Footer should be above sidebar when they would overlap */
+    #main-footer {
+        position: relative;
+        z-index: 35;
+    }
+    
+    /* Custom scrollbar for dropdowns */
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: var(--library-parchment, #f7f3e9);
+        border-radius: 3px;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: linear-gradient(to bottom, var(--library-burgundy, #800020), var(--library-navy, #1a365d));
+        border-radius: 3px;
+        border: 1px solid var(--library-gold, #ffd700);
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(to bottom, #a0002a, #234a6b);
+    }
+
+    /* Classical Library Color Palette */
+    :root {
+        --library-burgundy: #800020;
+        --library-navy: #1a365d;
+        --library-gold: #ffd700;
+        --library-sage: #9caf88;
+        --library-parchment: #f7f3e9;
+        --library-cream: #fdf6e3;
+    }
+
+    /* Classical Animations */
+    @keyframes glow {
+        0%, 100% { 
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+        }
+        50% { 
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.6), 0 0 40px rgba(255, 215, 0, 0.4);
+        }
+    }
+
+    @keyframes float {
+        0%, 100% { 
+            transform: translateY(0px);
+        }
+        50% { 
+            transform: translateY(-10px);
+        }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .animate-glow {
+        animation: glow 3s ease-in-out infinite;
+    }
+
+    .animate-float {
+        animation: float 6s ease-in-out infinite;
+    }
+
+    .animate-fade-in {
+        animation: fadeInUp 0.6s ease-out;
+    }
+
+    /* Enhanced Card Hover Effects */
+    .classical-card {
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .classical-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.1), transparent);
+        transition: left 0.6s;
+    }
+
+    .classical-card:hover::before {
+        left: 100%;
+    }
+
+    .classical-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 20px 40px rgba(128, 0, 32, 0.2), 0 0 30px rgba(255, 215, 0, 0.3);
+    }
+
+    /* Text shadow for classical effect */
+    .text-shadow-classical {
+        text-shadow: 2px 2px 4px rgba(128, 0, 32, 0.3);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .classical-card:hover {
+            transform: translateY(-4px) scale(1.01);
+        }
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 4px;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    </style>
+</head>
+<body class="bg-white min-h-screen flex flex-col font-body">
+    <!-- Navigation -->
+    <nav class="bg-fbc-green-600 text-white shadow-2xl sticky top-0 z-50 backdrop-blur-sm border-b-4 border-fbc-green-500">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <!-- Classical Brand -->
+                <div class="flex items-center">
+                    <a href="{% url 'fbc_books:home' %}" class="text-2xl font-serif font-bold text-white hover:text-fbc-green-100 transition-colors duration-300 flex items-center space-x-3">
+                        {% if system_logo %}
+                            <img src="{{ system_logo }}" alt="Logo" class="h-12 w-12 rounded-full border-2 border-white shadow-lg object-cover">
+                        {% else %}
+                            <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg">
+                                <i class="fas fa-university text-fbc-green-600 text-xl"></i>
+                            </div>
+                        {% endif %}
+                        <span class="tracking-wide">{{ system_name|default:"FBC Library" }}</span>
+                    </a>
+                </div>
+
+                <!-- Mobile menu button -->
+                <div class="md:hidden">
+                    <button type="button" id="mobile-menu-button" class="inline-flex items-center justify-center p-3 rounded-lg text-white hover:bg-white hover:bg-opacity-10 focus:outline-none focus:ring-2 focus:ring-white transition-all duration-200">
+                        <span class="sr-only">Open main menu</span>
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+
+                <!-- Desktop menu -->
+                <div class="hidden md:flex md:items-center md:space-x-8">
+                    <!-- Main Navigation -->
+                    <div class="flex space-x-6">
+                        {% if user.is_authenticated %}
+                            {% if user.user_type == 'admin' %}
+                                <a href="{% url 'fbc_books:admin_dashboard' %}" class="px-4 py-2 rounded-lg text-base font-serif font-semibold text-white hover:bg-white hover:bg-opacity-20 hover:text-white transition-all duration-300">
+                                    <i class="fas fa-crown mr-2"></i>Admin Dashboard
+                                </a>
+                                <!-- Classical Manage Dropdown -->
+                                <div class="relative group">
+                                    <button class="px-4 py-2 rounded-lg text-base font-serif font-semibold text-white hover:bg-white hover:bg-opacity-20 hover:text-white transition-all duration-300 flex items-center">
+                                        <i class="fas fa-cogs mr-2"></i>Manage
+                                        <i class="fas fa-chevron-down ml-2 text-sm"></i>
+                                    </button>
+                                    <div class="absolute left-0 mt-3 w-64 bg-white rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 border border-fbc-green-200">
+                                        <div class="py-2">
+                                            <a href="{% url 'fbc_books:manage_books' %}" class="block px-6 py-3 text-base font-body text-gray-700 hover:bg-fbc-green-50 transition-colors duration-200">
+                                                <i class="fas fa-book mr-3 text-fbc-green-600"></i>Manage Books
+                                            </a>
+                                            <a href="{% url 'fbc_books:manage_users' %}" class="block px-6 py-3 text-base font-body text-gray-700 hover:bg-fbc-green-50 transition-colors duration-200">
+                                                <i class="fas fa-users mr-3 text-fbc-green-600"></i>Manage Users
+                                            </a>
+                                            <a href="{% url 'fbc_books:manage_borrowings' %}" class="block px-6 py-3 text-base font-body text-gray-700 hover:bg-fbc-green-50 transition-colors duration-200">
+                                                <i class="fas fa-exchange-alt mr-3 text-fbc-green-600"></i>Manage Borrowings
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <a href="{% url 'fbc_books:home' %}" class="px-4 py-2 rounded-lg text-base font-serif font-semibold text-white hover:bg-white hover:bg-opacity-20 hover:text-white transition-all duration-300">
+                                    <i class="fas fa-home mr-2"></i>Home
+                                </a>
+                                <a href="{% url 'fbc_books:book_list' %}" class="px-4 py-2 rounded-lg text-base font-serif font-semibold text-white hover:bg-white hover:bg-opacity-20 hover:text-white transition-all duration-300">
+                                    <i class="fas fa-books mr-2"></i>Library
+                                </a>
+                                <a href="{% url 'fbc_books:dashboard' %}" class="px-4 py-2 rounded-lg text-base font-serif font-semibold text-white hover:bg-white hover:bg-opacity-20 hover:text-white transition-all duration-300">
+                                    <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
+                                </a>
+                            {% endif %}
+                        {% else %}
+                            <a href="{% url 'fbc_books:home' %}" class="px-4 py-2 rounded-lg text-base font-serif font-semibold text-white hover:bg-white hover:bg-opacity-20 hover:text-white transition-all duration-300">
+                                <i class="fas fa-home mr-2"></i>Home
+                            </a>
+                            <a href="{% url 'fbc_books:book_list' %}" class="px-4 py-2 rounded-lg text-base font-serif font-semibold text-white hover:bg-white hover:bg-opacity-20 hover:text-white transition-all duration-300">
+                                <i class="fas fa-books mr-2"></i>Books
+                            </a>
+                        {% endif %}
+                    </div>
+
+                    <!-- Right side navigation -->
+                    <div class="flex items-center space-x-6">
+                        {% if user.is_authenticated %}
+                            <!-- Classical Notifications Dropdown -->
+                            <div class="relative group">
+                                <button class="relative p-3 text-white hover:bg-white hover:bg-opacity-20 hover:text-white rounded-lg transition-all duration-300">
+                                    <i class="fas fa-bell text-lg"></i>
+                                    {% if unread_notifications %}
+                                        <span class="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full animate-pulse">
+                                            {{ unread_notifications }}
+                                        </span>
+                                    {% endif %}
+                                </button>
+                                <div class="absolute right-0 mt-3 w-96 bg-white rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 border border-fbc-green-200">
+                                    <div class="p-4 bg-fbc-green-50 rounded-t-xl border-b border-fbc-green-200">
+                                        <h3 class="font-serif font-bold text-gray-800 text-lg">Library Notifications</h3>
+                                    </div>
+                                    <div class="py-2 max-h-80 overflow-y-auto custom-scrollbar">
+                                        {% for notification in notifications %}
+                                            <a href="{% url 'fbc_notifications:notification_detail' notification.id %}" class="block px-6 py-4 text-base font-body text-gray-700 hover:bg-fbc-green-50 transition-colors duration-200 {% if notification.unread %}bg-blue-50 border-l-4 border-fbc-green-600{% endif %}">
+                                                <div class="truncate font-semibold">{{ notification.description }}</div>
+                                                <div class="text-sm text-gray-500 mt-1">{{ notification.created_at|timesince }} ago</div>
+                                            </a>
+                                        {% empty %}
+                                            <div class="px-6 py-8 text-center text-gray-500 font-body italic">No notifications</div>
+                                        {% endfor %}
+                                        {% if notifications %}
+                                            <div class="border-t border-fbc-green-200 mt-2 pt-2">
+                                                <a href="{% url 'fbc_notifications:notification_list' %}" class="block px-6 py-3 text-center text-fbc-green-600 hover:bg-fbc-green-50 transition-colors duration-200 font-serif font-semibold">
+                                                    View All Messages
+                                                </a>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Classical User Dropdown -->
+                            <div class="relative group">
+                                <button class="flex items-center px-4 py-2 text-base font-serif font-semibold text-white hover:bg-white hover:bg-opacity-20 hover:text-white rounded-lg transition-all duration-300">
+                                    <i class="fas fa-user-circle mr-3 text-xl"></i>
+                                    {{ user.get_full_name|default:user.username }}
+                                    <i class="fas fa-chevron-down ml-2 text-sm"></i>
+                                </button>
+                                <div class="absolute right-0 mt-3 w-56 bg-white rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 border border-fbc-green-200">
+                                    <div class="py-2">
+                                        <a href="{% url 'fbc_users:profile' %}" class="block px-6 py-3 text-base font-body text-gray-700 hover:bg-fbc-green-50 transition-colors duration-200">
+                                            <i class="fas fa-user-edit mr-3 text-fbc-green-600"></i>My Profile
+                                        </a>
+                                        <a href="{% url 'fbc_users:change_password' %}" class="block px-6 py-3 text-base font-body text-gray-700 hover:bg-fbc-green-50 transition-colors duration-200">
+                                            <i class="fas fa-key mr-3 text-fbc-green-600"></i>Change Password
+                                        </a>
+                                        <div class="border-t border-fbc-green-200 my-2"></div>
+                                        <a href="{% url 'fbc_users:logout' %}" class="block px-6 py-3 text-base font-body text-gray-700 hover:bg-red-50 transition-colors duration-200">
+                                            <i class="fas fa-sign-out-alt mr-3 text-red-600"></i>Logout
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% else %}
+                            <a href="{% url 'fbc_users:login' %}" class="bg-white text-fbc-green-600 px-6 py-3 rounded-xl text-base font-serif font-bold hover:bg-gray-50 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                                <i class="fas fa-sign-in-alt mr-2"></i>Login
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile menu -->
+            <div id="mobile-menu" class="md:hidden hidden">
+                <div class="px-4 pt-4 pb-6 space-y-3 bg-gradient-to-br from-fbc-green-700 via-fbc-green-600 to-fbc-green-800">
+                    {% if user.is_authenticated %}
+                        {% if user.user_type == 'admin' %}
+                            <a href="{% url 'fbc_books:admin_dashboard' %}" class="block px-4 py-3 rounded-lg text-base font-serif font-semibold text-white hover:bg-white hover:bg-opacity-20 transition-all duration-300">
+                                <i class="fas fa-crown mr-3"></i>Administrative Dashboard
+                            </a>
+                            <div class="px-4 py-2 text-white font-serif font-bold text-sm uppercase tracking-wider">Management</div>
+                            <a href="{% url 'fbc_books:manage_books' %}" class="block px-6 py-3 rounded-lg text-sm font-body text-white hover:bg-white hover:bg-opacity-20 transition-all duration-300">
+                                <i class="fas fa-book mr-3"></i>Literary Collection
+                            </a>
+                            <a href="{% url 'fbc_books:manage_users' %}" class="block px-6 py-3 rounded-lg text-sm font-body text-white hover:bg-white hover:bg-opacity-20 transition-all duration-300">
+                                <i class="fas fa-users mr-3"></i>Library Members
+                            </a>
+                            <a href="{% url 'fbc_books:manage_borrowings' %}" class="block px-6 py-3 rounded-lg text-sm font-body text-white hover:bg-white hover:bg-opacity-20 transition-all duration-300">
+                                <i class="fas fa-exchange-alt mr-3"></i>Circulation Records
+                            </a>
+                        {% else %}
+                            <a href="{% url 'fbc_books:home' %}" class="block px-4 py-3 rounded-lg text-base font-serif font-semibold text-white hover:bg-white hover:bg-opacity-20 transition-all duration-300">
+                                <i class="fas fa-home mr-3"></i>Home
+                            </a>
+                            <a href="{% url 'fbc_books:book_list' %}" class="block px-4 py-3 rounded-lg text-base font-serif font-semibold text-white hover:bg-white hover:bg-opacity-20 transition-all duration-300">
+                                <i class="fas fa-book mr-3"></i>Browse Collection
+                            </a>
+                            <a href="{% url 'fbc_books:dashboard' %}" class="block px-4 py-3 rounded-lg text-base font-serif font-semibold text-white hover:bg-white hover:bg-opacity-20 transition-all duration-300">
+                                <i class="fas fa-user-graduate mr-3"></i>Scholar's Portal
+                            </a>
+                        {% endif %}
+                        
+                        <div class="border-t border-white border-opacity-30 pt-4 pb-3">
+                            <div class="flex items-center px-3">
+                                <div class="text-white font-medium">{{ user.get_full_name|default:user.username }}</div>
+                        
+                        <div class="border-t border-white/20 my-4"></div>
+                        <div class="space-y-3">
+                            <a href="{% url 'fbc_users:profile' %}" class="block px-4 py-3 rounded-lg text-base font-serif font-semibold text-white hover:bg-white hover:bg-opacity-20 transition-all duration-300">
+                                <i class="fas fa-user-edit mr-3"></i>My Profile
+                            </a>
+                            <a href="{% url 'fbc_users:change_password' %}" class="block px-4 py-3 rounded-lg text-base font-serif font-semibold text-white hover:bg-white hover:bg-opacity-20 transition-all duration-300">
+                                <i class="fas fa-key mr-3"></i>Change Password
+                            </a>
+                            <a href="{% url 'fbc_users:logout' %}" class="block px-4 py-3 rounded-lg text-base font-serif font-semibold text-white hover:bg-red-600 transition-all duration-300">
+                                <i class="fas fa-sign-out-alt mr-3"></i>Logout
+                            </a>
+                        </div>
+                    </div>
+                {% else %}
+                    <a href="{% url 'fbc_books:home' %}" class="block px-4 py-3 rounded-lg text-base font-serif font-semibold text-white hover:bg-library-gold hover:text-library-navy transition-all duration-300">
+                        <i class="fas fa-home mr-3"></i>Home
+                    </a>
+                    <a href="{% url 'fbc_books:book_list' %}" class="block px-4 py-3 rounded-lg text-base font-serif font-semibold text-white hover:bg-library-gold hover:text-library-navy transition-all duration-300">
+                        <i class="fas fa-book mr-3"></i>Browse Collection
+                    </a>
+                    <a href="{% url 'fbc_users:login' %}" class="block px-4 py-3 rounded-lg text-base font-serif font-semibold text-white hover:bg-library-gold hover:text-library-navy transition-all duration-300">
+                        <i class="fas fa-sign-in-alt mr-3"></i>Login
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+        </div>    </nav>    <!-- Main Content -->
+    <main class="flex-1 w-full transition-all duration-300" id="main-content">
+        {% comment %}
+        Conditional layout: 
+        - Dashboard pages: content adjusts for sidebar (ml-64 on desktop)
+        - Public pages: content is centered (no margin adjustment)
+        {% endcomment %}
+        {% if user.is_authenticated and user.user_type in 'student,lecturer,staff,admin' %}
+            {% with is_dashboard_page=request.resolver_match.url_name %}
+                {% if 'dashboard' in is_dashboard_page or 'my_' in is_dashboard_page or is_dashboard_page in 'my_books,my_fines,my_subscription,my_payments,notifications,manage_borrowings,manage_fines,manage_users,manage_books,admin_dashboard' %}
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:ml-64" id="content-wrapper">
+                {% else %}
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" id="content-wrapper">
+                {% endif %}
+            {% endwith %}
+        {% else %}
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" id="content-wrapper">
+        {% endif %}
+        
+        <!-- Global Alerts Section -->
+        {% if messages %}
+            <div class="mb-6 space-y-4 relative z-40">
+                {% for message in messages %}
+                    <div class="alert-enter flex items-start p-4 rounded-lg shadow-lg border-l-4 {% if message.tags == 'success' %}bg-green-50 border-green-500 text-green-800{% elif message.tags == 'error' %}bg-red-50 border-red-500 text-red-800{% elif message.tags == 'warning' %}bg-yellow-50 border-yellow-500 text-yellow-800{% else %}bg-blue-50 border-blue-500 text-blue-800{% endif %} auto-dismiss" role="alert">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-triangle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %} text-lg mr-3"></i>
+                        </div>
+                        <div class="flex-1 text-sm font-medium">
+                            {{ message }}
+                        </div>
+                        <button type="button" class="ml-4 flex-shrink-0 {% if message.tags == 'success' %}text-green-500 hover:text-green-700{% elif message.tags == 'error' %}text-red-500 hover:text-red-700{% elif message.tags == 'warning' %}text-yellow-500 hover:text-yellow-700{% else %}text-blue-500 hover:text-blue-700{% endif %} transition-colors duration-200" onclick="this.parentElement.remove()">
+                            <span class="sr-only">Close</span>
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        {% block content %}
+        {% endblock %}
+        </div>
+    </main>
+
+    <!-- Include sidebar -->
+    {% include 'partials/user_sidebar.html' %}
+    
+    {% comment %}
+    Footer with conditional margin for dashboard pages where sidebar is present
+    {% endcomment %}
+    {% if user.is_authenticated and user.user_type in 'student,lecturer,staff,admin' %}
+        {% with is_dashboard_page=request.resolver_match.url_name %}
+            {% if 'dashboard' in is_dashboard_page or 'my_' in is_dashboard_page or is_dashboard_page in 'my_books,my_fines,my_subscription,my_payments,notifications,manage_borrowings,manage_fines,manage_users,manage_books,admin_dashboard' %}
+    <footer class="bg-gradient-to-br from-library-burgundy via-library-navy to-purple-900 text-white mt-auto md:ml-64 transition-all duration-300 border-t-4 border-fbc-green-500" id="main-footer">
+            {% else %}
+    <footer class="bg-gradient-to-br from-library-burgundy via-library-navy to-purple-900 text-white mt-auto border-t-4 border-fbc-green-500" id="main-footer">
+            {% endif %}
+        {% endwith %}
+    {% else %}
+    <footer class="bg-gradient-to-br from-library-burgundy via-library-navy to-purple-900 text-white mt-auto border-t-4 border-fbc-green-500" id="main-footer">
+    {% endif %}
+        <div class="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+                <!-- Library Information -->
+                <div class="space-y-6">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-university text-3xl text-fbc-green-400"></i>
+                        <h5 class="text-2xl font-serif font-bold text-library-cream">{{ system_name|default:"Fourah Bay College Library" }}</h5>
+                    </div>
+                    <p class="text-library-parchment text-lg font-body italic leading-relaxed">
+                        "A sanctuary of knowledge, preserving wisdom for generations of scholars."
+                    </p>
+                    <div class="space-y-3 text-library-parchment">
+                        <p class="flex items-center text-base font-body">
+                            <i class="fas fa-map-marker-alt mr-4 text-fbc-green-400"></i>
+                            University of Sierra Leone, Freetown
+                        </p>
+                        <p class="flex items-center text-base font-body">
+                            <i class="fas fa-phone mr-4 text-fbc-green-400"></i>
+                            +232 34 022-148
+                        </p>
+                        <p class="flex items-center text-base font-body">
+                            <i class="fas fa-envelope mr-4 text-fbc-green-400"></i>
+                            library@fbc.edu.sl
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="space-y-6">
+                    <h5 class="text-xl font-serif font-bold text-fbc-green-400 border-b-2 border-fbc-green-400 pb-2">Scholar's Gateway</h5>
+                    <ul class="space-y-4">
+                        <li>
+                            <a href="{% url 'fbc_books:home' %}" class="flex items-center text-library-parchment hover:text-fbc-green-400 transition-all duration-300 font-body text-base">
+                                <i class="fas fa-home mr-3 text-sm"></i>Home
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{% url 'fbc_books:book_list' %}" class="flex items-center text-library-parchment hover:text-fbc-green-400 transition-all duration-300 font-body text-base">
+                                <i class="fas fa-book mr-3 text-sm"></i>Literary Collection
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="flex items-center text-library-parchment hover:text-fbc-green-400 transition-all duration-300 font-body text-base">
+                                <i class="fas fa-info-circle mr-3 text-sm"></i>About the Library
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="flex items-center text-library-parchment hover:text-fbc-green-400 transition-all duration-300 font-body text-base">
+                                <i class="fas fa-envelope mr-3 text-sm"></i>Contact Us
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Library Hours & Services -->
+                <div class="space-y-6">
+                    <h5 class="text-xl font-serif font-bold text-fbc-green-400 border-b-2 border-fbc-green-400 pb-2">Library Services</h5>
+                    <div class="space-y-4 text-library-parchment">
+                        <div class="font-body text-base">
+                            <p class="font-semibold mb-2">Opening Hours:</p>
+                            <p>Monday - Friday: 8:00 AM - 6:00 PM</p>
+                            <p>Saturday: 9:00 AM - 1:00 PM</p>
+                            <p>Sunday: Closed</p>
+                        </div>
+                        <div class="pt-4 space-y-2">
+                            <p class="flex items-center font-body text-sm">
+                                <i class="fas fa-book-reader mr-3 text-fbc-green-400"></i>
+                                Digital Resources
+                            </p>
+                            <p class="flex items-center font-body text-sm">
+                                <i class="fas fa-laptop mr-3 text-fbc-green-400"></i>
+                                Study Spaces
+                            </p>
+                            <p class="flex items-center font-body text-sm">
+                                <i class="fas fa-users mr-3 text-fbc-green-400"></i>
+                                Research Support
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Decorative Border & Copyright -->
+            <div class="border-t border-fbc-green-400/30 mt-12 pt-8">
+                <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+                    <div class="flex items-center space-x-2 text-library-parchment">
+                        <i class="fas fa-scroll text-fbc-green-400"></i>
+                        <p class="font-body text-sm italic">
+                            "Knowledge is the treasure of the mind"
+                        </p>
+                    </div>
+                    <p class="text-library-parchment/80 text-sm font-body">
+                        &copy; {% now "Y" %} {{ system_name|default:"Fourah Bay College Library" }}. All rights reserved.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Alpine.js for enhanced interactivity -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="/static/js/main.js"></script>
+    
+    <!-- Global Alert Auto-Dismiss -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Auto-dismiss alerts after 5 seconds
+        const alerts = document.querySelectorAll('.auto-dismiss');
+        alerts.forEach(function(alert) {
+            setTimeout(function() {
+                alert.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                alert.style.opacity = '0';
+                alert.style.transform = 'translateY(-20px)';
+                setTimeout(function() {
+                    alert.remove();
+                }, 300);
+            }, 5000); // 5 seconds
+        });
+        
+        // Mobile menu toggle
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        
+        if (mobileMenuButton && mobileMenu) {
+            mobileMenuButton.addEventListener('click', function() {
+                if (mobileMenu.classList.contains('hidden')) {
+                    mobileMenu.classList.remove('hidden');
+                } else {
+                    mobileMenu.classList.add('hidden');
+                }
+            });
+        }
+    });
+    </script>    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const sidebar = document.getElementById('user-sidebar');
+    const mainContent = document.getElementById('main-content');
+    const contentWrapper = document.getElementById('content-wrapper');
+    const toggle = document.getElementById('sidebar-toggle');
+    const overlay = document.getElementById('sidebar-overlay');
+    const footer = document.getElementById('main-footer');
+
+    // Check if user is authenticated and has access to sidebar AND is on a dashboard page
+    const hasAccess = {{ user.is_authenticated|yesno:"true,false" }} && 
+                     ['student', 'lecturer', 'staff', 'admin'].includes('{{ user.user_type|default:"" }}');
+    
+    // Check if we're on a dashboard page
+    const isDashboardPage = {% if user.is_authenticated and user.user_type in 'student,lecturer,staff,admin' %}{% with is_dashboard_page=request.resolver_match.url_name %}{% if 'dashboard' in is_dashboard_page or 'my_' in is_dashboard_page or is_dashboard_page in 'my_books,my_fines,my_subscription,my_payments,notifications,manage_borrowings,manage_fines,manage_users,manage_books,admin_dashboard' %}true{% else %}false{% endif %}{% endwith %}{% else %}false{% endif %};
+
+    // Show toggle button only if user has access to sidebar AND is on dashboard page
+    if (hasAccess && isDashboardPage && toggle && sidebar) {
+        toggle.classList.remove('hidden');
+        
+        // Initialize sidebar state for desktop
+        if (window.innerWidth >= 768) {
+            openSidebar();
+        }
+    }
+
+    function openSidebar() {
+        if (sidebar) {
+            sidebar.classList.remove('-translate-x-full');
+            sidebar.classList.add('translate-x-0');
+            
+            if (window.innerWidth < 768) {
+                // Mobile behavior - overlay
+                if (overlay) overlay.classList.remove('hidden');
+            } else {
+                // Desktop behavior - adjust content margin
+                if (contentWrapper) {
+                    contentWrapper.classList.remove('md:ml-64');
+                    contentWrapper.classList.add('ml-64');
+                }
+                if (footer && footer.classList.contains('md:ml-64')) {
+                    footer.classList.remove('md:ml-64');
+                    footer.classList.add('ml-64');
+                }
+            }
+            
+            if (toggle) toggle.innerHTML = '<i class="fas fa-times"></i>';
+        }
+    }
+
+    function closeSidebar() {
+        if (sidebar) {
+            sidebar.classList.add('-translate-x-full');
+            sidebar.classList.remove('translate-x-0');
+            
+            if (overlay) overlay.classList.add('hidden');
+            
+            if (contentWrapper) {
+                contentWrapper.classList.remove('ml-64');
+                contentWrapper.classList.add('md:ml-64');
+            }
+            if (footer && footer.classList.contains('ml-64')) {
+                footer.classList.remove('ml-64');
+                footer.classList.add('md:ml-64');
+            }
+            if (toggle) toggle.innerHTML = '<i class="fas fa-bars"></i>';
+        }
+    }
+
+    toggle?.addEventListener('click', function() {
+        if (sidebar && sidebar.classList.contains('-translate-x-full')) {
+            openSidebar();
+        } else {
+            closeSidebar();
+        }
+    });
+
+    overlay?.addEventListener('click', function() {
+        closeSidebar();
+    });
+
+    // Handle window resize
+    window.addEventListener('resize', function() {
+        if (!hasAccess || !isDashboardPage || !sidebar) return;
+        
+        if (window.innerWidth >= 768) {
+            // Desktop: ensure sidebar is open and content is adjusted
+            if (sidebar.classList.contains('translate-x-0')) {
+                if (contentWrapper) {
+                    contentWrapper.classList.remove('md:ml-64');
+                    contentWrapper.classList.add('ml-64');
+                }
+                if (footer && footer.classList.contains('md:ml-64')) {
+                    footer.classList.remove('md:ml-64');
+                    footer.classList.add('ml-64');
+                }
+            }
+            if (overlay) overlay.classList.add('hidden');
+        } else {
+            // Mobile: ensure proper mobile behavior
+            if (contentWrapper) {
+                contentWrapper.classList.remove('ml-64');
+                contentWrapper.classList.add('md:ml-64');
+            }
+            if (footer && footer.classList.contains('ml-64')) {
+                footer.classList.remove('ml-64');
+                footer.classList.add('md:ml-64');
+            }
+        }
+    });
+});
+});
+</script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
+

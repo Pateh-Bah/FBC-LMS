@@ -1,0 +1,353 @@
+{% extends 'dashboard/base_dashboard.html' %}
+
+{% block content %}
+<div class="space-y-8">
+    <!-- Welcome Header -->
+    <div class="bg-gradient-to-r from-blue-600 to-green-600 rounded-xl shadow-lg overflow-hidden">
+        <div class="px-8 py-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-white mb-2">Welcome, {{ user.get_full_name }}</h1>
+                    <p class="text-blue-100">Your personal library dashboard</p>
+                </div>
+                {% if user.user_type == 'student' and user.subscription_end_date %}
+                <div class="text-right">
+                    <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium
+                        {% if user.is_subscription_active %}
+                            bg-green-100 text-green-800 border border-green-200
+                        {% else %}
+                            bg-red-100 text-red-800 border border-red-200
+                        {% endif %}">
+                        <i class="fas fa-circle mr-2 text-xs"></i>
+                        {% if user.is_subscription_active %}
+                            Active until {{ user.subscription_end_date|date:"M d, Y" }}
+                        {% else %}
+                            Subscription expired
+                        {% endif %}
+                    </span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Currently Borrowed Books -->
+        <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200 hover:shadow-lg transition-all duration-300">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-3xl font-bold text-blue-900 mb-2">{{ active_borrowings.count }}</h3>
+                    <p class="text-blue-700 font-medium">Currently Borrowed Books</p>
+                </div>
+                <div class="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-book text-white text-xl"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Outstanding Fines -->
+        <div class="bg-gradient-to-br from-red-50 to-red-100 rounded-xl p-6 border border-red-200 hover:shadow-lg transition-all duration-300">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-3xl font-bold text-red-900 mb-2">Le {{ total_fines|default:"0.00" }}</h3>
+                    <p class="text-red-700 font-medium">Outstanding Fines</p>
+                </div>
+                <div class="w-12 h-12 bg-red-600 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-money-bill text-white text-xl"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Returned Books -->
+        <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 border border-green-200 hover:shadow-lg transition-all duration-300">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-3xl font-bold text-green-900 mb-2">{{ returned_books_count }}</h3>
+                    <p class="text-green-700 font-medium">Total Books Returned</p>
+                </div>
+                <div class="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-check-circle text-white text-xl"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Subscription Status -->
+        <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 border border-purple-200 hover:shadow-lg transition-all duration-300">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-3xl font-bold text-purple-900 mb-2">{{ subscription_days_left|default:"0" }}</h3>
+                    <p class="text-purple-700 font-medium">Days Left in Subscription</p>
+                </div>
+                <div class="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-clock text-white text-xl"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Current Borrowings -->
+    {% if active_borrowings %}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="bg-gradient-to-r from-blue-600 to-green-600 px-6 py-4">
+            <h2 class="text-xl font-bold text-white flex items-center">
+                <i class="fas fa-books mr-3"></i>
+                Currently Borrowed Books
+            </h2>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Book Title</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Borrowed Date</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Due Date</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    {% for borrowing in active_borrowings %}
+                    <tr class="hover:bg-gray-50 transition-colors duration-200 {% if borrowing.is_overdue %}bg-red-50{% endif %}">
+                        <td class="px-6 py-4">
+                            <div class="text-sm font-medium text-gray-900">{{ borrowing.book.title }}</div>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-600">{{ borrowing.borrowed_date|date:"M d, Y" }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-600">{{ borrowing.due_date|date:"M d, Y" }}</td>
+                        <td class="px-6 py-4">
+                            {% if borrowing.is_overdue %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                    <i class="fas fa-exclamation-triangle mr-1"></i>
+                                    Overdue
+                                </span>
+                            {% else %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    <i class="fas fa-check mr-1"></i>
+                                    Active
+                                </span>
+                            {% endif %}
+                        </td>                        <td class="px-6 py-4">
+                            <span class="text-sm text-gray-500">Return at library desk</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Outstanding Fines -->
+    {% if outstanding_fines %}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="bg-gradient-to-r from-orange-500 to-red-600 px-6 py-4">
+            <h2 class="text-xl font-bold text-white flex items-center">
+                <i class="fas fa-exclamation-triangle mr-3"></i>
+                Outstanding Fines
+            </h2>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Book</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fine Amount</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Due Date</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    {% for fine in outstanding_fines %}
+                    <tr class="hover:bg-gray-50 transition-colors duration-200">
+                        <td class="px-6 py-4">
+                            <div class="text-sm font-medium text-gray-900">{{ fine.book.title }}</div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="text-lg font-bold text-red-600">Le {{ fine.amount }}</span>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-600">{{ fine.due_date|date:"M d, Y" }}</td>
+                        <td class="px-6 py-4">
+                            <button onclick="openPaymentModal('paymentModal{{ fine.id }}')" class="inline-flex items-center px-4 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1 transition-colors duration-200">
+                                <i class="fas fa-credit-card mr-2"></i>
+                                Pay Fine
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Payment Modals -->
+    {% for fine in outstanding_fines %}
+    <div id="paymentModal{{ fine.id }}" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div class="bg-gradient-to-r from-green-600 to-blue-600 px-6 py-4 rounded-t-xl">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xl font-bold text-white">Pay Fine - Le {{ fine.amount }}</h3>
+                    <button onclick="closePaymentModal('paymentModal{{ fine.id }}')" class="text-white hover:text-gray-200 transition-colors duration-200">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <form method="post" action="{% url 'fbc_fines:process_payment' fine.id %}" id="paymentForm{{ fine.id }}" class="p-6">
+                {% csrf_token %}
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-3">Select Payment Method</label>
+                        <div class="space-y-3">
+                            <label class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors duration-200">
+                                <input type="radio" name="payment_method" value="orange_money" required class="text-orange-600 focus:ring-orange-500">
+                                <div class="ml-3 flex items-center">
+                                    <i class="fas fa-mobile-alt text-orange-600 mr-2"></i>
+                                    <span class="font-medium text-gray-900">Orange Money</span>
+                                </div>
+                            </label>
+                            <label class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors duration-200">
+                                <input type="radio" name="payment_method" value="afrimoney" class="text-green-600 focus:ring-green-500">
+                                <div class="ml-3 flex items-center">
+                                    <i class="fas fa-mobile-alt text-green-600 mr-2"></i>
+                                    <span class="font-medium text-gray-900">Afrimoney</span>
+                                </div>
+                            </label>
+                            <label class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors duration-200">
+                                <input type="radio" name="payment_method" value="qmoney" class="text-blue-600 focus:ring-blue-500">
+                                <div class="ml-3 flex items-center">
+                                    <i class="fas fa-mobile-alt text-blue-600 mr-2"></i>
+                                    <span class="font-medium text-gray-900">QMoney</span>
+                                </div>
+                            </label>
+                            <label class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors duration-200">
+                                <input type="radio" name="payment_method" value="paypal" class="text-blue-600 focus:ring-blue-500">
+                                <div class="ml-3 flex items-center">
+                                    <i class="fab fa-paypal text-blue-600 mr-2"></i>
+                                    <span class="font-medium text-gray-900">PayPal</span>
+                                </div>
+                            </label>
+                            <label class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors duration-200">
+                                <input type="radio" name="payment_method" value="bank" class="text-gray-600 focus:ring-gray-500">
+                                <div class="ml-3 flex items-center">
+                                    <i class="fas fa-university text-gray-600 mr-2"></i>
+                                    <span class="font-medium text-gray-900">Bank Payment</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Amount (Le)</label>
+                        <input type="number" class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-600 cursor-not-allowed" name="amount" value="{{ fine.amount }}" readonly>
+                    </div>
+                    
+                    <div class="bank-details hidden">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Bank Receipt Number</label>
+                        <input type="text" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" name="bank_receipt_number" placeholder="Enter receipt number">
+                    </div>
+                    
+                    <button type="submit" class="w-full bg-gradient-to-r from-green-600 to-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:from-green-700 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105">
+                        <i class="fas fa-credit-card mr-2"></i>
+                        Process Payment
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <!-- Borrowing History -->
+    {% if borrowing_history %}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4">
+            <h2 class="text-xl font-bold text-white flex items-center">
+                <i class="fas fa-history mr-3"></i>
+                Borrowing History
+            </h2>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Book Title</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Borrowed Date</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Return Date</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    {% for borrowing in borrowing_history %}
+                    <tr class="hover:bg-gray-50 transition-colors duration-200">
+                        <td class="px-6 py-4">
+                            <div class="text-sm font-medium text-gray-900">{{ borrowing.book.title }}</div>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-600">{{ borrowing.borrowed_date|date:"M d, Y" }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-600">{{ borrowing.returned_date|date:"M d, Y"|default:"Not returned" }}</td>
+                        <td class="px-6 py-4">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                {% if borrowing.returned_date %}bg-green-100 text-green-800{% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                                {% if borrowing.returned_date %}
+                                    <i class="fas fa-check mr-1"></i>
+                                {% else %}
+                                    <i class="fas fa-clock mr-1"></i>
+                                {% endif %}
+                                {{ borrowing.get_status_display }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Payment method handling
+document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        const bankDetails = this.closest('form').querySelector('.bank-details');
+        if (this.value === 'bank') {
+            bankDetails.classList.remove('hidden');
+        } else {
+            bankDetails.classList.add('hidden');
+        }
+    });
+});
+
+// Modal functions
+function openPaymentModal(modalId) {
+    document.getElementById(modalId).classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function closePaymentModal(modalId) {
+    document.getElementById(modalId).classList.add('hidden');
+    document.body.style.overflow = 'auto';
+}
+
+// Close modal when clicking outside
+document.querySelectorAll('[id^="paymentModal"]').forEach(modal => {
+    modal.addEventListener('click', function(e) {
+        if (e.target === this) {
+            closePaymentModal(this.id);
+        }
+    });
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        document.querySelectorAll('[id^="paymentModal"]').forEach(modal => {
+            if (!modal.classList.contains('hidden')) {
+                closePaymentModal(modal.id);
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

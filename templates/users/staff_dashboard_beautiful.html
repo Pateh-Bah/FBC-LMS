@@ -1,0 +1,390 @@
+{% extends 'admin/staff_base.html' %}
+{% load static %}
+
+{% block title %}Staff Dashboard - {{ system_name|default:"FBC Library System" }}{% endblock %}
+
+{% block page_title %}Staff Dashboard{% endblock %}
+
+{% block content %}
+<!-- Classic Library Header -->
+<div class="relative bg-gradient-to-r from-library-navy via-library-burgundy to-library-navy rounded-none shadow-2xl mb-12">
+    <div class="absolute inset-0 bg-black opacity-10"></div>
+    <div class="absolute inset-0" style="background-image: url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1000 100\" fill=\"none\"><path d=\"M0,50 Q250,20 500,50 T1000,50 L1000,100 L0,100 Z\" fill=\"%23ffffff\" fill-opacity=\"0.03\"/></svg>');"></div>
+    
+    <div class="relative z-10 px-8 py-16">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-6">
+                    <!-- Classical Library Icon -->
+                    <div class="w-20 h-20 bg-library-gold rounded-full flex items-center justify-center shadow-lg animate-glow">
+                        <i class="fas fa-users-cog text-2xl text-library-navy"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-serif text-5xl font-bold text-white mb-2 tracking-wide">
+                            Staff 
+                            <span class="text-library-gold">Dashboard</span>
+                        </h1>
+                        <p class="text-library-cream text-xl font-body italic">
+                            "Serving knowledge, empowering minds" - Welcome, {{ user.get_full_name|default:user.username }}
+                        </p>
+                        <div class="flex items-center space-x-6 mt-4">
+                            <div class="flex items-center space-x-2 bg-white bg-opacity-10 rounded-lg px-4 py-2 backdrop-blur-sm">
+                                <i class="fas fa-user-tie text-library-gold"></i>
+                                <span class="text-library-cream font-semibold">Staff Member</span>
+                            </div>
+                            <div class="flex items-center space-x-2 bg-white bg-opacity-10 rounded-lg px-4 py-2 backdrop-blur-sm">
+                                <i class="fas fa-calendar-alt text-library-gold"></i>
+                                <span class="text-library-cream">{% now "F j, Y" %}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Classical Decorative Element -->
+                <div class="hidden xl:block">
+                    <div class="w-40 h-40 relative">
+                        <div class="absolute inset-0 border-4 border-library-gold rounded-full animate-float opacity-30"></div>
+                        <div class="absolute inset-4 border-2 border-library-cream rounded-full animate-float opacity-50" style="animation-delay: 1s;"></div>
+                        <div class="absolute inset-8 bg-library-gold rounded-full flex items-center justify-center shadow-xl">
+                            <i class="fas fa-book-reader text-3xl text-library-navy"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Classical Statistics Section -->
+<div class="max-w-7xl mx-auto px-8 mb-12">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <!-- User Statistics -->
+        <div class="bg-gradient-to-br from-library-parchment via-white to-library-cream rounded-2xl shadow-lg border border-library-gold border-opacity-20 p-8 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
+            <div class="flex items-center justify-between mb-6">
+                <div class="w-16 h-16 bg-gradient-to-br from-library-burgundy to-red-700 rounded-xl flex items-center justify-center shadow-lg">
+                    <i class="fas fa-users text-white text-2xl"></i>
+                </div>
+                <div class="text-right">
+                    <div class="text-3xl font-serif font-bold text-library-navy">{{ total_users }}</div>
+                    <div class="text-sm text-library-burgundy font-medium">Library Members</div>
+                </div>
+            </div>
+            <div class="space-y-2">
+                <div class="flex justify-between items-center">
+                    <span class="text-warm-gray-600 font-body text-sm">Active</span>
+                    <span class="font-semibold text-green-600">{{ active_users }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-warm-gray-600 font-body text-sm">Suspended</span>
+                    <span class="font-semibold text-red-600">{{ suspended_users }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Book Statistics -->
+        <div class="bg-gradient-to-br from-library-parchment via-white to-library-cream rounded-2xl shadow-lg border border-library-gold border-opacity-20 p-8 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
+            <div class="flex items-center justify-between mb-6">
+                <div class="w-16 h-16 bg-gradient-to-br from-library-navy to-blue-900 rounded-xl flex items-center justify-center shadow-lg">
+                    <i class="fas fa-book text-white text-2xl"></i>
+                </div>
+                <div class="text-right">
+                    <div class="text-3xl font-serif font-bold text-library-navy">{{ total_books }}</div>
+                    <div class="text-sm text-library-burgundy font-medium">Total Books</div>
+                </div>
+            </div>
+            <div class="space-y-2">
+                <div class="flex justify-between items-center">
+                    <span class="text-warm-gray-600 font-body text-sm">Available</span>
+                    <span class="font-semibold text-green-600">{{ available_books }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-warm-gray-600 font-body text-sm">Borrowed</span>
+                    <span class="font-semibold text-orange-600">{{ borrowed_books }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Financial Statistics -->
+        <div class="bg-gradient-to-br from-library-parchment via-white to-library-cream rounded-2xl shadow-lg border border-library-gold border-opacity-20 p-8 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
+            <div class="flex items-center justify-between mb-6">
+                <div class="w-16 h-16 bg-gradient-to-br from-library-gold to-yellow-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <i class="fas fa-coins text-white text-2xl"></i>
+                </div>
+                <div class="text-right">
+                    <div class="text-3xl font-serif font-bold text-library-navy">${{ total_fines|floatformat:0 }}</div>
+                    <div class="text-sm text-library-burgundy font-medium">Pending Fines</div>
+                </div>
+            </div>
+            <div class="space-y-2">
+                <div class="flex justify-between items-center">
+                    <span class="text-warm-gray-600 font-body text-sm">Payments</span>
+                    <span class="font-semibold text-green-600">${{ total_payments|floatformat:0 }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Daily Activity -->
+        <div class="bg-gradient-to-br from-library-parchment via-white to-library-cream rounded-2xl shadow-lg border border-library-gold border-opacity-20 p-8 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
+            <div class="flex items-center justify-between mb-6">
+                <div class="w-16 h-16 bg-gradient-to-br from-green-600 to-emerald-700 rounded-xl flex items-center justify-center shadow-lg">
+                    <i class="fas fa-chart-line text-white text-2xl"></i>
+                </div>
+                <div class="text-right">
+                    <div class="text-3xl font-serif font-bold text-library-navy">{{ daily_logins }}</div>
+                    <div class="text-sm text-library-burgundy font-medium">Today's Logins</div>
+                </div>
+            </div>
+            <div class="space-y-2">
+                <div class="flex justify-between items-center">
+                    <span class="text-warm-gray-600 font-body text-sm">Students</span>
+                    <span class="font-semibold text-blue-600">{{ student_users }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-warm-gray-600 font-body text-sm">Lecturers</span>
+                    <span class="font-semibold text-purple-600">{{ lecturer_users }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activities Section -->
+<div class="max-w-7xl mx-auto px-8 mb-12">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Recent Borrowings -->
+        <div class="bg-gradient-to-br from-library-parchment to-white rounded-2xl shadow-lg border border-library-gold border-opacity-20 p-8">
+            <div class="flex items-center justify-between mb-8">
+                <h3 class="font-serif text-2xl font-bold text-library-navy flex items-center">
+                    <i class="fas fa-clock mr-3 text-library-gold"></i>
+                    Recent Book Activity
+                </h3>
+                <a href="{% url 'fbc_books:book_list' %}" class="text-library-burgundy hover:text-library-navy transition-colors font-medium">
+                    View All <i class="fas fa-arrow-right ml-1"></i>
+                </a>
+            </div>
+            
+            {% if recent_borrowings %}
+                <div class="space-y-4 max-h-96 overflow-y-auto custom-scrollbar">
+                    {% for borrowing in recent_borrowings %}
+                    <div class="flex items-center p-4 bg-white rounded-xl border border-gray-100 hover:shadow-md transition-all duration-300">
+                        <div class="w-12 h-12 bg-library-gold bg-opacity-20 rounded-lg flex items-center justify-center mr-4">
+                            <i class="fas fa-book text-library-gold"></i>
+                        </div>
+                        <div class="flex-1">
+                            <div class="font-semibold text-library-navy">{{ borrowing.book.title }}</div>
+                            <div class="text-sm text-warm-gray-600">by {{ borrowing.user.get_full_name|default:borrowing.user.username }}</div>
+                            <div class="text-xs text-library-burgundy">{{ borrowing.borrowed_date|timesince }} ago</div>
+                        </div>
+                        <div class="text-right">
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                Active
+                            </span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-12">
+                    <i class="fas fa-book-open text-4xl text-warm-gray-300 mb-4"></i>
+                    <h4 class="font-serif text-xl font-semibold text-warm-gray-700 mb-2">No Recent Activities</h4>
+                    <p class="text-warm-gray-500">When books are borrowed, they'll appear here</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Recent Users (Staff can view but not manage) -->
+        <div class="bg-gradient-to-br from-library-parchment to-white rounded-2xl shadow-lg border border-library-gold border-opacity-20 p-8">
+            <div class="flex items-center justify-between mb-8">
+                <h3 class="font-serif text-2xl font-bold text-library-navy flex items-center">
+                    <i class="fas fa-user-plus mr-3 text-library-gold"></i>
+                    Recent Members
+                </h3>
+                <div class="text-library-burgundy font-medium">
+                    <i class="fas fa-eye mr-1"></i> View Only
+                </div>
+            </div>
+            
+            {% if recent_users %}
+                <div class="space-y-4 max-h-96 overflow-y-auto custom-scrollbar">
+                    {% for recent_user in recent_users %}
+                    <div class="flex items-center p-4 bg-white rounded-xl border border-gray-100 hover:shadow-md transition-all duration-300">
+                        <div class="w-12 h-12 bg-library-burgundy bg-opacity-20 rounded-lg flex items-center justify-center mr-4">
+                            <i class="fas fa-user text-library-burgundy"></i>
+                        </div>
+                        <div class="flex-1">
+                            <div class="font-semibold text-library-navy">{{ recent_user.get_full_name|default:recent_user.username }}</div>
+                            <div class="text-sm text-warm-gray-600">{{ recent_user.user_type|title }}</div>
+                            <div class="text-xs text-library-burgundy">Joined {{ recent_user.date_joined|timesince }} ago</div>
+                        </div>
+                        <div class="text-right">
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium 
+                                {% if recent_user.is_active %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                                {% if recent_user.is_active %}Active{% else %}Inactive{% endif %}
+                            </span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-12">
+                    <i class="fas fa-users text-4xl text-warm-gray-300 mb-4"></i>
+                    <h4 class="font-serif text-xl font-semibold text-warm-gray-700 mb-2">No Recent Members</h4>
+                    <p class="text-warm-gray-500">New member registrations will appear here</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Staff Actions & System Status (Limited compared to Admin) -->
+<div class="max-w-7xl mx-auto px-8 mb-12">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Staff Actions (Limited) -->
+        <div class="lg:col-span-2 bg-gradient-to-br from-library-parchment to-white rounded-2xl shadow-lg border border-library-gold border-opacity-20 p-8">
+            <div class="flex items-center justify-between mb-8">
+                <h3 class="font-serif text-2xl font-bold text-library-navy flex items-center">
+                    <i class="fas fa-tools mr-3 text-library-gold"></i>
+                    Staff Actions
+                </h3>
+                <span class="text-sm text-library-burgundy font-medium">Limited Access</span>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Book Management -->
+                <a href="{% url 'fbc_books:book_list' %}" class="group flex items-center p-4 rounded-xl hover:bg-library-parchment transition-all duration-300 border border-transparent hover:border-library-gold">
+                    <div class="w-12 h-12 bg-library-navy bg-opacity-10 rounded-lg flex items-center justify-center mr-4 group-hover:bg-library-navy group-hover:bg-opacity-20 transition-all duration-300">
+                        <i class="fas fa-books text-library-navy text-xl"></i>
+                    </div>
+                    <span class="ml-4 font-body font-semibold text-library-navy group-hover:text-library-navy transition-colors">Manage Books</span>
+                </a>
+
+                <!-- Borrowing Management -->
+                <a href="{% url 'fbc_books:manage_borrowings' %}" class="group flex items-center p-4 rounded-xl hover:bg-library-parchment transition-all duration-300 border border-transparent hover:border-library-gold">
+                    <div class="w-12 h-12 bg-library-burgundy bg-opacity-10 rounded-lg flex items-center justify-center mr-4 group-hover:bg-library-burgundy group-hover:bg-opacity-20 transition-all duration-300">
+                        <i class="fas fa-exchange-alt text-library-burgundy text-xl"></i>
+                    </div>
+                    <span class="ml-4 font-body font-semibold text-library-navy group-hover:text-library-navy transition-colors">Borrowing Records</span>
+                </a>
+
+                <!-- Fines Management -->
+                <a href="{% url 'fbc_fines:fine_list' %}" class="group flex items-center p-4 rounded-xl hover:bg-library-parchment transition-all duration-300 border border-transparent hover:border-library-gold">
+                    <div class="w-12 h-12 bg-library-gold bg-opacity-10 rounded-lg flex items-center justify-center mr-4 group-hover:bg-library-gold group-hover:bg-opacity-20 transition-all duration-300">
+                        <i class="fas fa-receipt text-library-gold text-xl"></i>
+                    </div>
+                    <span class="ml-4 font-body font-semibold text-library-navy group-hover:text-library-navy transition-colors">Manage Fines</span>
+                </a>
+
+                <!-- Reports -->
+                <a href="{% url 'fbc_books:admin_dashboard' %}" class="group flex items-center p-4 rounded-xl hover:bg-library-parchment transition-all duration-300 border border-transparent hover:border-library-gold">
+                    <div class="w-12 h-12 bg-green-600 bg-opacity-10 rounded-lg flex items-center justify-center mr-4 group-hover:bg-green-600 group-hover:bg-opacity-20 transition-all duration-300">
+                        <i class="fas fa-chart-bar text-green-600 text-xl"></i>
+                    </div>
+                    <span class="ml-4 font-body font-semibold text-library-navy group-hover:text-library-navy transition-colors">View Reports</span>
+                </a>
+
+                <!-- Restricted Actions Notice -->
+                <div class="col-span-1 md:col-span-2 bg-amber-50 border border-amber-200 rounded-lg p-4 mt-4">
+                    <div class="flex items-center">
+                        <i class="fas fa-info-circle text-amber-600 mr-2"></i>
+                        <span class="text-sm text-amber-800 font-medium">
+                            User management and system settings are restricted to administrators only.
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Health Monitor -->
+        <div class="bg-gradient-to-br from-library-navy to-blue-900 rounded-2xl shadow-lg p-8 text-white">
+            <div class="flex items-center justify-between mb-8">
+                <div>
+                    <h3 class="font-serif text-lg font-bold text-white">Library System Status</h3>
+                    <p class="text-library-cream text-sm">Monitor system health</p>
+                </div>
+                <div class="w-12 h-12 bg-library-gold rounded-lg flex items-center justify-center">
+                    <i class="fas fa-heartbeat text-library-navy text-xl"></i>
+                </div>
+            </div>
+            
+            <div class="space-y-6">
+                <div class="flex items-center justify-between">
+                    <span class="text-library-cream">Database</span>
+                    <span class="flex items-center">
+                        <div class="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
+                        <span class="text-green-300 font-semibold">Healthy</span>
+                    </span>
+                </div>
+                
+                <div class="flex items-center justify-between">
+                    <span class="text-library-cream">Book Catalog</span>
+                    <span class="flex items-center">
+                        <div class="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
+                        <span class="text-green-300 font-semibold">Online</span>
+                    </span>
+                </div>
+                
+                <div class="flex items-center justify-between">
+                    <span class="text-library-cream">User Sessions</span>
+                    <span class="flex items-center">
+                        <div class="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
+                        <span class="text-green-300 font-semibold">Active</span>
+                    </span>
+                </div>
+                
+                <div class="flex items-center justify-between">
+                    <span class="text-library-cream">Payment System</span>
+                    <span class="flex items-center">
+                        <div class="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
+                        <span class="text-green-300 font-semibold">Operational</span>
+                    </span>
+                </div>
+            </div>
+            
+            <div class="mt-8 pt-6 border-t border-library-cream border-opacity-20">
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-library-gold">{{ total_books }}</div>
+                    <div class="text-library-cream text-sm">Total Books in System</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.animate-glow {
+    animation: glow 2s ease-in-out infinite alternate;
+}
+
+.animate-float {
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes glow {
+    from { box-shadow: 0 0 20px rgba(217, 119, 6, 0.5); }
+    to { box-shadow: 0 0 30px rgba(217, 119, 6, 0.8); }
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #d97706;
+    border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #b45309;
+}
+</style>
+{% endblock %}

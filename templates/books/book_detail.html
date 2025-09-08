@@ -1,0 +1,386 @@
+{% extends 'admin/admin_base.html' %}
+{% load static %}
+
+{% block title %}{{ book.title }} - FBC Library{% endblock %}
+
+{% block page_title %}Book Details{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-6 py-6">
+    <!-- Breadcrumb -->
+    <nav class="flex mb-6" aria-label="Breadcrumb">
+        <ol class="inline-flex items-center space-x-1 md:space-x-3">
+            <li class="inline-flex items-center">
+                <a href="{% url 'fbc_books:admin_dashboard' %}" class="inline-flex items-center text-sm font-medium text-fbc-navy-700 hover:text-fbc-green-600 transition-colors duration-200">
+                    <i class="fas fa-tachometer-alt mr-1"></i>Dashboard
+                </a>
+            </li>
+            <li>
+                <div class="flex items-center">
+                    <i class="fas fa-chevron-right text-gray-400 text-sm"></i>
+                    <a href="{% url 'fbc_books:manage_books' %}" class="ml-1 text-sm font-medium text-fbc-navy-700 hover:text-fbc-green-600 md:ml-2 transition-colors duration-200">Manage Books</a>
+                </div>
+            </li>
+            <li aria-current="page">
+                <div class="flex items-center">
+                    <i class="fas fa-chevron-right text-gray-400 text-sm"></i>
+                    <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2">{{ book.title|truncatechars:30 }}</span>
+                </div>
+            </li>
+        </ol>
+    </nav>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Book Cover and Actions -->
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-xl shadow-lg border border-fbc-green-200 overflow-hidden sticky top-6">
+                <div class="relative">
+                    {% if book.cover_image %}
+                        <img src="{{ book.cover_image.url }}" class="w-full h-96 object-cover" alt="{{ book.title }}">
+                    {% else %}
+                        <img src="{% static 'img/default-book-cover.jpg' %}" class="w-full h-96 object-cover" alt="{{ book.title }}">
+                    {% endif %}
+                    <div class="absolute inset-0 bg-gradient-to-t from-fbc-navy-900/60 to-transparent"></div>
+                    <div class="absolute bottom-4 left-4 right-4">
+                        <div class="flex flex-wrap gap-2">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium font-body {% if book.status == 'available' %}bg-fbc-green-100 text-fbc-green-800{% elif book.status == 'borrowed' %}bg-yellow-100 text-yellow-800{% else %}bg-red-100 text-red-800{% endif %}">
+                                {% if book.status == 'available' %}
+                                    <i class="fas fa-check-circle mr-1"></i>
+                                {% elif book.status == 'borrowed' %}
+                                    <i class="fas fa-clock mr-1"></i>
+                                {% else %}
+                                    <i class="fas fa-times-circle mr-1"></i>
+                                {% endif %}
+                                {{ book.get_status_display }}
+                            </span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium font-body {% if book.book_type == 'ebook' %}bg-purple-100 text-purple-800{% else %}bg-fbc-navy-100 text-fbc-navy-800{% endif %}">
+                                {% if book.book_type == 'ebook' %}
+                                    <i class="fas fa-tablet-alt mr-1"></i>
+                                {% else %}
+                                    <i class="fas fa-book mr-1"></i>
+                                {% endif %}
+                                {{ book.get_book_type_display }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6 space-y-3">
+                    {% if is_ebook and has_pdf %}
+                        <!-- Ebook Actions -->
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                            <!-- Preview Button -->
+                            <a href="{% url 'fbc_books:ebook_preview' book.pk %}" class="w-full inline-flex items-center justify-center px-4 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold font-body rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+                                <i class="fas fa-search mr-2"></i>Preview
+                            </a>
+                            
+                            <!-- Read Online Button -->
+                            <a href="{% url 'fbc_books:ebook_reader' book.pk %}" class="w-full inline-flex items-center justify-center px-4 py-3 bg-gradient-to-r from-fbc-green-500 to-fbc-green-600 text-white font-semibold font-body rounded-lg hover:from-fbc-green-600 hover:to-fbc-green-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+                                <i class="fas fa-book-reader mr-2"></i>Read Online
+                            </a>
+                            
+                            <!-- Download Button -->
+                            <a href="{% url 'fbc_books:ebook_download' book.pk %}" class="w-full inline-flex items-center justify-center px-4 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white font-semibold font-body rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+                                <i class="fas fa-download mr-2"></i>Download PDF
+                            </a>
+                        </div>
+                        
+                        <!-- Ebook Info -->
+                        <div class="mt-6 p-4 bg-purple-50 border border-purple-200 rounded-lg">
+                            <div class="flex items-start">
+                                <i class="fas fa-info-circle text-purple-600 mt-0.5 mr-3"></i>
+                                <div class="text-sm text-purple-800 font-body">
+                                    <p class="font-medium mb-1">Digital Book Available</p>
+                                    <p>You can preview, read online, or download this ebook. No borrowing required!</p>
+                                </div>
+                            </div>
+                        </div>
+                    {% elif is_ebook and not has_pdf %}
+                        <!-- Ebook without PDF -->
+                        <div class="w-full p-4 bg-gray-50 border border-gray-200 rounded-lg text-center">
+                            <i class="fas fa-file-pdf text-gray-400 text-2xl mb-2"></i>
+                            <p class="text-sm text-gray-600 font-body">PDF file not available for this ebook</p>
+                        </div>
+                    {% endif %}
+
+                    {% if book.status == 'available' and not book.is_ebook and user.is_authenticated %}
+                        {% if can_borrow %}
+                            <form method="post" action="{% url 'fbc_books:borrow_book' book.pk %}">
+                                {% csrf_token %}
+                                <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-3 bg-gradient-to-r from-fbc-green-500 to-fbc-green-600 text-white font-semibold font-body rounded-lg hover:from-fbc-green-600 hover:to-fbc-green-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+                                    <i class="fas fa-book mr-2"></i>Borrow Book
+                                </button>
+                            </form>
+                        {% else %}
+                            <!-- Disabled borrow button with restriction message -->
+                            <div class="w-full">
+                                <button disabled class="w-full inline-flex items-center justify-center px-4 py-3 bg-gray-400 text-white font-semibold font-body rounded-lg cursor-not-allowed opacity-60">
+                                    <i class="fas fa-ban mr-2"></i>Cannot Borrow
+                                </button>
+                                <div class="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                    <div class="flex items-start">
+                                        <i class="fas fa-exclamation-triangle text-yellow-600 mt-0.5 mr-2"></i>
+                                        <p class="text-sm text-yellow-800 font-body font-medium">{{ borrow_restriction_message }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% elif book.status != 'available' and not book.is_ebook and user.is_authenticated %}
+                        <!-- Book not available -->
+                        <div class="w-full">
+                            <button disabled class="w-full inline-flex items-center justify-center px-4 py-3 bg-gray-400 text-white font-semibold font-body rounded-lg cursor-not-allowed opacity-60">
+                                <i class="fas fa-times mr-2"></i>Not Available
+                            </button>
+                            <div class="mt-3 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                                <div class="flex items-start">
+                                    <i class="fas fa-info-circle text-gray-600 mt-0.5 mr-2"></i>
+                                    <p class="text-sm text-gray-700 font-body">This book is currently {{ book.get_status_display|lower }}.</p>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    {% if user.is_authenticated and user.is_staff %}
+                        <div class="border-t border-fbc-green-200 pt-4 mt-4">
+                            <h4 class="text-sm font-serif font-semibold text-fbc-navy-800 mb-3">Administrative Actions</h4>
+                            <div class="space-y-2">
+                                <a href="{% url 'fbc_books:edit_book' book.pk %}" class="w-full inline-flex items-center justify-center px-4 py-2 bg-fbc-green-100 text-fbc-green-700 font-medium font-body rounded-lg hover:bg-fbc-green-200 transition-colors duration-200">
+                                    <i class="fas fa-edit mr-2"></i>Edit Book
+                                </a>
+                                <a href="{% url 'fbc_books:manage_books' %}" class="w-full inline-flex items-center justify-center px-4 py-2 bg-fbc-navy-100 text-fbc-navy-700 font-medium font-body rounded-lg hover:bg-fbc-navy-200 transition-colors duration-200">
+                                    <i class="fas fa-list mr-2"></i>Manage All Books
+                                </a>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Book Details -->
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-xl shadow-lg border border-fbc-green-200 p-8">
+                <h1 class="text-4xl font-serif font-bold text-fbc-navy-800 mb-6">{{ book.title }}</h1>
+                
+                {% if book.authors.exists %}
+                    <div class="mb-6">
+                        <p class="text-lg text-fbc-navy-600 font-body">
+                            by {% for author in book.authors.all %}
+                                <a href="{% url 'fbc_books:book_list' %}?author={{ author.pk }}" class="text-fbc-green-600 hover:text-fbc-green-700 font-medium transition-colors duration-200">
+                                    {{ author.name }}
+                                </a>{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </p>
+                    </div>
+                {% endif %}
+
+                <!-- Book Information Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div class="space-y-4">
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-barcode text-fbc-green-500 w-5"></i>
+                            <div>
+                                <span class="font-medium text-fbc-navy-700 font-body">ISBN:</span>
+                                <span class="text-fbc-navy-600 ml-2 font-body">{{ book.isbn }}</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-calendar text-fbc-green-500 w-5"></i>
+                            <div>
+                                <span class="font-medium text-fbc-navy-700 font-body">Publication Year:</span>
+                                <span class="text-fbc-navy-600 ml-2 font-body">{{ book.publication_year }}</span>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-copy text-fbc-green-500 w-5"></i>
+                            <div>
+                                <span class="font-medium text-fbc-navy-700 font-body">Available Copies:</span>
+                                <span class="text-fbc-navy-600 ml-2 font-semibold font-body">{{ book.available_copies }}</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-tag text-fbc-green-500 w-5"></i>
+                            <div>
+                                <span class="font-medium text-fbc-navy-700 font-body">Category:</span>
+                                <a href="{% url 'fbc_books:book_list' %}?category={{ book.category.pk }}" class="text-fbc-green-600 hover:text-fbc-green-700 ml-2 font-medium font-body transition-colors duration-200">
+                                    {{ book.category.name }}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {% if book.description %}
+                    <div class="mb-8">
+                        <h3 class="text-xl font-serif font-semibold text-fbc-navy-800 mb-4 flex items-center">
+                            <i class="fas fa-info-circle mr-2 text-fbc-green-600"></i>Description
+                        </h3>
+                        <div class="prose prose-fbc-navy max-w-none font-body text-fbc-navy-700 leading-relaxed">
+                            {{ book.description|linebreaks }}
+                        </div>
+                    </div>
+                {% endif %}
+
+                {% if book.table_of_contents %}
+                    <div class="mb-8">
+                        <h3 class="text-xl font-serif font-semibold text-fbc-navy-800 mb-4 flex items-center">
+                            <i class="fas fa-list mr-2 text-fbc-green-600"></i>Table of Contents
+                        </h3>
+                        <div class="bg-fbc-green-50 border border-fbc-green-200 rounded-lg p-4 font-mono text-sm whitespace-pre-wrap text-fbc-navy-700">{{ book.table_of_contents }}</div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Current Borrowers Section (Admin Only) -->
+    {% if user.is_staff and book.current_borrowings.exists %}
+        <div class="mt-8">
+            <div class="bg-white rounded-xl shadow-lg border border-fbc-green-200 overflow-hidden">
+                <div class="bg-fbc-green-50 px-6 py-4 border-b border-fbc-green-200">
+                    <h3 class="text-lg font-serif font-semibold text-fbc-navy-800 flex items-center">
+                        <i class="fas fa-users mr-2 text-fbc-green-600"></i>Current Borrowers
+                    </h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-fbc-green-200">
+                        <thead class="bg-fbc-green-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-fbc-navy-700 uppercase tracking-wider font-body">User</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-fbc-navy-700 uppercase tracking-wider font-body">Borrowed Date</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-fbc-navy-700 uppercase tracking-wider font-body">Due Date</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-fbc-navy-700 uppercase tracking-wider font-body">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-fbc-green-100">
+                            {% for borrowing in book.current_borrowings.all %}
+                                <tr class="hover:bg-fbc-green-50 transition-colors duration-200">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="flex-shrink-0 h-10 w-10">
+                                                <div class="h-10 w-10 rounded-full bg-fbc-green-100 flex items-center justify-center">
+                                                    <i class="fas fa-user text-fbc-green-600"></i>
+                                                </div>
+                                            </div>
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium text-fbc-navy-900 font-body">{{ borrowing.user.get_full_name }}</div>
+                                                <div class="text-sm text-fbc-navy-500 font-body">{{ borrowing.user.email }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-fbc-navy-900 font-body">{{ borrowing.borrowed_date|date:"M d, Y" }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-fbc-navy-900 font-body">{{ borrowing.due_date|date:"M d, Y" }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium font-body {% if borrowing.is_overdue %}bg-red-100 text-red-800{% else %}bg-fbc-green-100 text-fbc-green-800{% endif %}">
+                                            {% if borrowing.is_overdue %}
+                                                <i class="fas fa-exclamation-triangle mr-1"></i>Overdue
+                                            {% else %}
+                                                <i class="fas fa-check-circle mr-1"></i>Active
+                                            {% endif %}
+                                        </span>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    
+    <!-- Similar Books Section -->
+    {% if similar_books %}
+        <div class="mt-8">
+            <div class="text-center mb-8">
+                <h2 class="text-2xl font-serif font-bold text-fbc-navy-800 mb-4">You May Also Like</h2>
+                <div class="w-24 h-1 bg-gradient-to-r from-fbc-green-500 to-fbc-green-600 mx-auto rounded-full"></div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for book in similar_books %}
+                    <div class="group bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-fbc-green-200 hover:border-fbc-green-400 transform hover:-translate-y-2">
+                        <div class="relative overflow-hidden">
+                            {% if book.cover_image %}
+                                <img src="{{ book.cover_image.url }}" class="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300" alt="{{ book.title }}">
+                            {% else %}
+                                <img src="{% static 'img/default-book-cover.jpg' %}" class="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300" alt="{{ book.title }}">
+                            {% endif %}
+                            <div class="absolute inset-0 bg-gradient-to-t from-fbc-navy-900/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        </div>
+                        <div class="p-4">
+                            <h3 class="font-serif font-semibold text-base text-fbc-navy-800 mb-2 line-clamp-2 group-hover:text-fbc-green-600 transition-colors duration-200">{{ book.title }}</h3>
+                            <p class="text-fbc-navy-600 text-sm mb-3 font-body">
+                                {% for author in book.authors.all %}
+                                    {{ author.name }}{% if not forloop.last %}, {% endif %}
+                                {% endfor %}
+                            </p>
+                            <a href="{% url 'fbc_books:book_detail' book.pk %}" class="w-full inline-flex items-center justify-center px-3 py-2 bg-fbc-green-600 text-white text-sm font-medium font-body rounded-lg hover:bg-fbc-green-700 transition-colors duration-200">
+                                <i class="fas fa-eye mr-1"></i>View Details
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    .prose {
+        line-height: 1.7;
+        color: var(--fbc-navy);
+    }
+    
+    .prose p {
+        margin-bottom: 1rem;
+    }
+    
+    /* FBC specific color variables */
+    :root {
+        --fbc-green: #22c55e;
+        --fbc-green-dark: #16a34a;
+        --fbc-navy: #1e293b;
+        --fbc-navy-light: #334155;
+    }
+    
+    /* Enhanced transitions for all interactive elements */
+    * {
+        transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        transition-duration: 200ms;
+    }
+    
+    /* Enhanced card hover effects */
+    .group:hover {
+        box-shadow: 0 20px 25px -5px rgba(34, 197, 94, 0.1), 0 10px 10px -5px rgba(34, 197, 94, 0.04);
+    }
+    
+    /* Custom scrollbar for content areas */
+    .prose::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .prose::-webkit-scrollbar-track {
+        background: rgba(34, 197, 94, 0.1);
+        border-radius: 3px;
+    }
+    
+    .prose::-webkit-scrollbar-thumb {
+        background: var(--fbc-green);
+        border-radius: 3px;
+    }
+    
+    .prose::-webkit-scrollbar-thumb:hover {
+        background: var(--fbc-green-dark);
+    }
+</style>
+{% endblock %}
+

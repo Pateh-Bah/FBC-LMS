@@ -1,0 +1,181 @@
+{% extends "admin/admin_base.html" %}
+{% load static %}
+
+{% block page_title %}Add New Notification{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-xl shadow-lg p-8 animate-fade-in">
+    <!-- Header Section -->
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h1 class="text-3xl font-serif font-bold text-fbc-navy-900 mb-2">Add New Notification</h1>
+            <p class="text-fbc-gray-600 font-body">Create a new notification for library members</p>
+        </div>
+        <a href="{% url 'fbc_notifications:manage_notifications' %}" 
+           class="flex items-center space-x-2 px-6 py-3 bg-fbc-gray-100 text-fbc-gray-700 rounded-lg hover:bg-fbc-gray-200 transition-all duration-300">
+            <i class="fas fa-arrow-left"></i>
+            <span class="font-body">Back to Notifications</span>
+        </a>
+    </div>
+
+    <!-- Add Notification Form -->
+    <div class="max-w-4xl">
+        <form method="post" class="space-y-8">
+            {% csrf_token %}
+            
+            <!-- Notification Details Section -->
+            <div class="bg-white border border-fbc-green-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-xl font-serif font-bold text-fbc-navy-900 mb-6 flex items-center">
+                    <i class="fas fa-bell text-fbc-green-600 mr-3"></i>
+                    Notification Details
+                </h3>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Title -->
+                    <div class="lg:col-span-2">
+                        <label for="title" class="block text-sm font-sans font-medium text-fbc-navy-900 mb-2">
+                            Notification Title <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" 
+                               id="title" 
+                               name="title" 
+                               required
+                               placeholder="Enter notification title..."
+                               class="w-full px-4 py-3 border border-fbc-green-300 rounded-lg focus:ring-2 focus:ring-fbc-green-500 focus:border-fbc-green-500 transition-all duration-300 font-body">
+                    </div>
+
+                    <!-- Recipient -->
+                    <div class="lg:col-span-2">
+                        <label for="recipient" class="block text-sm font-sans font-medium text-fbc-navy-900 mb-2">
+                            Recipient <span class="text-red-500">*</span>
+                        </label>
+                        <select id="recipient" 
+                                name="recipient" 
+                                required
+                                class="w-full px-4 py-3 border border-fbc-green-300 rounded-lg focus:ring-2 focus:ring-fbc-green-500 focus:border-fbc-green-500 transition-all duration-300 font-body">
+                            <option value="">Select a recipient...</option>
+                            {% for user in users %}
+                            <option value="{{ user.id }}">{{ user.get_full_name|default:user.username }} ({{ user.email }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Message -->
+                    <div class="lg:col-span-2">
+                        <label for="message" class="block text-sm font-sans font-medium text-fbc-navy-900 mb-2">
+                            Message <span class="text-red-500">*</span>
+                        </label>
+                        <textarea id="message" 
+                                  name="message" 
+                                  rows="6" 
+                                  required
+                                  placeholder="Enter the notification message..."
+                                  class="w-full px-4 py-3 border border-fbc-green-300 rounded-lg focus:ring-2 focus:ring-fbc-green-500 focus:border-fbc-green-500 transition-all duration-300 font-body resize-none"></textarea>
+                        <p class="text-sm text-fbc-gray-500 mt-2 font-body">Provide a clear and concise message for the recipient.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notification Options -->
+            <div class="bg-white border border-fbc-green-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-xl font-serif font-bold text-fbc-navy-900 mb-6 flex items-center">
+                    <i class="fas fa-cogs text-fbc-green-600 mr-3"></i>
+                    Notification Options
+                </h3>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Priority Level -->
+                    <div>
+                        <label for="priority" class="block text-sm font-sans font-medium text-fbc-navy-900 mb-2">
+                            Priority Level
+                        </label>
+                        <select id="priority" 
+                                name="priority" 
+                                class="w-full px-4 py-3 border border-fbc-green-300 rounded-lg focus:ring-2 focus:ring-fbc-green-500 focus:border-fbc-green-500 transition-all duration-300 font-body">
+                            <option value="normal">Normal</option>
+                            <option value="high">High Priority</option>
+                            <option value="urgent">Urgent</option>
+                        </select>
+                    </div>
+
+                    <!-- Send Immediately -->
+                    <div class="flex items-center space-x-3">
+                        <input type="checkbox" 
+                               id="send_immediately" 
+                               name="send_immediately" 
+                               checked
+                               class="w-5 h-5 text-fbc-green-600 border-fbc-green-300 rounded focus:ring-fbc-green-500">
+                        <label for="send_immediately" class="text-sm font-sans font-medium text-fbc-navy-900">
+                            Send notification immediately
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="flex flex-col sm:flex-row gap-4 justify-end pt-6 border-t border-fbc-green-200">
+                <a href="{% url 'fbc_notifications:manage_notifications' %}" 
+                   class="px-8 py-3 border border-fbc-gray-300 text-fbc-gray-700 rounded-lg hover:bg-fbc-gray-50 transition-all duration-300 text-center font-body font-medium">
+                    Cancel
+                </a>
+                <button type="submit" 
+                        class="btn-fbc px-8 py-3 rounded-lg font-body font-medium flex items-center justify-center space-x-2 hover:shadow-lg transition-all duration-300">
+                    <i class="fas fa-paper-plane"></i>
+                    <span>Send Notification</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+// Form validation and enhancement
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const submitButton = form.querySelector('button[type="submit"]');
+    
+    // Enhanced form submission
+    form.addEventListener('submit', function(e) {
+        // Disable submit button to prevent double submission
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<i class="fas fa-spinner animate-spin mr-2"></i>Sending...';
+        
+        // Re-enable button after 3 seconds (in case of error)
+        setTimeout(() => {
+            submitButton.disabled = false;
+            submitButton.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>Send Notification';
+        }, 3000);
+    });
+
+    // Character counter for message
+    const messageTextarea = document.getElementById('message');
+    const charCounter = document.createElement('div');
+    charCounter.className = 'text-sm text-fbc-gray-500 mt-2 font-body text-right';
+    messageTextarea.parentNode.appendChild(charCounter);
+    
+    function updateCharCounter() {
+        const length = messageTextarea.value.length;
+        charCounter.textContent = `${length} characters`;
+        
+        if (length > 500) {
+            charCounter.className = 'text-sm text-red-500 mt-2 font-body text-right';
+        } else if (length > 400) {
+            charCounter.className = 'text-sm text-orange-500 mt-2 font-body text-right';
+        } else {
+            charCounter.className = 'text-sm text-fbc-gray-500 mt-2 font-body text-right';
+        }
+    }
+    
+    messageTextarea.addEventListener('input', updateCharCounter);
+    updateCharCounter(); // Initial call
+
+    // Auto-resize textarea
+    messageTextarea.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
+    });
+});
+</script>
+{% endblock %}
+{% endblock %}

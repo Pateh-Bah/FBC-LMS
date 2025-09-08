@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sidebar Toggle Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .sidebar-transition {
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <nav class="fixed top-0 left-0 h-screen w-72 bg-gray-800 sidebar-transition transform" id="sidebar">
+        <div class="p-4 text-white">Sidebar Content</div>
+    </nav>
+    
+    <div class="ml-72 min-h-screen sidebar-transition" id="mainContent">
+        <header class="bg-blue-600 p-4">
+            <button class="bg-white text-blue-600 px-4 py-2 rounded sidebar-toggle">
+                Toggle Mobile
+            </button>
+            <button class="bg-white text-blue-600 px-4 py-2 rounded ml-2 sidebar-toggle">
+                Toggle Desktop
+            </button>
+        </header>
+        <main class="p-8">
+            <h1>Main Content</h1>
+            <p>Click the toggle buttons to test sidebar functionality.</p>
+        </main>
+    </div>
+    
+    <footer class="ml-72 bg-gray-600 p-4 text-white sidebar-transition" id="footer">
+        Footer Content
+    </footer>
+
+    <script>
+        // Test the exact same logic as in admin_base.html
+        document.querySelectorAll('.sidebar-toggle').forEach(button => {
+            button.addEventListener('click', function() {
+                console.log('Toggle button clicked!');
+                const sidebar = document.getElementById('sidebar');
+                const mainContent = document.getElementById('mainContent');
+                const footer = document.getElementById('footer');
+                
+                if (window.innerWidth > 1024) {
+                    // Desktop behavior
+                    sidebar.classList.toggle('-translate-x-full');
+                    if (sidebar.classList.contains('-translate-x-full')) {
+                        mainContent.classList.remove('ml-72');
+                        mainContent.classList.add('ml-0');
+                        footer.classList.remove('ml-72');
+                        footer.classList.add('ml-0');
+                    } else {
+                        mainContent.classList.remove('ml-0');
+                        mainContent.classList.add('ml-72');
+                        footer.classList.remove('ml-0');
+                        footer.classList.add('ml-72');
+                    }
+                } else {
+                    // Mobile behavior
+                    sidebar.classList.toggle('-translate-x-full');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

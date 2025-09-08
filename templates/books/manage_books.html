@@ -1,0 +1,834 @@
+{% extends "admin/admin_base.html" %}
+{% load static %}
+
+{% block page_title %}Book Management{% endblock %}
+
+{% block content %}
+<!-- Modal Styles -->
+<style>
+    /* Ensure modals appear above all other content */
+    .modal-backdrop {
+        z-index: 9998 !important;
+    }
+    .modal-content {
+        z-index: 9999 !important;
+    }
+    
+    /* Prevent body scroll when modal is open */
+    .modal-open {
+        overflow: hidden !important;
+    }
+    
+    /* Enhanced modal animations */
+    .modal-enter {
+        opacity: 0;
+        transform: scale(0.95);
+        transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+    }
+    
+    .modal-enter-active {
+        opacity: 1;
+        transform: scale(1);
+    }
+    
+    /* Link styling to look like buttons */
+    .no-underline {
+        text-decoration: none !important;
+    }
+    
+    .btn-fbc:hover,
+    .btn-fbc:focus,
+    .btn-fbc:active {
+        text-decoration: none !important;
+        color: white !important;
+    }
+    
+    a.btn-fbc,
+    a.btn-fbc:visited {
+        text-decoration: none !important;
+        color: white !important;
+    }
+    
+    /* Make sure all action links look like buttons */
+    .action-links a {
+        text-decoration: none !important;
+    }
+    
+    .action-links a:hover {
+        text-decoration: none !important;
+    }
+</style>
+
+<!-- Hidden CSRF token for JavaScript -->
+<form style="display: none;">
+    {% csrf_token %}
+</form>
+
+<div class="content-area p-6 animate-fade-in">
+    <!-- Enhanced Header Section -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
+        <div class="mb-4 md:mb-0">
+            <h1 class="text-3xl font-serif font-bold text-fbc-navy-800 mb-2">Book Management System</h1>
+            <p class="text-fbc-navy-600 font-body text-lg">Manage your literary collection with ease</p>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-3">
+            <a href="{% url 'fbc_books:add_book' %}" 
+               class="btn-fbc flex items-center justify-center space-x-2 hover:scale-105 transition-all duration-300 no-underline text-white">
+                <i class="fas fa-plus"></i>
+                <span>Add New Book</span>
+            </a>
+            <a href="{% url 'fbc_books:export_books' %}" 
+               class="bg-fbc-navy-700 hover:bg-fbc-navy-600 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300 flex items-center space-x-2 no-underline">
+                <i class="fas fa-download"></i>
+                <span>Export Data</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Enhanced Statistics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="admin-card bg-gradient-to-br from-fbc-green-500 to-fbc-green-600 rounded-xl p-6 text-white shadow-lg">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-fbc-green-100 text-sm font-medium mb-1">Total Books</p>
+                    <p class="text-3xl font-bold">{{ books|length }}</p>
+                    <p class="text-fbc-green-200 text-xs mt-1">
+                        <i class="fas fa-arrow-up mr-1"></i>12% from last month
+                    </p>
+                </div>
+                <div class="bg-white bg-opacity-20 rounded-full p-3">
+                    <i class="fas fa-book text-2xl"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-card bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-lg">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-blue-100 text-sm font-medium mb-1">Available Books</p>
+                    <p class="text-3xl font-bold">
+                        {% for book in books %}
+                            {% if book.available_copies > 0 %}
+                                {% if forloop.first %}{{ book.available_copies }}{% endif %}
+                            {% endif %}
+                        {% empty %}0{% endfor %}
+                    </p>
+                    <p class="text-blue-200 text-xs mt-1">
+                        <i class="fas fa-check-circle mr-1"></i>Ready to borrow
+                    </p>
+                </div>
+                <div class="bg-white bg-opacity-20 rounded-full p-3">
+                    <i class="fas fa-check-circle text-2xl"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-card bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl p-6 text-white shadow-lg">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-orange-100 text-sm font-medium mb-1">Borrowed Books</p>
+                    <p class="text-3xl font-bold">
+                        {% for book in books %}
+                            {% if book.available_copies == 0 %}
+                                {% if forloop.first %}{{ book.total_copies }}{% endif %}
+                            {% endif %}
+                        {% empty %}0{% endfor %}
+                    </p>
+                    <p class="text-orange-200 text-xs mt-1">
+                        <i class="fas fa-clock mr-1"></i>Currently on loan
+                    </p>
+                </div>
+                <div class="bg-white bg-opacity-20 rounded-full p-3">
+                    <i class="fas fa-handshake text-2xl"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-card bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-6 text-white shadow-lg">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-purple-100 text-sm font-medium mb-1">Categories</p>
+                    <p class="text-3xl font-bold">{{ categories|length|default:"0" }}</p>
+                    <p class="text-purple-200 text-xs mt-1">
+                        <i class="fas fa-tags mr-1"></i>Book categories
+                    </p>
+                </div>
+                <div class="bg-white bg-opacity-20 rounded-full p-3">
+                    <i class="fas fa-tags text-2xl"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enhanced Search and Filter Section -->
+    <div class="bg-white rounded-xl shadow-lg p-6 mb-8 border border-fbc-green-100">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div class="flex-1">
+                <div class="relative">
+                    <input type="text" 
+                           id="searchInput" 
+                           placeholder="Search books by title, author, ISBN, or category..." 
+                           class="w-full pl-12 pr-4 py-3 border border-fbc-green-300 rounded-lg focus:ring-2 focus:ring-fbc-green-500 focus:border-fbc-green-500 transition-all duration-300 font-body">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-search text-fbc-green-400"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-3">
+                <select id="categoryFilter" class="px-4 py-3 border border-fbc-green-300 rounded-lg focus:ring-2 focus:ring-fbc-green-500 focus:border-fbc-green-500 font-body">
+                    <option value="">All Categories</option>
+                    {% for category in categories %}
+                    <option value="{{ category.name }}">{{ category.name }}</option>
+                    {% endfor %}
+                </select>
+                <select id="statusFilter" class="px-4 py-3 border border-fbc-green-300 rounded-lg focus:ring-2 focus:ring-fbc-green-500 focus:border-fbc-green-500 font-body">
+                    <option value="">All Status</option>
+                    <option value="available">Available</option>
+                    <option value="borrowed">Borrowed</option>
+                    <option value="damaged">Damaged</option>
+                    <option value="lost">Lost</option>
+                </select>
+                <button onclick="clearFilters()" class="px-6 py-3 bg-fbc-navy-600 hover:bg-fbc-navy-700 text-white rounded-lg font-semibold transition-colors duration-300">
+                    <i class="fas fa-refresh mr-2"></i>Clear
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enhanced Books Table -->
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-fbc-green-100">
+        <div class="bg-gradient-to-r from-fbc-green-600 to-fbc-green-500 px-6 py-4">
+            <div class="flex items-center justify-between">
+                <h2 class="text-xl font-serif font-bold text-white">Book Collection</h2>
+                <div class="flex items-center space-x-2 text-fbc-green-100">
+                    <i class="fas fa-books"></i>
+                    <span class="font-body" id="bookCount">{{ books|length }} books total</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="w-full" id="booksTable">
+                <thead class="bg-fbc-navy-50 border-b border-fbc-green-200">
+                    <tr>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-fbc-navy-800 uppercase tracking-wider">Book Details</th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-fbc-navy-800 uppercase tracking-wider">Category</th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-fbc-navy-800 uppercase tracking-wider">Availability</th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-fbc-navy-800 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-fbc-navy-800 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-fbc-green-100" id="booksTableBody">
+                    {% for book in books %}
+                    <tr class="hover:bg-fbc-green-50 transition-colors duration-200" data-book-id="{{ book.id }}" data-book-title="{{ book.title|lower }}" data-book-authors="{{ book.authors.all|join:", "|lower }}" data-book-category="{{ book.category.name|default:""|lower }}" data-book-isbn="{{ book.isbn|lower }}">
+                        <td class="px-6 py-4">
+                            <div class="flex items-start space-x-4">
+                                <div class="flex-shrink-0">
+                                    {% if book.cover_image %}
+                                    <img src="{{ book.cover_image.url }}" alt="{{ book.title }}" class="w-12 h-16 object-cover rounded-lg shadow-md">
+                                    {% else %}
+                                    <div class="w-12 h-16 bg-gradient-to-br from-fbc-green-400 to-fbc-green-600 rounded-lg flex items-center justify-center shadow-md">
+                                        <i class="fas fa-book text-white text-sm"></i>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="text-lg font-serif font-semibold text-fbc-navy-900 mb-1">{{ book.title }}</h3>
+                                    <p class="text-fbc-navy-600 font-body mb-1">
+                                        <i class="fas fa-user-edit text-fbc-green-500 mr-1"></i>
+                                        {{ book.authors.all|join:", "|default:"Unknown Author" }}
+                                    </p>
+                                    <p class="text-sm text-fbc-navy-500 font-body">
+                                        <i class="fas fa-barcode text-fbc-green-500 mr-1"></i>
+                                        ISBN: {{ book.isbn }}
+                                    </p>
+                                    {% if book.book_type == 'ebook' %}
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mt-1">
+                                        <i class="fas fa-file-pdf mr-1"></i>E-Book
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-fbc-green-100 text-fbc-green-800">
+                                    <i class="fas fa-tag mr-1"></i>
+                                    {{ book.category.name|default:"Uncategorized" }}
+                                </span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="text-sm text-fbc-navy-900">
+                                <div class="flex items-center space-x-2">
+                                    <div class="flex items-center text-fbc-green-600">
+                                        <i class="fas fa-books mr-1"></i>
+                                        <span class="font-semibold">{{ book.available_copies }}</span>
+                                    </div>
+                                    <span class="text-fbc-navy-500">/</span>
+                                    <div class="flex items-center text-fbc-navy-600">
+                                        <i class="fas fa-box mr-1"></i>
+                                        <span>{{ book.total_copies }}</span>
+                                    </div>
+                                </div>
+                                <p class="text-xs text-fbc-navy-500 mt-1">Available / Total</p>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            {% if book.available_copies > 0 %}
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                    <i class="fas fa-check-circle mr-1"></i>Available
+                                </span>
+                            {% elif book.status == 'damaged' %}
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                                    <i class="fas fa-exclamation-triangle mr-1"></i>Damaged
+                                </span>
+                            {% elif book.status == 'lost' %}
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                                    <i class="fas fa-times-circle mr-1"></i>Lost
+                                </span>
+                            {% else %}
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-800">
+                                    <i class="fas fa-clock mr-1"></i>Borrowed
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center space-x-2 action-links">
+                                <a href="{% url 'fbc_books:edit_book' book.id %}" 
+                                   class="inline-flex items-center px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors duration-200 no-underline">
+                                    <i class="fas fa-edit mr-1"></i>Edit
+                                </a>
+                                <a href="{% url 'fbc_books:book_detail' book.id %}" 
+                                   class="inline-flex items-center px-3 py-2 bg-fbc-green-600 hover:bg-fbc-green-700 text-white text-sm font-medium rounded-lg transition-colors duration-200 no-underline">
+                                    <i class="fas fa-eye mr-1"></i>View
+                                </a>
+                                <button onclick="deleteBook({{ book.id }})" 
+                                        class="inline-flex items-center px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors duration-200">
+                                    <i class="fas fa-trash mr-1"></i>Delete
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="px-6 py-12 text-center">
+                            <div class="flex flex-col items-center justify-center">
+                                <div class="w-16 h-16 bg-fbc-green-100 rounded-full flex items-center justify-center mb-4">
+                                    <i class="fas fa-book text-fbc-green-500 text-2xl"></i>
+                                </div>
+                                <h3 class="text-lg font-serif font-semibold text-fbc-navy-800 mb-2">No Books Found</h3>
+                                <p class="text-fbc-navy-600 font-body mb-4">Start building your library by adding your first book.</p>
+                                <a href="{% url 'fbc_books:add_book' %}" class="btn-fbc no-underline text-white">
+                                    <i class="fas fa-plus mr-2"></i>Add Your First Book
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Enhanced Pagination -->
+        <div class="bg-fbc-navy-50 px-6 py-4 border-t border-fbc-green-200">
+            <div class="flex items-center justify-between">
+                <div class="text-sm text-fbc-navy-600 font-body">
+                    Showing <span class="font-semibold" id="showingStart">1</span> to <span class="font-semibold" id="showingEnd">{{ books|length }}</span> of <span class="font-semibold" id="totalBooks">{{ books|length }}</span> books
+                </div>
+                <div class="flex items-center space-x-2" id="pagination">
+                    <!-- Pagination will be generated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+<!-- Enhanced Edit Book Modal -->
+<div id="editBookModal" class="fixed inset-0 z-[60] hidden overflow-y-auto" aria-labelledby="edit-modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 bg-gray-900 bg-opacity-50 transition-opacity" aria-hidden="true" onclick="closeEditBookModal()"></div>
+        
+        <!-- Span to center the modal -->
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        
+        <div class="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full mx-auto relative z-[70]">
+            <form method="post" action="" enctype="multipart/form-data" id="editBookForm">
+                {% csrf_token %}
+                <div class="bg-gradient-to-r from-blue-600 to-blue-500 px-6 py-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-xl font-serif font-bold text-white" id="edit-modal-title">
+                            <i class="fas fa-edit mr-2"></i>Edit Book
+                        </h3>
+                        <button type="button" onclick="closeEditBookModal()" class="text-blue-100 hover:text-white transition-colors">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="px-6 py-6 space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Book Title -->
+                        <div class="md:col-span-2">
+                            <label for="edit_title" class="block text-sm font-semibold text-fbc-navy-800 mb-2">
+                                <i class="fas fa-book mr-1 text-blue-500"></i>Book Title *
+                            </label>
+                            <input type="text" id="edit_title" name="title" required 
+                                   class="w-full px-4 py-3 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-body">
+                        </div>
+
+                        <!-- Authors -->
+                        <div>
+                            <label for="edit_authors" class="block text-sm font-semibold text-fbc-navy-800 mb-2">
+                                <i class="fas fa-user-edit mr-1 text-blue-500"></i>Author(s) *
+                            </label>
+                            <input type="text" id="edit_authors" name="authors" required 
+                                   class="w-full px-4 py-3 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-body">
+                        </div>
+
+                        <!-- ISBN -->
+                        <div>
+                            <label for="edit_isbn" class="block text-sm font-semibold text-fbc-navy-800 mb-2">
+                                <i class="fas fa-barcode mr-1 text-blue-500"></i>ISBN *
+                            </label>
+                            <input type="text" id="edit_isbn" name="isbn" required 
+                                   class="w-full px-4 py-3 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-body">
+                        </div>
+
+                        <!-- Category -->
+                        <div>
+                            <label for="edit_category" class="block text-sm font-semibold text-fbc-navy-800 mb-2">
+                                <i class="fas fa-tag mr-1 text-blue-500"></i>Category *
+                            </label>
+                            <select id="edit_category" name="category" required 
+                                    class="w-full px-4 py-3 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-body">
+                                <option value="">Select category</option>
+                                {% for category in categories %}
+                                <option value="{{ category.id }}">{{ category.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Book Type -->
+                        <div>
+                            <label for="edit_book_type" class="block text-sm font-semibold text-fbc-navy-800 mb-2">
+                                <i class="fas fa-layer-group mr-1 text-blue-500"></i>Book Type
+                            </label>
+                            <select id="edit_book_type" name="book_type" 
+                                    class="w-full px-4 py-3 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-body">
+                                <option value="physical">Physical Book</option>
+                                <option value="ebook">E-Book</option>
+                            </select>
+                        </div>
+
+                        <!-- Total Copies -->
+                        <div>
+                            <label for="edit_total_copies" class="block text-sm font-semibold text-fbc-navy-800 mb-2">
+                                <i class="fas fa-box mr-1 text-blue-500"></i>Total Copies
+                            </label>
+                            <input type="number" id="edit_total_copies" name="total_copies" min="1" 
+                                   class="w-full px-4 py-3 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-body">
+                        </div>
+
+                        <!-- Available Copies -->
+                        <div>
+                            <label for="edit_available_copies" class="block text-sm font-semibold text-fbc-navy-800 mb-2">
+                                <i class="fas fa-books mr-1 text-blue-500"></i>Available Copies
+                            </label>
+                            <input type="number" id="edit_available_copies" name="available_copies" min="0" 
+                                   class="w-full px-4 py-3 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-body">
+                        </div>
+
+                        <!-- Description -->
+                        <div class="md:col-span-2">
+                            <label for="edit_description" class="block text-sm font-semibold text-fbc-navy-800 mb-2">
+                                <i class="fas fa-align-left mr-1 text-blue-500"></i>Description
+                            </label>
+                            <textarea id="edit_description" name="description" rows="4" 
+                                      class="w-full px-4 py-3 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-body"></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-fbc-navy-50 px-6 py-4 flex justify-end space-x-3">
+                    <button type="button" onclick="closeEditBookModal()" 
+                            class="px-6 py-3 bg-fbc-navy-600 hover:bg-fbc-navy-700 text-white rounded-lg font-semibold transition-colors duration-300">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                            class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors duration-300 flex items-center space-x-2">
+                        <i class="fas fa-save"></i>
+                        <span>Update Book</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Enhanced Add Book Modal -->
+<div id="addBookModal" class="fixed inset-0 z-[60] hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 bg-gray-900 bg-opacity-50 transition-opacity" aria-hidden="true" onclick="closeAddBookModal()"></div>
+        
+        <!-- Span to center the modal -->
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        
+        <div class="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full mx-auto relative z-[70]">
+            <form method="post" action="{% url 'fbc_books:add_book' %}" enctype="multipart/form-data" id="addBookForm">
+                {% csrf_token %}
+                <div class="bg-gradient-to-r from-fbc-green-600 to-fbc-green-500 px-6 py-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-xl font-serif font-bold text-white" id="modal-title">
+                            <i class="fas fa-plus-circle mr-2"></i>Add New Book
+                        </h3>
+                        <button type="button" onclick="closeAddBookModal()" class="text-fbc-green-100 hover:text-white transition-colors">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="px-6 py-6 space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Book Title -->
+                        <div class="md:col-span-2">
+                            <label for="title" class="block text-sm font-semibold text-fbc-navy-800 mb-2">
+                                <i class="fas fa-book mr-1 text-fbc-green-500"></i>Book Title *
+                            </label>
+                            <input type="text" id="title" name="title" required 
+                                   class="w-full px-4 py-3 border border-fbc-green-300 rounded-lg focus:ring-2 focus:ring-fbc-green-500 focus:border-fbc-green-500 font-body"
+                                   placeholder="Enter book title">
+                        </div>
+
+                        <!-- Authors -->
+                        <div>
+                            <label for="authors" class="block text-sm font-semibold text-fbc-navy-800 mb-2">
+                                <i class="fas fa-user-edit mr-1 text-fbc-green-500"></i>Author(s) *
+                            </label>
+                            <input type="text" id="authors" name="authors" required 
+                                   class="w-full px-4 py-3 border border-fbc-green-300 rounded-lg focus:ring-2 focus:ring-fbc-green-500 focus:border-fbc-green-500 font-body"
+                                   placeholder="Enter author names (comma-separated)">
+                        </div>
+
+                        <!-- ISBN -->
+                        <div>
+                            <label for="isbn" class="block text-sm font-semibold text-fbc-navy-800 mb-2">
+                                <i class="fas fa-barcode mr-1 text-fbc-green-500"></i>ISBN *
+                            </label>
+                            <input type="text" id="isbn" name="isbn" required 
+                                   class="w-full px-4 py-3 border border-fbc-green-300 rounded-lg focus:ring-2 focus:ring-fbc-green-500 focus:border-fbc-green-500 font-body"
+                                   placeholder="Enter ISBN">
+                        </div>
+
+                        <!-- Category -->
+                        <div>
+                            <label for="category" class="block text-sm font-semibold text-fbc-navy-800 mb-2">
+                                <i class="fas fa-tag mr-1 text-fbc-green-500"></i>Category *
+                            </label>
+                            <select id="category" name="category" required 
+                                    class="w-full px-4 py-3 border border-fbc-green-300 rounded-lg focus:ring-2 focus:ring-fbc-green-500 focus:border-fbc-green-500 font-body">
+                                <option value="">Select category</option>
+                                {% for category in categories %}
+                                <option value="{{ category.id }}">{{ category.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Book Type -->
+                        <div>
+                            <label for="book_type" class="block text-sm font-semibold text-fbc-navy-800 mb-2">
+                                <i class="fas fa-layer-group mr-1 text-fbc-green-500"></i>Book Type
+                            </label>
+                            <select id="book_type" name="book_type" 
+                                    class="w-full px-4 py-3 border border-fbc-green-300 rounded-lg focus:ring-2 focus:ring-fbc-green-500 focus:border-fbc-green-500 font-body">
+                                <option value="physical">Physical Book</option>
+                                <option value="ebook">E-Book</option>
+                            </select>
+                        </div>
+
+                        <!-- Total Copies -->
+                        <div>
+                            <label for="total_copies" class="block text-sm font-semibold text-fbc-navy-800 mb-2">
+                                <i class="fas fa-box mr-1 text-fbc-green-500"></i>Total Copies
+                            </label>
+                            <input type="number" id="total_copies" name="total_copies" min="1" value="1"
+                                   class="w-full px-4 py-3 border border-fbc-green-300 rounded-lg focus:ring-2 focus:ring-fbc-green-500 focus:border-fbc-green-500 font-body">
+                        </div>
+
+                        <!-- Available Copies -->
+                        <div>
+                            <label for="available_copies" class="block text-sm font-semibold text-fbc-navy-800 mb-2">
+                                <i class="fas fa-books mr-1 text-fbc-green-500"></i>Available Copies
+                            </label>
+                            <input type="number" id="available_copies" name="available_copies" min="0" value="1"
+                                   class="w-full px-4 py-3 border border-fbc-green-300 rounded-lg focus:ring-2 focus:ring-fbc-green-500 focus:border-fbc-green-500 font-body">
+                        </div>
+
+                        <!-- Cover Image -->
+                        <div class="md:col-span-2">
+                            <label for="cover_image" class="block text-sm font-semibold text-fbc-navy-800 mb-2">
+                                <i class="fas fa-image mr-1 text-fbc-green-500"></i>Cover Image
+                            </label>
+                            <div class="flex items-center justify-center w-full">
+                                <label for="cover_image" class="flex flex-col items-center justify-center w-full h-32 border-2 border-fbc-green-300 border-dashed rounded-lg cursor-pointer bg-fbc-green-50 hover:bg-fbc-green-100 transition-colors">
+                                    <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                        <i class="fas fa-cloud-upload-alt text-fbc-green-500 text-2xl mb-2"></i>
+                                        <p class="text-sm text-fbc-green-600 font-body"><span class="font-semibold">Click to upload</span> or drag and drop</p>
+                                        <p class="text-xs text-fbc-green-500">PNG, JPG or GIF (MAX. 10MB)</p>
+                                    </div>
+                                    <input id="cover_image" name="cover_image" type="file" class="hidden" accept="image/*">
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="md:col-span-2">
+                            <label for="description" class="block text-sm font-semibold text-fbc-navy-800 mb-2">
+                                <i class="fas fa-align-left mr-1 text-fbc-green-500"></i>Description
+                            </label>
+                            <textarea id="description" name="description" rows="4" 
+                                      class="w-full px-4 py-3 border border-fbc-green-300 rounded-lg focus:ring-2 focus:ring-fbc-green-500 focus:border-fbc-green-500 font-body"
+                                      placeholder="Enter book description..."></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-fbc-navy-50 px-6 py-4 flex justify-end space-x-3">
+                    <button type="button" onclick="closeAddBookModal()" 
+                            class="px-6 py-3 bg-fbc-navy-600 hover:bg-fbc-navy-700 text-white rounded-lg font-semibold transition-colors duration-300">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                            class="btn-fbc flex items-center space-x-2">
+                        <i class="fas fa-save"></i>
+                        <span>Add Book</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Enhanced JavaScript -->
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize search and filter functionality
+    initializeSearch();
+    initializePagination();
+    
+    // Form validation and submission handling
+    document.getElementById('addBookForm').addEventListener('submit', function(e) {
+        console.log('Add book form submitted');
+        
+        // Validate required fields
+        const title = document.getElementById('title').value.trim();
+        const authors = document.getElementById('authors').value.trim();
+        const isbn = document.getElementById('isbn').value.trim();
+        const category = document.getElementById('category').value;
+        
+        if (!title || !authors || !isbn || !category) {
+            e.preventDefault();
+            alert('Please fill in all required fields (Title, Authors, ISBN, Category)');
+            return false;
+        }
+        
+        const button = this.querySelector('button[type="submit"]');
+        if (button) {
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner animate-spin mr-2"></i>Adding Book...';
+        }
+        
+        console.log('Form validated and submitted successfully');
+    });
+    
+    // Add edit form validation
+    const editForm = document.getElementById('editBookForm');
+    if (editForm) {
+        editForm.addEventListener('submit', function(e) {
+            console.log('Edit book form submitted');
+            console.log('Form action:', this.action);
+            
+            // Validate required fields
+            const title = document.getElementById('edit_title').value.trim();
+            const authors = document.getElementById('edit_authors').value.trim();
+            const isbn = document.getElementById('edit_isbn').value.trim();
+            const category = document.getElementById('edit_category').value;
+            
+            if (!title || !authors || !isbn || !category) {
+                e.preventDefault();
+                alert('Please fill in all required fields (Title, Authors, ISBN, Category)');
+                return false;
+            }
+            
+            if (!this.action || this.action.includes('/0/')) {
+                e.preventDefault();
+                alert('Error: Invalid form action. Please try opening the edit form again.');
+                console.error('Invalid form action:', this.action);
+                return false;
+            }
+            
+            const button = this.querySelector('button[type="submit"]');
+            if (button) {
+                button.disabled = true;
+                button.innerHTML = '<i class="fas fa-spinner animate-spin mr-2"></i>Updating Book...';
+            }
+            
+            console.log('Edit form validated and submitted successfully');
+        });
+    }
+});
+
+// Search and Filter Functions
+function initializeSearch() {
+    const searchInput = document.getElementById('searchInput');
+    const categoryFilter = document.getElementById('categoryFilter');
+    const statusFilter = document.getElementById('statusFilter');
+    
+    function performSearch() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const categoryFilter_val = categoryFilter.value.toLowerCase();
+        const statusFilter_val = statusFilter.value.toLowerCase();
+        const rows = document.querySelectorAll('#booksTableBody tr[data-book-title]');
+        let visibleCount = 0;
+        
+        rows.forEach(row => {
+            const title = row.dataset.bookTitle;
+            const authors = row.dataset.bookAuthors;
+            const category = row.dataset.bookCategory;
+            const isbn = row.dataset.bookIsbn;
+            
+            const matchesSearch = !searchTerm || 
+                title.includes(searchTerm) || 
+                authors.includes(searchTerm) || 
+                category.includes(searchTerm) || 
+                isbn.includes(searchTerm);
+            
+            const matchesCategory = !categoryFilter_val || category.includes(categoryFilter_val);
+            
+            // Status filter logic would need to be implemented based on the actual status data
+            const matchesStatus = !statusFilter_val; // Simplified for now
+            
+            if (matchesSearch && matchesCategory && matchesStatus) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        updateBookCount(visibleCount);
+    }
+    
+    searchInput.addEventListener('input', performSearch);
+    categoryFilter.addEventListener('change', performSearch);
+    statusFilter.addEventListener('change', performSearch);
+}
+
+function clearFilters() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('categoryFilter').value = '';
+    document.getElementById('statusFilter').value = '';
+    
+    const rows = document.querySelectorAll('#booksTableBody tr');
+    rows.forEach(row => row.style.display = '');
+    
+    updateBookCount({{ books|length }});
+}
+
+function updateBookCount(count) {
+    document.getElementById('bookCount').textContent = count + ' books total';
+    document.getElementById('showingEnd').textContent = count;
+    document.getElementById('totalBooks').textContent = count;
+}
+
+// Pagination (simplified implementation)
+function initializePagination() {
+    // Basic pagination implementation
+    // In a real app, this would be server-side pagination
+}
+
+// Navigation Functions (Updated for separate pages)
+function openAddBookModal() {
+    // Navigate to add book page instead of opening modal
+    window.location.href = "{% url 'fbc_books:add_book' %}";
+}
+
+function openEditBookModal(bookId) {
+    // Navigate to edit book page instead of opening modal
+    window.location.href = `{% url 'fbc_books:edit_book' 0 %}`.replace('0', bookId);
+}
+
+// Book Actions
+function editBook(bookId) {
+    // Navigate to edit book page
+    window.location.href = `{% url 'fbc_books:edit_book' 0 %}`.replace('0', bookId);
+}
+
+function viewBook(bookId) {
+    // Navigate to book detail page
+    window.location.href = `{% url 'fbc_books:book_detail' 0 %}`.replace('0', bookId);
+}
+
+function deleteBook(bookId) {
+    if (confirm('Are you sure you want to delete this book? This action cannot be undone.')) {
+        // Create a form and submit it for deletion
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `{% url 'fbc_books:delete_book' 0 %}`.replace('0', bookId);
+        
+        // Add CSRF token
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrfmiddlewaretoken';
+        csrfInput.value = csrfToken;
+        form.appendChild(csrfInput);
+        
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+function exportBooks() {
+    // Show loading state
+    const exportBtn = document.querySelector('button[onclick="exportBooks()"]');
+    const originalHTML = exportBtn.innerHTML;
+    exportBtn.disabled = true;
+    exportBtn.innerHTML = '<i class="fas fa-spinner animate-spin mr-2"></i>Exporting...';
+    
+    // Redirect to export URL
+    window.location.href = '{% url "fbc_books:export_books" %}';
+    
+    // Reset button after a short delay
+    setTimeout(() => {
+        exportBtn.disabled = false;
+        exportBtn.innerHTML = originalHTML;
+    }, 2000);
+}
+
+// Enhanced file upload preview
+document.getElementById('cover_image').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        // Show file name or preview
+        const label = e.target.parentNode;
+        const preview = label.querySelector('div');
+        preview.innerHTML = `
+            <i class="fas fa-check-circle text-fbc-green-500 text-2xl mb-2"></i>
+            <p class="text-sm text-fbc-green-600 font-body font-semibold">${file.name}</p>
+            <p class="text-xs text-fbc-green-500">File selected successfully</p>
+        `;
+    }
+});
+
+// Escape key to close modals
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeAddBookModal();
+        closeEditBookModal();
+    }
+});
+</script>
+{% endblock %}

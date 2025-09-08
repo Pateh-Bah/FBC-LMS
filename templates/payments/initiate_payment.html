@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Initiate Payment{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Initiate Payment</h2>
+    <p>Select the type of payment you want to make and your preferred payment method.</p>
+
+    <form method="post" action="{% url 'fbc_payments:process_payment' %}">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="payment_type" class="form-label">Payment Type</label>
+            <select class="form-select" id="payment_type" name="payment_type" required>
+                <option value="" selected disabled>Select payment type</option>
+                <option value="subscription">Subscription</option>
+                {% if user_fines %}
+                <option value="fine">Fine</option>
+                {% endif %}
+            </select>
+        </div>
+
+        {% if user_fines %}
+        <div class="mb-3" id="fine_selection_div" style="display: none;">
+            <label for="fine_id" class="form-label">Select Fine to Pay</label>
+            <select class="form-select" id="fine_id" name="fine_id">
+                <option value="" selected disabled>Select a fine</option>
+                {% for fine in user_fines %}
+                <option value="{{ fine.id }}">Fine for: {{ fine.book.title }} - Amount: GMD {{ fine.amount }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
+
+        <div class="mb-3">
+            <label for="payment_method" class="form-label">Payment Method</label>
+            <select class="form-select" id="payment_method" name="payment_method" required>
+                <option value="" selected disabled>Select payment method</option>
+                <option value="orange_money">Orange Money</option>
+                <option value="afrimoney">Afrimoney</option>
+                <option value="qmoney">Qmoney</option>
+                <option value="paypal">PayPal</option>
+                <option value="bank_transfer">Bank Transfer</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Proceed to Payment Simulation</button>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const paymentTypeSelect = document.getElementById('payment_type');
+    const fineSelectionDiv = document.getElementById('fine_selection_div');
+    const fineSelect = document.getElementById('fine_id');
+
+    if (paymentTypeSelect && fineSelectionDiv) {
+        paymentTypeSelect.addEventListener('change', function() {
+            if (this.value === 'fine') {
+                fineSelectionDiv.style.display = 'block';
+                if (fineSelect) {
+                    fineSelect.required = true;
+                }
+            } else {
+                fineSelectionDiv.style.display = 'none';
+                if (fineSelect) {
+                    fineSelect.required = false;
+                    fineSelect.value = ''; // Reset fine selection
+                }
+            }
+        });
+        // Trigger change on load if fine is pre-selected (e.g. form error)
+        if (paymentTypeSelect.value === 'fine') {
+             fineSelectionDiv.style.display = 'block';
+             if (fineSelect) {
+                fineSelect.required = true;
+             }
+        }
+    }
+});
+</script>
+{% endblock %}

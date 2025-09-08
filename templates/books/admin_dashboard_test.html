@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Simple Admin Dashboard Test</h1>
+<p>This is a test page to isolate the URL issue.</p>
+<p>User: {{ user.username }}</p>
+<p>User Type: {{ user.user_type }}</p>
+<p>Is Superuser: {{ user.is_superuser }}</p>
+{% endblock %}

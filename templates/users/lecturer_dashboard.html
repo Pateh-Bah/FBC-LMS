@@ -1,0 +1,219 @@
+{% extends 'dashboard/user_dashboard_base.html' %}
+{% load static %}
+
+{% block title %}Lecturer Dashboard - FBC Library{% endblock %}
+
+{% block dashboard_title %}Lecturer Dashboard{% endblock %}
+{% block dashboard_subtitle %}Welcome to your academic resource center{% endblock %}
+
+{% block dashboard_content %}
+<div class="space-y-8">
+    <!-- Welcome Section -->
+    <div class="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-xl shadow-lg overflow-hidden">
+        <div class="px-8 py-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-white mb-2">Lecturer Dashboard</h1>
+                    <p class="text-emerald-100">Manage your academic resources and research materials</p>
+                </div>
+                <div class="text-right">
+                    <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-white text-emerald-700 border border-emerald-200">
+                        <i class="fas fa-chalkboard-teacher mr-2"></i>
+                        Faculty Access
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Activity Summary -->
+    {% include 'dashboard/activity_summary.html' %}
+
+    <!-- Quick Actions for Lecturers -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-lg transition-all duration-300">
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-search text-blue-600 text-xl"></i>
+                </div>
+                <i class="fas fa-arrow-right text-gray-400"></i>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">Research Materials</h3>
+            <p class="text-gray-600 mb-4">Access academic journals and research papers</p>
+            <a href="{% url 'fbc_books:book_list' %}?category=research" 
+               class="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium">
+                Browse research
+                <i class="fas fa-chevron-right ml-2 text-sm"></i>
+            </a>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-lg transition-all duration-300">
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-book-open text-green-600 text-xl"></i>
+                </div>
+                <i class="fas fa-arrow-right text-gray-400"></i>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">Course Resources</h3>
+            <p class="text-gray-600 mb-4">Find textbooks and course materials</p>
+            <a href="{% url 'fbc_books:book_list' %}?category=textbooks" 
+               class="inline-flex items-center text-green-600 hover:text-green-700 font-medium">
+                View textbooks
+                <i class="fas fa-chevron-right ml-2 text-sm"></i>
+            </a>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-lg transition-all duration-300">
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-book-reader text-purple-600 text-xl"></i>
+                </div>
+                <i class="fas fa-arrow-right text-gray-400"></i>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">My Borrowings</h3>
+            <p class="text-gray-600 mb-4">Manage your borrowed materials</p>
+            <a href="{% url 'books:user_dashboard' %}" 
+               class="inline-flex items-center text-purple-600 hover:text-purple-700 font-medium">
+                View borrowings
+                <i class="fas fa-chevron-right ml-2 text-sm"></i>
+            </a>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-lg transition-all duration-300">
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-user-cog text-orange-600 text-xl"></i>
+                </div>
+                <i class="fas fa-arrow-right text-gray-400"></i>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">Profile</h3>
+            <p class="text-gray-600 mb-4">Update your faculty information</p>
+            <a href="{% url 'users:profile' %}" 
+               class="inline-flex items-center text-orange-600 hover:text-orange-700 font-medium">
+                Edit profile
+                <i class="fas fa-chevron-right ml-2 text-sm"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- Faculty Resources -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Academic Resources -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4">
+                <h2 class="text-xl font-bold text-white flex items-center">
+                    <i class="fas fa-university mr-3"></i>
+                    Academic Resources
+                </h2>
+            </div>
+            <div class="p-6">
+                <div class="space-y-4">
+                    <div class="flex items-start">
+                        <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0 mt-1">
+                            <i class="fas fa-journal-whills text-blue-600 text-sm"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900">Research Journals</h3>
+                            <p class="text-gray-600 text-sm">Access to peer-reviewed academic journals</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start">
+                        <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0 mt-1">
+                            <i class="fas fa-database text-green-600 text-sm"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900">Academic Databases</h3>
+                            <p class="text-gray-600 text-sm">Comprehensive research databases</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start">
+                        <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0 mt-1">
+                            <i class="fas fa-microscope text-purple-600 text-sm"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900">Research Tools</h3>
+                            <p class="text-gray-600 text-sm">Digital tools for academic research</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Teaching Resources -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="bg-gradient-to-r from-green-600 to-teal-600 px-6 py-4">
+                <h2 class="text-xl font-bold text-white flex items-center">
+                    <i class="fas fa-chalkboard mr-3"></i>
+                    Teaching Resources
+                </h2>
+            </div>
+            <div class="p-6">
+                <div class="space-y-4">
+                    <div class="flex items-start">
+                        <div class="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0 mt-1">
+                            <i class="fas fa-book text-orange-600 text-sm"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900">Course Materials</h3>
+                            <p class="text-gray-600 text-sm">Textbooks and supplementary materials</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start">
+                        <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0 mt-1">
+                            <i class="fas fa-presentation text-red-600 text-sm"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900">Presentation Tools</h3>
+                            <p class="text-gray-600 text-sm">Digital tools for creating presentations</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start">
+                        <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0 mt-1">
+                            <i class="fas fa-users text-indigo-600 text-sm"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900">Student Resources</h3>
+                            <p class="text-gray-600 text-sm">Materials to share with students</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Faculty Privileges Info -->
+    <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-6">
+        <div class="flex items-start">
+            <div class="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center mr-4 flex-shrink-0 mt-1">
+                <i class="fas fa-star text-emerald-600"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-medium text-emerald-900 mb-2">Faculty Privileges</h3>
+                <p class="text-emerald-700 mb-4">
+                    As a faculty member, you have unlimited access to library resources without subscription fees.
+                    You can borrow materials for extended periods and access exclusive academic databases.
+                </p>
+                <ul class="space-y-2 text-emerald-800">
+                    <li class="flex items-center">
+                        <i class="fas fa-check text-emerald-600 mr-2"></i>
+                        Unlimited borrowing privileges
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fas fa-check text-emerald-600 mr-2"></i>
+                        Extended loan periods
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fas fa-check text-emerald-600 mr-2"></i>
+                        Access to faculty-only resources
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fas fa-check text-emerald-600 mr-2"></i>
+                        Inter-library loan services
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

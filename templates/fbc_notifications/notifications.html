@@ -1,0 +1,196 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Notifications - FBC Library{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">My Notifications</h1>
+                    <p class="text-sm text-gray-600 mt-1">Stay updated with your library activity</p>
+                </div>
+                <div class="flex items-center space-x-3">
+                    {% if notifications.exists %}
+                    <button id="mark-all-read" class="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-600 transition-colors duration-200">
+                        <i class="fas fa-check-double mr-2"></i>
+                        Mark All as Read
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notifications Content -->
+    {% if notifications.exists %}
+        <div class="space-y-4">
+            {% for notification in notifications %}
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 {% if notification.unread %}border-l-4 border-l-blue-500{% endif %} notification-item" data-id="{{ notification.id }}">
+                <div class="p-6">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-2 mb-2">
+                                <h3 class="text-lg font-semibold text-gray-900">{{ notification.title }}</h3>
+                                {% if notification.unread %}
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                    <i class="fas fa-circle text-blue-500 mr-1" style="font-size: 0.5rem;"></i>
+                                    New
+                                </span>
+                                {% endif %}
+                            </div>
+                            <p class="text-gray-600 mb-3">{{ notification.message }}</p>
+                            <div class="flex items-center text-sm text-gray-500">
+                                <i class="fas fa-clock mr-2"></i>
+                                <span>{{ notification.created_at|timesince }} ago</span>
+                                <span class="mx-2">•</span>
+                                <span>{{ notification.created_at|date:"F j, Y g:i A" }}</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2 ml-4">
+                            {% if notification.unread %}
+                            <button class="mark-read-btn text-gray-400 hover:text-primary transition-colors duration-200" data-id="{{ notification.id }}" title="Mark as read">
+                                <i class="fas fa-check-circle text-lg"></i>
+                            </button>
+                            {% else %}
+                            <div class="text-gray-300" title="Read">
+                                <i class="fas fa-check-circle text-lg"></i>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination (if needed in the future) -->
+        <div class="mt-8 flex justify-center">
+            <!-- Add pagination here if needed -->
+        </div>
+    {% else %}
+        <!-- Empty State -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div class="px-6 py-12 text-center">
+                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-bell-slash text-2xl text-gray-400"></i>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">No notifications yet</h3>
+                <p class="text-gray-600 mb-6">You're all caught up! Notifications will appear here when you have updates.</p>
+                <a href="{% url 'fbc_books:book_list' %}" class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-600 transition-colors duration-200">
+                    <i class="fas fa-book mr-2"></i>
+                    Browse Books
+                </a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- JavaScript for handling mark as read functionality -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get CSRF token
+    function getCSRFToken() {
+        return document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+               document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
+               '{{ csrf_token }}';
+    }
+
+    // Mark individual notification as read
+    document.querySelectorAll('.mark-read-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const notificationId = this.dataset.id;
+            const notificationItem = this.closest('.notification-item');
+            
+            fetch(`{% url 'fbc_notifications:mark_as_read' 0 %}`.replace('0', notificationId), {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCSRFToken(),
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Remove the blue left border
+                    notificationItem.classList.remove('border-l-4', 'border-l-blue-500');
+                    
+                    // Remove the "New" badge
+                    const newBadge = notificationItem.querySelector('.bg-blue-100');
+                    if (newBadge) newBadge.remove();
+                    
+                    // Replace the button with a read indicator
+                    this.outerHTML = '<div class="text-gray-300" title="Read"><i class="fas fa-check-circle text-lg"></i></div>';
+                    
+                    // Show success message
+                    showMessage('Notification marked as read', 'success');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showMessage('Error marking notification as read', 'error');
+            });
+        });
+    });
+
+    // Mark all notifications as read
+    const markAllReadBtn = document.getElementById('mark-all-read');
+    if (markAllReadBtn) {
+        markAllReadBtn.addEventListener('click', function() {
+            fetch('{% url "fbc_notifications:mark_all_as_read" %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCSRFToken(),
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Remove all unread indicators
+                    document.querySelectorAll('.notification-item').forEach(item => {
+                        item.classList.remove('border-l-4', 'border-l-blue-500');
+                        const newBadge = item.querySelector('.bg-blue-100');
+                        if (newBadge) newBadge.remove();
+                    });
+                    
+                    // Replace all read buttons with read indicators
+                    document.querySelectorAll('.mark-read-btn').forEach(button => {
+                        button.outerHTML = '<div class="text-gray-300" title="Read"><i class="fas fa-check-circle text-lg"></i></div>';
+                    });
+                    
+                    // Hide the mark all read button
+                    this.style.display = 'none';
+                    
+                    // Show success message
+                    showMessage('All notifications marked as read', 'success');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showMessage('Error marking notifications as read', 'error');
+            });
+        });
+    }
+
+    function showMessage(message, type) {
+        // Create a temporary message element
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `fixed top-4 right-4 z-50 px-4 py-2 rounded-lg text-white ${type === 'success' ? 'bg-green-500' : 'bg-red-500'}`;
+        messageDiv.textContent = message;
+        document.body.appendChild(messageDiv);
+        
+        // Remove the message after 3 seconds
+        setTimeout(() => {
+            messageDiv.remove();
+        }, 3000);
+    }
+});
+</script>
+
+<!-- CSRF Token for AJAX requests -->
+<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+{% endblock %}

@@ -1,0 +1,372 @@
+{% extends "admin/admin_base.html" %}
+{% load static %}
+
+{% block page_title %}Notification Details{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-xl shadow-lg p-8 animate-fade-in">
+    <!-- Header Section -->
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h1 class="text-3xl font-serif font-bold text-fbc-navy-900 mb-2">Notification Details</h1>
+            <p class="text-fbc-gray-600 font-body">View comprehensive notification information</p>
+        </div>
+        <div class="flex space-x-3">
+            {% if request.user.user_type == 'admin' or request.user.is_superuser %}
+            <a href="{% url 'fbc_notifications:edit_notification' notification.id %}" 
+               class="flex items-center space-x-2 px-6 py-3 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-all duration-300">
+                <i class="fas fa-edit"></i>
+                <span class="font-body">Edit Notification</span>
+            </a>
+            {% endif %}
+            <a href="{% url 'fbc_notifications:manage_notifications' %}" 
+               class="flex items-center space-x-2 px-6 py-3 bg-fbc-gray-100 text-fbc-gray-700 rounded-lg hover:bg-fbc-gray-200 transition-all duration-300">
+                <i class="fas fa-arrow-left"></i>
+                <span class="font-body">Back to Notifications</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Notification Overview -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+        <!-- Main Notification Card -->
+        <div class="lg:col-span-2">
+            <div class="bg-white border border-fbc-green-200 rounded-xl p-6 shadow-sm">
+                <div class="flex items-start justify-between mb-6">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 bg-fbc-green-100 rounded-full flex items-center justify-center border-2 border-fbc-green-200">
+                            <i class="fas fa-bell text-fbc-green-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-serif font-bold text-fbc-navy-900">{{ notification.title }}</h2>
+                            <p class="text-fbc-gray-600 font-body mt-1">
+                                Created on {{ notification.created_at|date:"F d, Y \a\t g:i A" }}
+                            </p>
+                        </div>
+                    </div>
+                    {% if notification.is_read %}
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                        <div class="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
+                        Read
+                    </span>
+                    {% else %}
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                        <div class="w-2 h-2 bg-blue-400 rounded-full mr-2 animate-pulse"></div>
+                        Unread
+                    </span>
+                    {% endif %}
+                </div>
+                
+                <!-- Message Content -->
+                <div class="bg-fbc-green-25 border border-fbc-green-100 rounded-lg p-6">
+                    <h3 class="text-lg font-serif font-semibold text-fbc-navy-900 mb-3">Message Content</h3>
+                    <div class="text-fbc-navy-800 font-body leading-relaxed">
+                        {{ notification.message|linebreaks }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notification Info Sidebar -->
+        <div class="space-y-6">
+            <!-- Recipient Information -->
+            <div class="bg-white border border-fbc-green-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-lg font-serif font-bold text-fbc-navy-900 mb-4 flex items-center">
+                    <i class="fas fa-user text-fbc-green-600 mr-3"></i>
+                    Recipient Information
+                </h3>
+                <div class="space-y-3">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-fbc-green-100 rounded-full flex items-center justify-center">
+                            {% if notification.recipient.profile_image %}
+                            <img src="{{ notification.recipient.profile_image.url }}" 
+                                 alt="{{ notification.recipient.get_full_name }}"
+                                 class="w-10 h-10 rounded-full object-cover">
+                            {% else %}
+                            <i class="fas fa-user text-fbc-green-600"></i>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <p class="font-serif font-semibold text-fbc-navy-900">
+                                {{ notification.recipient.get_full_name|default:notification.recipient.username }}
+                            </p>
+                            <p class="text-sm text-fbc-gray-600 font-body">{{ notification.recipient.email }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="pt-3 border-t border-fbc-green-100">
+                        <div class="grid grid-cols-2 gap-3 text-sm font-body">
+                            <div>
+                                <span class="text-fbc-gray-600">User Type:</span>
+                                <span class="text-fbc-navy-900 font-medium block">
+                                    {% if notification.recipient.user_type == 'admin' %}
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                        <i class="fas fa-crown mr-1"></i> Admin
+                                    </span>
+                                    {% elif notification.recipient.user_type == 'staff' %}
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                        <i class="fas fa-user-tie mr-1"></i> Staff
+                                    </span>
+                                    {% elif notification.recipient.user_type == 'lecturer' %}
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                        <i class="fas fa-chalkboard-teacher mr-1"></i> Lecturer
+                                    </span>
+                                    {% else %}
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-fbc-green-100 text-fbc-green-800">
+                                        <i class="fas fa-graduation-cap mr-1"></i> Student
+                                    </span>
+                                    {% endif %}
+                                </span>
+                            </div>
+                            <div>
+                                <span class="text-fbc-gray-600">Status:</span>
+                                <span class="text-fbc-navy-900 font-medium block">
+                                    {% if notification.recipient.is_active %}
+                                    <span class="text-green-600">Active</span>
+                                    {% else %}
+                                    <span class="text-red-600">Inactive</span>
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notification Statistics -->
+            <div class="bg-white border border-fbc-green-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-lg font-serif font-bold text-fbc-navy-900 mb-4 flex items-center">
+                    <i class="fas fa-chart-bar text-fbc-green-600 mr-3"></i>
+                    Notification Stats
+                </h3>
+                <div class="space-y-3 text-sm font-body">
+                    <div class="flex justify-between items-center">
+                        <span class="text-fbc-gray-600">Created:</span>
+                        <span class="text-fbc-navy-900 font-medium">{{ notification.created_at|date:"M d, Y" }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-fbc-gray-600">Time:</span>
+                        <span class="text-fbc-navy-900 font-medium">{{ notification.created_at|time:"g:i A" }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-fbc-gray-600">Days Ago:</span>
+                        <span class="text-fbc-navy-900 font-medium">{{ notification.created_at|timesince }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-fbc-gray-600">Read Status:</span>
+                        <span class="text-fbc-navy-900 font-medium">
+                            {% if notification.is_read %}
+                            <span class="text-green-600">✓ Read</span>
+                            {% else %}
+                            <span class="text-blue-600">⚬ Unread</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="bg-white border border-fbc-green-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-lg font-serif font-bold text-fbc-navy-900 mb-4 flex items-center">
+                    <i class="fas fa-bolt text-fbc-green-600 mr-3"></i>
+                    Quick Actions
+                </h3>
+                <div class="space-y-3">
+                    {% if request.user.user_type == 'admin' or request.user.is_superuser %}
+                    {% if not notification.is_read %}
+                    <button onclick="markAsRead({{ notification.id }})"
+                            class="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-all duration-300 font-body">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Mark as Read</span>
+                    </button>
+                    {% endif %}
+                    
+                    <a href="{% url 'fbc_notifications:edit_notification' notification.id %}"
+                       class="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-all duration-300 font-body">
+                        <i class="fas fa-edit"></i>
+                        <span>Edit Notification</span>
+                    </a>
+                    
+                    <button onclick="deleteNotification({{ notification.id }})"
+                            class="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-all duration-300 font-body">
+                        <i class="fas fa-trash"></i>
+                        <span>Delete Notification</span>
+                    </button>
+                    {% endif %}
+                    
+                    <button onclick="copyToClipboard()"
+                            class="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-fbc-gray-100 text-fbc-gray-700 rounded-lg hover:bg-fbc-gray-200 transition-all duration-300 font-body">
+                        <i class="fas fa-copy"></i>
+                        <span>Copy Message</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Notifications -->
+    <div class="bg-white border border-fbc-green-200 rounded-xl p-6 shadow-sm">
+        <h3 class="text-xl font-serif font-bold text-fbc-navy-900 mb-6 flex items-center">
+            <i class="fas fa-list text-fbc-green-600 mr-3"></i>
+            Other Notifications for {{ notification.recipient.get_full_name|default:notification.recipient.username }}
+        </h3>
+        
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-fbc-navy-50 border-b border-fbc-green-200">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-sm font-sans font-semibold text-fbc-navy-900">Title</th>
+                        <th class="px-4 py-3 text-left text-sm font-sans font-semibold text-fbc-navy-900">Date</th>
+                        <th class="px-4 py-3 text-left text-sm font-sans font-semibold text-fbc-navy-900">Status</th>
+                        <th class="px-4 py-3 text-left text-sm font-sans font-semibold text-fbc-navy-900">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-fbc-green-100">
+                    {% for related_notification in related_notifications %}
+                    <tr class="hover:bg-fbc-green-25 transition-colors duration-200">
+                        <td class="px-4 py-3">
+                            <div class="text-sm font-serif font-medium text-fbc-navy-900">
+                                {{ related_notification.title|truncatechars:50 }}
+                            </div>
+                        </td>
+                        <td class="px-4 py-3 text-sm text-fbc-gray-600 font-body">
+                            {{ related_notification.created_at|date:"M d, Y" }}
+                        </td>
+                        <td class="px-4 py-3">
+                            {% if related_notification.is_read %}
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">Read</span>
+                            {% else %}
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Unread</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3">
+                            <a href="{% url 'fbc_notifications:notification_details' related_notification.id %}"
+                               class="text-fbc-green-600 hover:text-fbc-green-800 font-body text-sm">
+                                View Details
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="px-4 py-8 text-center text-fbc-gray-500 font-body">
+                            No other notifications found for this recipient.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+// Mark notification as read
+function markAsRead(notificationId) {
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+                     document.querySelector('meta[name="csrf-token"]')?.content;
+    
+    fetch(`/notifications/admin-mark-read/${notificationId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken,
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => {
+        if (response.ok) {
+            location.reload();
+        } else {
+            throw new Error('Failed to mark as read');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to mark notification as read. Please try again.');
+    });
+}
+
+// Delete notification function
+function deleteNotification(notificationId) {
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+    modal.innerHTML = `
+        <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4 animate-bounce-in">
+            <div class="text-center">
+                <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-exclamation-triangle text-2xl text-red-600"></i>
+                </div>
+                <h3 class="text-xl font-serif font-bold text-fbc-navy-900 mb-2">Confirm Deletion</h3>
+                <p class="text-fbc-gray-600 font-body mb-6">Are you sure you want to delete this notification? This action cannot be undone.</p>
+                <div class="flex space-x-3">
+                    <button onclick="this.closest('.fixed').remove()" 
+                            class="flex-1 px-4 py-2 border border-fbc-gray-300 rounded-lg text-fbc-gray-700 hover:bg-fbc-gray-50 transition-colors duration-200 font-body">
+                        Cancel
+                    </button>
+                    <button onclick="confirmDeleteNotification(${notificationId}); this.closest('.fixed').remove()" 
+                            class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 font-body">
+                        Delete Notification
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+}
+
+function confirmDeleteNotification(notificationId) {
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+    
+    fetch(`/notifications/delete/${notificationId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken,
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => {
+        if (response.ok) {
+            window.location.href = "{% url 'fbc_notifications:manage_notifications' %}";
+        } else {
+            throw new Error('Failed to delete notification');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to delete notification. Please try again.');
+    });
+}
+
+// Copy notification message to clipboard
+function copyToClipboard() {
+    const message = `{{ notification.message|escapejs }}`;
+    navigator.clipboard.writeText(message).then(function() {
+        // Show success message
+        const toast = document.createElement('div');
+        toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform duration-300';
+        toast.innerHTML = '<i class="fas fa-check-circle mr-2"></i>Message copied to clipboard!';
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.classList.remove('translate-x-full');
+        }, 100);
+        
+        setTimeout(() => {
+            toast.classList.add('translate-x-full');
+            setTimeout(() => {
+                document.body.removeChild(toast);
+            }, 300);
+        }, 2000);
+    }, function(err) {
+        console.error('Could not copy text: ', err);
+        alert('Failed to copy message to clipboard.');
+    });
+}
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Notification details page loaded successfully');
+});
+</script>
+{% endblock %}
+{% endblock %}

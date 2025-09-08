@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}FBC Library Dashboard{% endblock %}</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#00843D',
+                        secondary: '#2563eb',
+                        success: '#059669',
+                        danger: '#dc2626',
+                        warning: '#d97706',
+                        info: '#0ea5e9'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/style.css">
+    {% block extra_css %}{% endblock %}    <style>
+        /* Custom styles for enhanced dashboard */
+        .stats-card-books { background: linear-gradient(135deg, #2193b0, #6dd5ed); }
+        .stats-card-fines { background: linear-gradient(135deg, #ee0979, #ff6a00); }
+        .stats-card-returned { background: linear-gradient(135deg, #11998e, #38ef7d); }
+        .stats-card-subscription { background: linear-gradient(135deg, #834d9b, #d04ed6); }
+        
+        /* Alert Animations */
+        .alert-enter {
+            animation: slideInDown 0.3s ease-out;
+        }
+        
+        .alert-exit {
+            animation: slideOutUp 0.3s ease-in;
+        }
+        
+        @keyframes slideInDown {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOutUp {
+            from {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+        }
+
+        /* Smooth transitions for interactive elements */
+        .transition-all {
+            transition: all 0.2s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="flex min-h-screen">        <!-- Sidebar -->
+        <div class="w-64 bg-gradient-to-b from-green-600 to-green-700 text-white shadow-xl">
+            <div class="p-6">
+                <!-- User Profile Section -->
+                <div class="bg-white bg-opacity-10 backdrop-blur rounded-lg p-4 mb-6">
+                    <div class="text-center">
+                        {% if user.profile_image %}
+                            <img src="{{ user.profile_image.url }}" alt="Profile" class="w-16 h-16 rounded-full mx-auto mb-3 border-2 border-white border-opacity-20 object-cover">
+                        {% else %}
+                            <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full mx-auto mb-3 flex items-center justify-center">
+                                <i class="fas fa-user text-2xl text-white"></i>
+                            </div>
+                        {% endif %}
+                        <h5 class="font-semibold text-sm mb-1">{{ user.get_full_name|default:user.username }}</h5>
+                        <p class="text-xs text-white text-opacity-70">{{ user.get_user_type_display }}</p>
+                    </div>
+                </div>
+                
+                <!-- Navigation Menu -->
+                <nav class="space-y-2">
+                    {% if user.user_type == 'admin' %}
+                        <a href="{% url 'fbc_books:admin_dashboard' %}" class="flex items-center px-4 py-3 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition-colors duration-200">
+                            <i class="fas fa-home mr-3"></i>Dashboard
+                        </a>
+                        <a href="{% url 'fbc_books:manage_books' %}" class="flex items-center px-4 py-3 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition-colors duration-200">
+                            <i class="fas fa-book mr-3"></i>Manage Books
+                        </a>
+                        <a href="{% url 'fbc_books:manage_users' %}" class="flex items-center px-4 py-3 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition-colors duration-200">
+                            <i class="fas fa-users mr-3"></i>Manage Users
+                        </a>
+                        <a href="{% url 'fbc_books:manage_borrowings' %}" class="flex items-center px-4 py-3 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition-colors duration-200">
+                            <i class="fas fa-exchange-alt mr-3"></i>Manage Borrowings
+                        </a>
+                        <a href="{% url 'fbc_fines:manage_fines' %}" class="flex items-center px-4 py-3 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition-colors duration-200">
+                            <i class="fas fa-money-bill mr-3"></i>Manage Fines
+                        </a>
+                        <a href="{% url 'fbc_books:reports' %}" class="flex items-center px-4 py-3 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition-colors duration-200">
+                            <i class="fas fa-chart-bar mr-3"></i>Reports
+                        </a>
+                        <a href="{% url 'fbc_books:system_logs' %}" class="flex items-center px-4 py-3 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition-colors duration-200">
+                            <i class="fas fa-history mr-3"></i>System Logs
+                        </a>
+                    {% elif user.user_type == 'staff' %}
+                        <a href="{% url 'fbc_books:staff_dashboard' %}" class="flex items-center px-4 py-3 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition-colors duration-200">
+                            <i class="fas fa-home mr-3"></i>Dashboard
+                        </a>
+                        <a href="{% url 'fbc_books:book_list' %}" class="flex items-center px-4 py-3 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition-colors duration-200">
+                            <i class="fas fa-book mr-3"></i>Book Management
+                        </a>
+                        <a href="{% url 'fbc_fines:manage_fines' %}" class="flex items-center px-4 py-3 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition-colors duration-200">
+                            <i class="fas fa-money-bill mr-3"></i>Manage Fines
+                        </a>
+                        <a href="{% url 'fbc_books:attendance_log' %}" class="flex items-center px-4 py-3 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition-colors duration-200">
+                            <i class="fas fa-clock mr-3"></i>Attendance Log
+                        </a>
+                    {% elif user.user_type == 'lecturer' %}
+                        <a href="{% url 'fbc_books:dashboard' %}" class="flex items-center px-4 py-3 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition-colors duration-200">
+                            <i class="fas fa-home mr-3"></i>Dashboard
+                        </a>
+                        <a href="{% url 'fbc_books:book_list' %}" class="flex items-center px-4 py-3 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition-colors duration-200">
+                            <i class="fas fa-book mr-3"></i>Browse Books
+                        </a>
+                        <a href="{% url 'fbc_books:my_borrows' %}" class="flex items-center px-4 py-3 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition-colors duration-200">
+                            <i class="fas fa-book-reader mr-3"></i>My Borrows
+                        </a>
+                        <a href="{% url 'fbc_fines:my_fines' %}" class="flex items-center px-4 py-3 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition-colors duration-200">
+                            <i class="fas fa-money-bill mr-3"></i>My Fines
+                        </a>
+                    {% else %}  <!-- Student -->
+                        <a href="{% url 'fbc_books:dashboard' %}" class="flex items-center px-4 py-3 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition-colors duration-200">
+                            <i class="fas fa-home mr-3"></i>Dashboard
+                        </a>
+                        <a href="{% url 'fbc_books:book_list' %}" class="flex items-center px-4 py-3 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition-colors duration-200">
+                            <i class="fas fa-book mr-3"></i>Browse Books
+                        </a>
+                        <a href="{% url 'fbc_books:ebooks' %}" class="flex items-center px-4 py-3 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition-colors duration-200">
+                            <i class="fas fa-tablet-alt mr-3"></i>E-Books
+                        </a>
+                        <a href="{% url 'fbc_fines:my_fines' %}" class="flex items-center px-4 py-3 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition-colors duration-200">
+                            <i class="fas fa-money-bill mr-3"></i>My Fines
+                        </a>
+                    {% endif %}
+                    
+                    <!-- Common links for all users -->
+                    <div class="border-t border-white border-opacity-20 mt-4 pt-4">
+                        <a href="{% url 'fbc_users:profile' %}" class="flex items-center px-4 py-3 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition-colors duration-200">
+                            <i class="fas fa-user mr-3"></i>My Profile
+                        </a>
+                        <a href="{% url 'fbc_notifications:list' %}" class="flex items-center px-4 py-3 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition-colors duration-200 relative">
+                            <i class="fas fa-bell mr-3"></i>Notifications
+                            {% if notifications_count > 0 %}
+                                <span class="absolute top-2 right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">{{ notifications_count }}</span>
+                            {% endif %}
+                        </a>
+                        <a href="{% url 'fbc_users:logout' %}" class="flex items-center px-4 py-3 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition-colors duration-200">
+                            <i class="fas fa-sign-out-alt mr-3"></i>Logout
+                        </a>
+                    </div>
+                </nav>
+            </div>
+        </div>        <!-- Main Content -->
+        <div class="flex-1 bg-gray-50">
+            <!-- Top Navigation -->
+            <div class="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
+                <div class="flex justify-between items-center">
+                    <h1 class="text-xl font-semibold text-gray-800">{% block page_title %}Dashboard{% endblock %}</h1>
+                    <div class="flex items-center space-x-4">
+                        <span class="text-sm text-gray-600">Welcome, {{ user.get_full_name|default:user.username }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alert Messages -->
+            {% if messages %}
+            <div class="p-6 pb-0">
+                <div class="space-y-3">
+                    {% for message in messages %}
+                        <div class="alert-enter flex items-start p-4 rounded-lg border-l-4 {% if message.tags == 'success' %}bg-green-50 border-green-500 text-green-800{% elif message.tags == 'error' %}bg-red-50 border-red-500 text-red-800{% elif message.tags == 'warning' %}bg-yellow-50 border-yellow-500 text-yellow-800{% else %}bg-blue-50 border-blue-500 text-blue-800{% endif %} auto-dismiss" role="alert">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-triangle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %} mr-3"></i>
+                            </div>
+                            <div class="flex-1 text-sm">
+                                {{ message }}
+                            </div>
+                            <button type="button" class="ml-4 flex-shrink-0 {% if message.tags == 'success' %}text-green-500 hover:text-green-700{% elif message.tags == 'error' %}text-red-500 hover:text-red-700{% elif message.tags == 'warning' %}text-yellow-500 hover:text-yellow-700{% else %}text-blue-500 hover:text-blue-700{% endif %} transition-colors duration-200" onclick="this.parentElement.remove()">
+                                <span class="sr-only">Close</span>
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Main Content Area -->
+            <div class="p-6">
+                {% block content %}{% endblock %}
+            </div>
+        </div>    </div>
+    
+    <!-- Custom Dashboard JavaScript -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Auto-dismiss alerts after 5 seconds
+        const alerts = document.querySelectorAll('.auto-dismiss');
+        alerts.forEach(function(alert) {
+            setTimeout(function() {
+                alert.style.opacity = '0';
+                alert.style.transform = 'translateY(-10px)';
+                setTimeout(function() {
+                    alert.remove();
+                }, 300);
+            }, 5000); // 5 seconds
+        });
+    });
+    </script>
+    
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

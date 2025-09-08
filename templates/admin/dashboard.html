@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Admin Dashboard - FBC Library{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <h1 class="mb-4">Admin Dashboard</h1>
+
+    <!-- Summary Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Total Books</h5>
+                    <h2 class="mb-0">{{ total_books }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Active Users</h5>
+                    <h2 class="mb-0">{{ active_users }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Active Borrowings</h5>
+                    <h2 class="mb-0">{{ active_borrowings }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Overdue Books</h5>
+                    <h2 class="mb-0">{{ overdue_books }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <a href="{% url 'fbc_books:manage_books' %}" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-book me-2"></i>Manage Books
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'admin:fbc_books_bookborrowing_changelist' %}" class="btn btn-outline-success w-100">
+                                <i class="fas fa-exchange-alt me-2"></i>Manage Borrowings
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'admin:fbc_users_customuser_changelist' %}" class="btn btn-outline-info w-100">
+                                <i class="fas fa-users me-2"></i>Manage Users
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'admin:fbc_payments_payment_changelist' %}" class="btn btn-outline-warning w-100">
+                                <i class="fas fa-money-bill me-2"></i>Manage Payments
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activities -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Recent Borrowings</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Book</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for borrowing in recent_borrowings %}
+                                <tr>
+                                    <td>{{ borrowing.user.get_full_name }}</td>
+                                    <td>{{ borrowing.book.title }}</td>
+                                    <td>{{ borrowing.borrowed_date|date }}</td>
+                                    <td>
+                                        <span class="badge bg-{% if borrowing.is_overdue %}danger{% else %}success{% endif %}">
+                                            {% if borrowing.is_overdue %}Overdue{% else %}On Time{% endif %}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center">No recent borrowings</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Recent Payments</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Amount</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for payment in recent_payments %}
+                                <tr>
+                                    <td>{{ payment.user.get_full_name }}</td>
+                                    <td>{{ payment.amount }} Le</td>
+                                    <td>{{ payment.get_payment_type_display }}</td>
+                                    <td>
+                                        <span class="badge bg-{% if payment.status == 'completed' %}success{% elif payment.status == 'pending' %}warning{% else %}danger{% endif %}">
+                                            {{ payment.get_status_display }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center">No recent payments</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .card {
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        margin-bottom: 1rem;
+    }
+    
+    .card-title {
+        color: inherit;
+        margin-bottom: 0;
+    }
+    
+    .table {
+        margin-bottom: 0;
+    }
+    
+    .badge {
+        font-weight: 500;
+    }
+</style>
+{% endblock %}
+

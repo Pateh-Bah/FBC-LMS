@@ -1,0 +1,231 @@
+<!-- Enhanced User Sidebar Navigation with FBC Green Theme -->
+{% comment %}
+Only show sidebar on dashboard pages for authenticated users.
+Dashboard pages include: /dashboard/, /my-*, and other authenticated internal pages.
+NOT shown on: home, login, public book browsing, etc.
+{% endcomment %}
+{% if user.is_authenticated and user.user_type in 'student,lecturer,staff,admin' %}
+    {% comment %}Check if current page is a dashboard page{% endcomment %}
+    {% with is_dashboard_page=request.resolver_match.url_name %}
+        {% if 'dashboard' in is_dashboard_page or 'my_' in is_dashboard_page or is_dashboard_page in 'my_books,my_fines,my_subscription,my_payments,notifications,manage_borrowings,manage_fines,manage_users,manage_books,admin_dashboard' %}
+<aside class="fixed left-0 top-16 w-64 bg-white border-r border-fbc-green-200 shadow-xl z-30 transform transition-transform duration-300 ease-in-out -translate-x-full md:translate-x-0" id="user-sidebar" style="height: calc(100vh - 4rem); bottom: auto; overflow-y: auto;">
+    <div class="flex flex-col h-full">
+        <!-- Sidebar Header -->
+        <div class="bg-gradient-to-r from-fbc-green-600 to-emerald-600 p-4 text-white">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                    <i class="fas fa-user text-white"></i>
+                </div>
+                <div>
+                    <div class="font-serif font-bold text-sm">{{ user.get_full_name|default:user.username }}</div>
+                    <div class="text-fbc-green-100 text-xs">{{ user.user_type|capfirst }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Menu -->
+        <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+            <!-- Main Dashboard -->
+            {% if user.user_type == 'admin' %}
+                <a href="{% url 'fbc_books:admin_dashboard' %}" class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-fbc-green-50 hover:text-fbc-green-700 rounded-lg transition-all duration-200 group {% if request.resolver_match.url_name == 'admin_dashboard' %}bg-fbc-green-100 text-fbc-green-800 border-l-4 border-fbc-green-600{% endif %}">
+                    <i class="fas fa-crown w-5 group-hover:text-fbc-green-600"></i>
+                    <span class="font-medium">Admin Dashboard</span>
+                </a>
+            {% else %}
+                <a href="{% url 'fbc_books:dashboard' %}" class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-fbc-green-50 hover:text-fbc-green-700 rounded-lg transition-all duration-200 group {% if request.resolver_match.url_name == 'dashboard' %}bg-fbc-green-100 text-fbc-green-800 border-l-4 border-fbc-green-600{% endif %}">
+                    <i class="fas fa-tachometer-alt w-5 group-hover:text-fbc-green-600"></i>
+                    <span class="font-medium">Dashboard</span>
+                </a>
+            {% endif %}
+
+            <!-- Admin Management Section -->
+            {% if user.user_type == 'admin' %}
+            <div class="pt-4">
+                <div class="px-4 py-2 text-xs font-bold text-fbc-green-600 uppercase tracking-wider border-b border-fbc-green-100 mb-2">
+                    <i class="fas fa-cogs mr-2"></i>Management
+                </div>
+                
+                <!-- Circulation Management -->
+                <a href="{% url 'fbc_books:manage_borrowings' %}" class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-fbc-green-50 hover:text-fbc-green-700 rounded-lg transition-all duration-200 group {% if request.resolver_match.url_name == 'manage_borrowings' %}bg-fbc-green-100 text-fbc-green-800 border-l-4 border-fbc-green-600{% endif %}">
+                    <i class="fas fa-exchange-alt w-5 group-hover:text-fbc-green-600"></i>
+                    <span class="font-medium">Circulation</span>
+                    {% if total_borrowings %}
+                        <span class="ml-auto bg-fbc-green-500 text-white text-xs px-2 py-1 rounded-full">{{ total_borrowings }}</span>
+                    {% endif %}
+                </a>
+
+                <!-- Book Management -->
+                <a href="{% url 'fbc_books:manage_books' %}" class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-fbc-green-50 hover:text-fbc-green-700 rounded-lg transition-all duration-200 group {% if request.resolver_match.url_name == 'manage_books' %}bg-fbc-green-100 text-fbc-green-800 border-l-4 border-fbc-green-600{% endif %}">
+                    <i class="fas fa-books w-5 group-hover:text-fbc-green-600"></i>
+                    <span class="font-medium">Books</span>
+                </a>
+
+                <!-- User Management -->
+                <a href="{% url 'fbc_books:manage_users' %}" class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-fbc-green-50 hover:text-fbc-green-700 rounded-lg transition-all duration-200 group {% if request.resolver_match.url_name == 'manage_users' %}bg-fbc-green-100 text-fbc-green-800 border-l-4 border-fbc-green-600{% endif %}">
+                    <i class="fas fa-users w-5 group-hover:text-fbc-green-600"></i>
+                    <span class="font-medium">Users</span>
+                </a>
+
+                <!-- Fines Management -->
+                <a href="{% url 'fbc_fines:manage_fines' %}" class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-fbc-green-50 hover:text-fbc-green-700 rounded-lg transition-all duration-200 group {% if request.resolver_match.url_name == 'manage_fines' %}bg-fbc-green-100 text-fbc-green-800 border-l-4 border-fbc-green-600{% endif %}">
+                    <i class="fas fa-gavel w-5 group-hover:text-fbc-green-600"></i>
+                    <span class="font-medium">Fines</span>
+                    {% if pending_fines_count %}
+                        <span class="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">{{ pending_fines_count }}</span>
+                    {% endif %}
+                </a>
+
+                <!-- Reports & Analytics -->
+                <a href="#" class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-fbc-green-50 hover:text-fbc-green-700 rounded-lg transition-all duration-200 group">
+                    <i class="fas fa-chart-bar w-5 group-hover:text-fbc-green-600"></i>
+                    <span class="font-medium">Reports</span>
+                </a>
+            </div>
+            {% endif %}
+
+            <!-- User Personal Section -->
+            <div class="pt-4">
+                <div class="px-4 py-2 text-xs font-bold text-fbc-green-600 uppercase tracking-wider border-b border-fbc-green-100 mb-2">
+                    <i class="fas fa-user mr-2"></i>Personal
+                </div>
+
+                <!-- My Books -->
+                <a href="{% url 'fbc_books:my_books' %}" class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-fbc-green-50 hover:text-fbc-green-700 rounded-lg transition-all duration-200 group {% if request.resolver_match.url_name == 'my_books' %}bg-fbc-green-100 text-fbc-green-800 border-l-4 border-fbc-green-600{% endif %}">
+                    <i class="fas fa-book w-5 group-hover:text-fbc-green-600"></i>
+                    <span class="font-medium">My Books</span>
+                    {% if user.active_borrowings_count %}
+                        <span class="ml-auto bg-blue-500 text-white text-xs px-2 py-1 rounded-full">{{ user.active_borrowings_count }}</span>
+                    {% endif %}
+                </a>
+
+                <!-- My Fines -->
+                <a href="{% url 'fbc_fines:my_fines' %}" class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-fbc-green-50 hover:text-fbc-green-700 rounded-lg transition-all duration-200 group {% if request.resolver_match.url_name == 'my_fines' %}bg-fbc-green-100 text-fbc-green-800 border-l-4 border-fbc-green-600{% endif %}">
+                    <i class="fas fa-money-bill-wave w-5 group-hover:text-fbc-green-600"></i>
+                    <span class="font-medium">My Fines</span>
+                    {% if user.pending_fines_count %}
+                        <span class="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">{{ user.pending_fines_count }}</span>
+                    {% endif %}
+                </a>
+
+                <!-- My Notifications -->
+                <a href="{% url 'fbc_notifications:notifications' %}" class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-fbc-green-50 hover:text-fbc-green-700 rounded-lg transition-all duration-200 group {% if request.resolver_match.url_name == 'notifications' %}bg-fbc-green-100 text-fbc-green-800 border-l-4 border-fbc-green-600{% endif %}">
+                    <i class="fas fa-bell w-5 group-hover:text-fbc-green-600"></i>
+                    <span class="font-medium">Notifications</span>
+                    {% if user.unread_notifications_count %}
+                        <span class="ml-auto bg-yellow-500 text-white text-xs px-2 py-1 rounded-full">{{ user.unread_notifications_count }}</span>
+                    {% endif %}
+                </a>
+
+                <!-- My Payments -->
+                <a href="{% url 'fbc_payments:my_payments' %}" class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-fbc-green-50 hover:text-fbc-green-700 rounded-lg transition-all duration-200 group {% if request.resolver_match.url_name == 'my_payments' %}bg-fbc-green-100 text-fbc-green-800 border-l-4 border-fbc-green-600{% endif %}">
+                    <i class="fas fa-wallet w-5 group-hover:text-fbc-green-600"></i>
+                    <span class="font-medium">Payments</span>
+                </a>
+
+                <!-- Subscription (Students only) -->
+                {% if user.user_type == 'student' %}
+                <a href="{% url 'fbc_users:my_subscription' %}" class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-fbc-green-50 hover:text-fbc-green-700 rounded-lg transition-all duration-200 group {% if request.resolver_match.url_name == 'my_subscription' %}bg-fbc-green-100 text-fbc-green-800 border-l-4 border-fbc-green-600{% endif %}">
+                    <i class="fas fa-credit-card w-5 group-hover:text-fbc-green-600"></i>
+                    <span class="font-medium">Subscription</span>
+                    {% if not user.is_subscription_active %}
+                        <span class="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">Expired</span>
+                    {% endif %}
+                </a>
+                {% endif %}
+            </div>
+
+            <!-- Library Section -->
+            <div class="pt-4">
+                <div class="px-4 py-2 text-xs font-bold text-fbc-green-600 uppercase tracking-wider border-b border-fbc-green-100 mb-2">
+                    <i class="fas fa-university mr-2"></i>Library
+                </div>
+
+                <!-- Browse Books -->
+                <a href="{% url 'fbc_books:book_list' %}" class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-fbc-green-50 hover:text-fbc-green-700 rounded-lg transition-all duration-200 group">
+                    <i class="fas fa-search w-5 group-hover:text-fbc-green-600"></i>
+                    <span class="font-medium">Browse Collection</span>
+                </a>
+
+                <!-- Library Home -->
+                <a href="{% url 'fbc_books:home' %}" class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-fbc-green-50 hover:text-fbc-green-700 rounded-lg transition-all duration-200 group">
+                    <i class="fas fa-home w-5 group-hover:text-fbc-green-600"></i>
+                    <span class="font-medium">Library Home</span>
+                </a>
+            </div>
+
+            <!-- Staff Tools (for staff members) -->
+            {% if user.user_type == 'staff' %}
+            <div class="pt-4">
+                <div class="px-4 py-2 text-xs font-bold text-fbc-green-600 uppercase tracking-wider border-b border-fbc-green-100 mb-2">
+                    <i class="fas fa-tools mr-2"></i>Staff Tools
+                </div>
+                
+                <a href="{% url 'fbc_books:manage_borrowings' %}" class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-fbc-green-50 hover:text-fbc-green-700 rounded-lg transition-all duration-200 group {% if request.resolver_match.url_name == 'manage_borrowings' %}bg-fbc-green-100 text-fbc-green-800 border-l-4 border-fbc-green-600{% endif %}">
+                    <i class="fas fa-clipboard-list w-5 group-hover:text-fbc-green-600"></i>
+                    <span class="font-medium">Manage Borrowings</span>
+                </a>
+                
+                <a href="{% url 'fbc_fines:manage_fines' %}" class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-fbc-green-50 hover:text-fbc-green-700 rounded-lg transition-all duration-200 group {% if request.resolver_match.url_name == 'manage_fines' %}bg-fbc-green-100 text-fbc-green-800 border-l-4 border-fbc-green-600{% endif %}">
+                    <i class="fas fa-gavel w-5 group-hover:text-fbc-green-600"></i>
+                    <span class="font-medium">Manage Fines</span>
+                </a>
+            </div>
+            {% endif %}
+        </nav>
+
+        <!-- Enhanced Quick Stats Footer -->
+        <div class="bg-gradient-to-r from-fbc-green-50 to-emerald-50 border-t border-fbc-green-200 p-4 mt-auto">
+            <div class="text-xs font-bold text-fbc-green-600 uppercase tracking-wider mb-3 flex items-center">
+                <i class="fas fa-chart-pie mr-2"></i>Quick Stats
+            </div>
+            <div class="grid grid-cols-2 gap-3 text-xs">
+                <div class="bg-white p-3 rounded-lg shadow-sm border border-fbc-green-100 text-center">
+                    <div class="font-bold text-lg text-blue-600">{{ user.active_borrowings_count|default:0 }}</div>
+                    <div class="text-gray-500 font-medium">Active Books</div>
+                </div>
+                <div class="bg-white p-3 rounded-lg shadow-sm border border-fbc-green-100 text-center">
+                    <div class="font-bold text-lg {% if user.pending_fines_count %}text-red-600{% else %}text-fbc-green-600{% endif %}">{{ user.pending_fines_count|default:0 }}</div>
+                    <div class="text-gray-500 font-medium">Pending Fines</div>
+                </div>
+            </div>
+            {% if user.user_type == 'student' %}
+            <div class="mt-3 bg-white p-3 rounded-lg shadow-sm border border-fbc-green-100 text-center">
+                <div class="font-bold text-lg {% if user.is_subscription_active %}text-fbc-green-600{% else %}text-red-600{% endif %}">
+                    {% if user.is_subscription_active %}
+                        <i class="fas fa-check-circle mr-1"></i>Active
+                    {% else %}
+                        <i class="fas fa-times-circle mr-1"></i>Expired
+                    {% endif %}
+                </div>
+                <div class="text-gray-500 font-medium">Subscription</div>
+            </div>
+            {% endif %}
+            
+            {% if user.user_type == 'admin' %}
+            <!-- Admin specific stats -->
+            <div class="grid grid-cols-2 gap-3 text-xs mt-3">
+                <div class="bg-white p-3 rounded-lg shadow-sm border border-fbc-green-100 text-center">
+                    <div class="font-bold text-lg text-purple-600">{{ total_books|default:0 }}</div>
+                    <div class="text-gray-500 font-medium">Total Books</div>
+                </div>
+                <div class="bg-white p-3 rounded-lg shadow-sm border border-fbc-green-100 text-center">
+                    <div class="font-bold text-lg text-indigo-600">{{ total_users|default:0 }}</div>
+                    <div class="text-gray-500 font-medium">Total Users</div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</aside>
+
+<!-- Enhanced Sidebar Toggle Button -->
+<button class="fixed top-20 left-4 z-50 bg-gradient-to-r from-fbc-green-600 to-emerald-600 text-white p-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 hidden" id="sidebar-toggle">
+    <i class="fas fa-times"></i>
+</button>
+
+<!-- Enhanced Overlay for mobile -->
+<div class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden md:hidden backdrop-blur-sm" id="sidebar-overlay"></div>
+
+        {% endif %}
+    {% endwith %}
+{% endif %}

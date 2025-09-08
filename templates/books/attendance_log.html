@@ -1,0 +1,41 @@
+{% extends "admin/admin_base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="mb-4">Attendance Log</h1>
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Today's Visitors</h5>
+        </div>
+        <div class="card-body">
+            {% if visitors %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>User Type</th>
+                            <th>Entry Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in visitors %}
+                        <tr>
+                            <td>{{ user.get_full_name }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>{{ user.get_user_type_display }}</td>
+                            <td>{{ user.last_library_entry|date:'M d, Y H:i' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p>No visitors found for today.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

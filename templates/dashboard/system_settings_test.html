@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>System Settings Test</title>
+</head>
+<body>
+    <h1>System Settings Test</h1>
+    {% if settings %}
+        <p>System Name: {{ settings.system_name }}</p>
+        <p>Primary Color: {{ settings.primary_color }}</p>
+    {% else %}
+        <p>No settings found</p>
+    {% endif %}
+    
+    {% if error %}
+        <p>Error: {{ error }}</p>
+    {% endif %}
+    
+    {% if message %}
+        <p>Message: {{ message }}</p>
+    {% endif %}
+</body>
+</html>

@@ -1,0 +1,25 @@
+from fbc_users.system_settings import SystemSettings
+
+def system_settings_context(request):
+    try:
+        settings = SystemSettings.get_settings()
+        return {
+            'primary_color': settings.primary_color,
+            'sidebar_color': settings.sidebar_color,
+            'header_color': settings.header_color,
+            'footer_color': settings.footer_color,
+            'system_name': settings.system_name,
+            'system_logo': settings.logo.url if settings.logo else None,
+            'system_favicon': settings.favicon.url if settings.favicon else None,
+        }
+    except Exception as e:
+        # Return default values if there's an error
+        return {
+            'primary_color': '#22c55e',
+            'sidebar_color': '#16a34a',
+            'header_color': '#15803d',
+            'footer_color': '#166534',
+            'system_name': 'FBC Library System',
+            'system_logo': None,
+            'system_favicon': None,
+        }

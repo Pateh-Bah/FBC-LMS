@@ -1,0 +1,285 @@
+{% extends "admin/admin_base.html" %}
+{% load static %}
+
+{% block page_title %}System Settings{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-xl shadow-lg p-8 animate-fade-in">
+    <!-- Header Section -->
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h1 class="text-3xl font-serif font-bold text-fbc-navy-900 mb-2">System Settings</h1>
+            <p class="text-fbc-gray-600 font-body">Configure system appearance and branding settings</p>
+        </div>
+        <div class="flex items-center space-x-2 px-4 py-2 bg-fbc-green-100 text-fbc-green-700 rounded-lg">
+            <i class="fas fa-cogs"></i>
+            <span class="font-body">Administrative Settings</span>
+        </div>
+    </div>
+
+    <!-- Debug Information -->
+    <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
+        <h3 class="font-serif font-bold text-blue-900 mb-2">Debug Information</h3>
+        <p class="text-blue-800 font-body">Settings object exists: {{ settings|yesno:"Yes,No" }}</p>
+        {% if error %}
+        <p class="text-red-600 font-body">Error: {{ error }}</p>
+        {% endif %}
+        {% if message %}
+        <p class="text-green-600 font-body">Message: {{ message }}</p>
+        {% endif %}
+    </div>
+
+    {% if error %}
+    <div class="bg-red-50 border border-red-200 rounded-xl p-6 mb-6">
+        <div class="flex items-center space-x-3">
+            <div class="flex items-center justify-center w-10 h-10 bg-red-100 rounded-full">
+                <i class="fas fa-exclamation-triangle text-red-600"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-serif font-bold text-red-900">System Settings Error</h3>
+                <p class="text-red-700 font-body mt-1">{{ error }}</p>
+                <p class="text-red-600 font-body text-sm mt-2">Please contact your system administrator for assistance.</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if message %}
+    <div class="bg-green-50 border border-green-200 rounded-xl p-6 mb-6">
+        <div class="flex items-center space-x-3">
+            <div class="flex items-center justify-center w-10 h-10 bg-green-100 rounded-full">
+                <i class="fas fa-check text-green-600"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-serif font-bold text-green-900">Success</h3>
+                <p class="text-green-700 font-body mt-1">{{ message }}</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Settings Form -->
+    <div class="bg-white border border-fbc-green-200 rounded-xl shadow-sm">
+        <div class="bg-gradient-to-r from-fbc-green-500 to-fbc-green-600 px-6 py-4 rounded-t-xl">
+            <h2 class="text-xl font-serif font-bold text-white">System Configuration</h2>
+            <p class="text-fbc-green-100 mt-1 font-body">Customize your library system's appearance and branding</p>
+        </div>
+
+        {% if settings %}
+        <form method="post" enctype="multipart/form-data" class="p-6 space-y-6">
+            {% csrf_token %}
+            
+            <!-- System Name -->
+            <div class="space-y-2">
+                <label for="system_name" class="block text-sm font-sans font-medium text-fbc-navy-900">
+                    System Name <span class="text-red-500">*</span>
+                </label>
+                <input type="text" 
+                       id="system_name" 
+                       name="system_name" 
+                       value="{{ settings.system_name|default:'FBC Library System' }}"
+                       placeholder="Enter system name"
+                       class="w-full px-4 py-3 border border-fbc-green-300 rounded-lg focus:ring-2 focus:ring-fbc-green-500 focus:border-fbc-green-500 transition-all duration-300 font-body">
+                <p class="text-fbc-gray-500 text-sm font-body">This name appears in the sidebar, header, and browser title</p>
+            </div>
+
+            <!-- Color Settings -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Primary Color -->
+                <div class="space-y-2">
+                    <label for="primary_color" class="block text-sm font-sans font-medium text-fbc-navy-900">Primary Color</label>
+                    <div class="flex items-center space-x-3">
+                        <input type="color" 
+                               id="primary_color" 
+                               name="primary_color" 
+                               value="{{ settings.primary_color|default:'#22c55e' }}"
+                               class="w-12 h-12 border-2 border-fbc-green-300 rounded-lg cursor-pointer">
+                        <div class="flex-1">
+                            <input type="text" 
+                                   value="{{ settings.primary_color|default:'#22c55e' }}"
+                                   class="w-full px-3 py-2 border border-fbc-green-300 rounded-lg font-mono text-sm">
+                        </div>
+                    </div>
+                    <p class="text-fbc-gray-500 text-sm font-body">Main theme color for buttons and accents</p>
+                </div>
+
+                <!-- Sidebar Color -->
+                <div class="space-y-2">
+                    <label for="sidebar_color" class="block text-sm font-sans font-medium text-fbc-navy-900">Sidebar Color</label>
+                    <div class="flex items-center space-x-3">
+                        <input type="color" 
+                               id="sidebar_color" 
+                               name="sidebar_color" 
+                               value="{{ settings.sidebar_color|default:'#0f172a' }}"
+                               class="w-12 h-12 border-2 border-fbc-green-300 rounded-lg cursor-pointer">
+                        <div class="flex-1">
+                            <input type="text" 
+                                   value="{{ settings.sidebar_color|default:'#0f172a' }}"
+                                   class="w-full px-3 py-2 border border-fbc-green-300 rounded-lg font-mono text-sm">
+                        </div>
+                    </div>
+                    <p class="text-fbc-gray-500 text-sm font-body">Background color for the navigation sidebar</p>
+                </div>
+
+                <!-- Header Color -->
+                <div class="space-y-2">
+                    <label for="header_color" class="block text-sm font-sans font-medium text-fbc-navy-900">Header Color</label>
+                    <div class="flex items-center space-x-3">
+                        <input type="color" 
+                               id="header_color" 
+                               name="header_color" 
+                               value="{{ settings.header_color|default:'#1e293b' }}"
+                               class="w-12 h-12 border-2 border-fbc-green-300 rounded-lg cursor-pointer">
+                        <div class="flex-1">
+                            <input type="text" 
+                                   value="{{ settings.header_color|default:'#1e293b' }}"
+                                   class="w-full px-3 py-2 border border-fbc-green-300 rounded-lg font-mono text-sm">
+                        </div>
+                    </div>
+                    <p class="text-fbc-gray-500 text-sm font-body">Background color for the top header</p>
+                </div>
+
+                <!-- Footer Color -->
+                <div class="space-y-2">
+                    <label for="footer_color" class="block text-sm font-sans font-medium text-fbc-navy-900">Footer Color</label>
+                    <div class="flex items-center space-x-3">
+                        <input type="color" 
+                               id="footer_color" 
+                               name="footer_color" 
+                               value="{{ settings.footer_color|default:'#334155' }}"
+                               class="w-12 h-12 border-2 border-fbc-green-300 rounded-lg cursor-pointer">
+                        <div class="flex-1">
+                            <input type="text" 
+                                   value="{{ settings.footer_color|default:'#334155' }}"
+                                   class="w-full px-3 py-2 border border-fbc-green-300 rounded-lg font-mono text-sm">
+                        </div>
+                    </div>
+                    <p class="text-fbc-gray-500 text-sm font-body">Background color for the footer section</p>
+                </div>
+            </div>
+
+            <!-- File Uploads -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Logo Upload -->
+                <div class="space-y-2">
+                    <label for="logo" class="block text-sm font-sans font-medium text-fbc-navy-900">System Logo</label>
+                    <input type="file" 
+                           id="logo" 
+                           name="logo" 
+                           accept="image/*"
+                           class="w-full px-3 py-2 border border-fbc-green-300 rounded-lg focus:ring-2 focus:ring-fbc-green-500 focus:border-fbc-green-500 font-body">
+                    {% if settings.logo %}
+                    <div class="mt-2">
+                        <img src="{{ settings.logo.url }}" alt="Current Logo" class="h-12 w-auto border border-fbc-green-200 rounded">
+                    </div>
+                    {% endif %}
+                    <p class="text-fbc-gray-500 text-sm font-body">Logo displayed in sidebar and header</p>
+                </div>
+
+                <!-- Favicon Upload -->
+                <div class="space-y-2">
+                    <label for="favicon" class="block text-sm font-sans font-medium text-fbc-navy-900">Favicon</label>
+                    <input type="file" 
+                           id="favicon" 
+                           name="favicon" 
+                           accept="image/*"
+                           class="w-full px-3 py-2 border border-fbc-green-300 rounded-lg focus:ring-2 focus:ring-fbc-green-500 focus:border-fbc-green-500 font-body">
+                    {% if settings.favicon %}
+                    <div class="mt-2">
+                        <img src="{{ settings.favicon.url }}" alt="Current Favicon" class="h-8 w-8 border border-fbc-green-200 rounded">
+                    </div>
+                    {% endif %}
+                    <p class="text-fbc-gray-500 text-sm font-body">Small icon displayed in browser tab</p>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="flex justify-end pt-6 border-t border-fbc-green-200">
+                <button type="submit" 
+                        class="btn-fbc px-8 py-3 rounded-lg font-body font-medium flex items-center space-x-2 hover:shadow-lg transition-all duration-300">
+                    <i class="fas fa-save"></i>
+                    <span>Save Settings</span>
+                </button>
+            </div>
+        </form>
+        {% else %}
+        <div class="p-6">
+            <div class="text-center py-8">
+                <i class="fas fa-exclamation-triangle text-6xl text-fbc-gray-300 mb-4"></i>
+                <h3 class="text-lg font-serif font-medium text-fbc-navy-900 mb-2">Settings Not Available</h3>
+                <p class="text-fbc-gray-600 font-body">Unable to load system settings. Please check your database configuration.</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Current Settings Preview -->
+    {% if settings %}
+    <div class="bg-white border border-fbc-green-200 rounded-xl shadow-sm">
+        <div class="px-6 py-4 border-b border-fbc-green-200">
+            <h3 class="text-lg font-serif font-bold text-fbc-navy-900">Current Settings</h3>
+            <p class="text-fbc-gray-600 font-body text-sm mt-1">Preview of your current system configuration</p>
+        </div>
+        <div class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm font-body">
+                <div class="flex justify-between">
+                    <span class="text-fbc-gray-600">System Name:</span>
+                    <span class="text-fbc-navy-900 font-medium">{{ settings.system_name|default:"Not set" }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-fbc-gray-600">Primary Color:</span>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-4 h-4 rounded border" style="background-color: {{ settings.primary_color|default:'#22c55e' }}"></div>
+                        <span class="text-fbc-navy-900 font-mono">{{ settings.primary_color|default:"#22c55e" }}</span>
+                    </div>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-fbc-gray-600">Last Updated:</span>
+                    <span class="text-fbc-navy-900 font-medium">{{ settings.updated_at|date:"M d, Y g:i A"|default:"Never" }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-fbc-gray-600">Logo Status:</span>
+                    <span class="text-fbc-navy-900 font-medium">{{ settings.logo|yesno:"Uploaded,Not uploaded" }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% block extra_js %}
+<script>
+// Color picker functionality
+document.addEventListener('DOMContentLoaded', function() {
+    // Sync color pickers with text inputs
+    const colorInputs = document.querySelectorAll('input[type="color"]');
+    
+    colorInputs.forEach(colorInput => {
+        const textInput = colorInput.parentNode.querySelector('input[type="text"]');
+        
+        colorInput.addEventListener('change', function() {
+            textInput.value = this.value;
+        });
+        
+        textInput.addEventListener('change', function() {
+            if (/^#[0-9A-F]{6}$/i.test(this.value)) {
+                colorInput.value = this.value;
+            }
+        });
+    });
+
+    // Form submission
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function() {
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner animate-spin mr-2"></i>Saving...';
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
+{% endblock %}

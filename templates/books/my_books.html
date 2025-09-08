@@ -1,0 +1,222 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Books - FBC Library{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'fbc_books:home' %}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'fbc_users:profile' %}">Profile</a></li>
+            <li class="breadcrumb-item active" aria-current="page">My Books</li>
+        </ol>
+    </nav>
+
+    <!-- Active Borrowings -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4 class="card-title mb-0">Currently Borrowed Books</h4>
+        </div>
+        <div class="card-body">
+            {% if active_borrowings %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Book</th>
+                                <th>Borrowed Date</th>
+                                <th>Due Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for borrowing in active_borrowings %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {% if borrowing.book.cover_image %}
+                                                <img src="{{ borrowing.book.cover_image.url }}" alt="{{ borrowing.book.title }}" 
+                                                     class="img-thumbnail me-3" style="width: 50px; height: 70px; object-fit: cover;">
+                                            {% else %}
+                                                <img src="{% static 'img/default-book-cover.jpg' %}" alt="{{ borrowing.book.title }}" 
+                                                     class="img-thumbnail me-3" style="width: 50px; height: 70px; object-fit: cover;">
+                                            {% endif %}
+                                            <div>
+                                                <a href="{% url 'fbc_books:book_detail' borrowing.book.pk %}" class="text-decoration-none">
+                                                    {{ borrowing.book.title }}
+                                                </a>
+                                                <br>
+                                                <small class="text-muted">
+                                                    {% for author in borrowing.book.authors.all %}
+                                                        {{ author.name }}{% if not forloop.last %}, {% endif %}
+                                                    {% endfor %}
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>{{ borrowing.borrowed_date|date }}</td>
+                                    <td>{{ borrowing.due_date|date }}</td>
+                                    <td>
+                                        {% if borrowing.is_overdue %}
+                                            <span class="badge bg-danger">
+                                                Overdue
+                                                <br>
+                                                Fine: {{ borrowing.fine_amount }} Le
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-success">On Time</span>
+                                        {% endif %}
+                                    </td>                                    <td>
+                                        {% if borrowing.book.is_ebook %}
+                                            <a href="{% url 'fbc_books:read_ebook' borrowing.book.pk %}" class="btn btn-sm btn-success mb-2">
+                                                <i class="fas fa-book-reader me-1"></i>Read Online
+                                            </a>
+                                        {% endif %}
+                                        <span class="text-muted">Return at library desk</span>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-center mb-0">You have no books currently borrowed.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Borrowing History -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h4 class="card-title mb-0">Borrowing History</h4>
+            
+            <!-- Sort Options -->
+            <div class="dropdown">
+                <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" 
+                        id="sortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    Sort by
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="sortDropdown">
+                    <li>
+                        <a class="dropdown-item {% if request.GET.sort == '-returned_date' %}active{% endif %}" 
+                           href="?sort=-returned_date">Recently Returned</a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item {% if request.GET.sort == 'returned_date' %}active{% endif %}" 
+                           href="?sort=returned_date">Oldest First</a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item {% if request.GET.sort == 'book__title' %}active{% endif %}" 
+                           href="?sort=book__title">Book Title (A-Z)</a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item {% if request.GET.sort == '-book__title' %}active{% endif %}" 
+                           href="?sort=-book__title">Book Title (Z-A)</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="card-body">
+            {% if past_borrowings %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Book</th>
+                                <th>Borrowed Date</th>
+                                <th>Returned Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for borrowing in past_borrowings %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {% if borrowing.book.cover_image %}
+                                                <img src="{{ borrowing.book.cover_image.url }}" alt="{{ borrowing.book.title }}" 
+                                                     class="img-thumbnail me-3" style="width: 50px; height: 70px; object-fit: cover;">
+                                            {% else %}
+                                                <img src="{% static 'img/default-book-cover.jpg' %}" alt="{{ borrowing.book.title }}" 
+                                                     class="img-thumbnail me-3" style="width: 50px; height: 70px; object-fit: cover;">
+                                            {% endif %}
+                                            <div>
+                                                <a href="{% url 'fbc_books:book_detail' borrowing.book.pk %}" class="text-decoration-none">
+                                                    {{ borrowing.book.title }}
+                                                </a>
+                                                <br>
+                                                <small class="text-muted">
+                                                    {% for author in borrowing.book.authors.all %}
+                                                        {{ author.name }}{% if not forloop.last %}, {% endif %}
+                                                    {% endfor %}
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>{{ borrowing.borrowed_date|date }}</td>
+                                    <td>{{ borrowing.returned_date|date }}</td>
+                                    <td>
+                                        {% if borrowing.status == 'returned' %}
+                                            <span class="badge bg-success">Returned</span>
+                                        {% elif borrowing.status == 'lost' %}
+                                            <span class="badge bg-danger">Lost</span>
+                                        {% elif borrowing.status == 'damaged' %}
+                                            <span class="badge bg-warning text-dark">Damaged</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'fbc_books:book_detail' borrowing.book.pk %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-info-circle me-1"></i>Book Details
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                {% if past_borrowings.paginator.num_pages > 1 %}
+                    <nav aria-label="Borrowing history pagination" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {% if past_borrowings.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ past_borrowings.previous_page_number }}&{{ request.GET.urlencode }}" aria-label="Previous">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                            {% for num in past_borrowings.paginator.page_range %}
+                                {% if past_borrowings.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                {% elif num > past_borrowings.number|add:'-3' and num < past_borrowings.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}&{{ request.GET.urlencode }}">{{ num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if past_borrowings.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ past_borrowings.next_page_number }}&{{ request.GET.urlencode }}" aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+            {% else %}
+                <p class="text-center mb-0">You have no borrowing history.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+

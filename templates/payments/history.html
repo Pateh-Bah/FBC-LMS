@@ -1,0 +1,583 @@
+{% extends 'admin/admin_base.html' %}
+{% load static %}
+
+{% block title %}Payment History - FBC Library System{% endblock %}
+
+{% block extra_head %}
+<!-- Bootstrap 5 CSS and JS for modals -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="bg-gradient-to-br from-gray-50 via-white to-gray-100 min-h-screen">
+    <div class="container-fluid px-6 py-8">
+        <!-- Page Header -->
+        <div class="mb-8">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+                <div class="mb-4 lg:mb-0">
+                    <h1 class="text-4xl font-serif font-bold text-fbc-navy-900 mb-2">Payment History</h1>
+                    <p class="text-lg text-gray-600 font-body">Comprehensive view of all payment transactions and financial records</p>
+                    
+                    <!-- Breadcrumb -->
+                    <nav class="flex mt-4" aria-label="Breadcrumb">
+                        <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                            <li class="inline-flex items-center">
+                                <a href="{% url 'fbc_books:admin_dashboard' %}" class="inline-flex items-center text-sm font-medium text-gray-500 hover:text-fbc-green-600">
+                                    <i class="fas fa-home mr-2"></i>
+                                    Dashboard
+                                </a>
+                            </li>
+                            <li>
+                                <div class="flex items-center">
+                                    <i class="fas fa-chevron-right text-gray-400 mx-2"></i>
+                                    <span class="text-sm font-medium text-fbc-green-600">Payment History</span>
+                                </div>
+                            </li>
+                        </ol>
+                    </nav>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <button onclick="exportPayments()" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors duration-200">
+                        <i class="fas fa-download mr-2"></i>
+                        Export Data
+                    </button>
+                    <button onclick="refreshData()" class="inline-flex items-center px-4 py-2 bg-fbc-green-600 text-white font-medium rounded-lg hover:bg-fbc-green-700 transition-colors duration-200">
+                        <i class="fas fa-sync-alt mr-2"></i>
+                        Refresh
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Total Payments</p>
+                        <p class="text-2xl font-bold text-gray-900 mt-1">{{ payments|length }}</p>
+                        <p class="text-sm text-green-600 mt-1">
+                            <i class="fas fa-arrow-up mr-1"></i>
+                            All transactions
+                        </p>
+                    </div>
+                    <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-credit-card text-blue-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Completed</p>
+                        <p class="text-2xl font-bold text-green-600 mt-1">{{ payments|length }}</p>
+                        <p class="text-sm text-gray-500 mt-1">
+                            <i class="fas fa-check-circle mr-1"></i>
+                            Successful payments
+                        </p>
+                    </div>
+                    <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-check text-green-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Pending</p>
+                        <p class="text-2xl font-bold text-yellow-600 mt-1">0</p>
+                        <p class="text-sm text-gray-500 mt-1">
+                            <i class="fas fa-clock mr-1"></i>
+                            Awaiting processing
+                        </p>
+                    </div>
+                    <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-clock text-yellow-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Revenue</p>
+                        <p class="text-2xl font-bold text-fbc-green-600 mt-1">Le 0</p>
+                        <p class="text-sm text-gray-500 mt-1">
+                            <i class="fas fa-coins mr-1"></i>
+                            Total collected
+                        </p>
+                    </div>
+                    <div class="w-12 h-12 bg-fbc-green-100 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-coins text-fbc-green-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters Section -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 mb-8">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                <i class="fas fa-filter text-fbc-green-600 mr-2"></i>
+                Filter & Search Options
+            </h3>
+            <!-- Filters -->
+            <form method="get" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div>
+                    <label for="payment_type" class="block text-sm font-medium text-gray-700 mb-2">Payment Type</label>
+                    <select name="payment_type" id="payment_type" class="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-fbc-green-500 focus:border-fbc-green-500 bg-gray-50 focus:bg-white transition-all duration-200">
+                        <option value="">All Types</option>
+                        <option value="subscription" {% if request.GET.payment_type == 'subscription' %}selected{% endif %}>Annual Subscription</option>
+                        <option value="fine" {% if request.GET.payment_type == 'fine' %}selected{% endif %}>Late Return Fine</option>
+                        <option value="membership" {% if request.GET.payment_type == 'membership' %}selected{% endif %}>Membership</option>
+                        <option value="deposit" {% if request.GET.payment_type == 'deposit' %}selected{% endif %}>Security Deposit</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="payment_method" class="block text-sm font-medium text-gray-700 mb-2">Payment Method</label>
+                    <select name="payment_method" id="payment_method" class="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-fbc-green-500 focus:border-fbc-green-500 bg-gray-50 focus:bg-white transition-all duration-200">
+                        <option value="">All Methods</option>
+                        <option value="stripe" {% if request.GET.payment_method == 'stripe' %}selected{% endif %}>Stripe</option>
+                        <option value="paypal" {% if request.GET.payment_method == 'paypal' %}selected{% endif %}>PayPal</option>
+                        <option value="orange_money" {% if request.GET.payment_method == 'orange_money' %}selected{% endif %}>Orange Money</option>
+                        <option value="afrimoney" {% if request.GET.payment_method == 'afrimoney' %}selected{% endif %}>Afrimoney</option>
+                        <option value="qmoney" {% if request.GET.payment_method == 'qmoney' %}selected{% endif %}>QMoney</option>
+                        <option value="bank_transfer" {% if request.GET.payment_method == 'bank_transfer' %}selected{% endif %}>Bank Transfer</option>
+                        <option value="cash" {% if request.GET.payment_method == 'cash' %}selected{% endif %}>Cash</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                    <select name="status" id="status" class="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-fbc-green-500 focus:border-fbc-green-500 bg-gray-50 focus:bg-white transition-all duration-200">
+                        <option value="">All Statuses</option>
+                        <option value="completed" {% if request.GET.status == 'completed' %}selected{% endif %}>Completed</option>
+                        <option value="pending" {% if request.GET.status == 'pending' %}selected{% endif %}>Pending</option>
+                        <option value="failed" {% if request.GET.status == 'failed' %}selected{% endif %}>Failed</option>
+                        <option value="refunded" {% if request.GET.status == 'refunded' %}selected{% endif %}>Refunded</option>
+                        <option value="cancelled" {% if request.GET.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Actions</label>
+                    <div class="flex gap-2">
+                        <button type="submit" class="flex-1 px-4 py-2 bg-fbc-green-600 text-white font-medium rounded-lg hover:bg-fbc-green-700 transition-colors duration-200">
+                            <i class="fas fa-search mr-1"></i>
+                            Filter
+                        </button>
+                        <a href="{% url 'fbc_payments:payment_history' %}" class="px-4 py-2 bg-gray-500 text-white font-medium rounded-lg hover:bg-gray-600 transition-colors duration-200">
+                            <i class="fas fa-times"></i>
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Payment History Table -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+            <div class="px-6 py-4 bg-gradient-to-r from-fbc-green-500 to-fbc-green-600 text-white">
+                <h3 class="text-lg font-semibold">
+                    <i class="fas fa-history mr-2"></i>
+                    Payment Transactions
+                </h3>
+                <p class="text-fbc-green-100 text-sm mt-1">Complete record of all financial transactions</p>
+            </div>
+            
+            {% if payments %}
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Transaction ID</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Method</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {% for payment in payments %}
+                                <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        <div class="flex flex-col">
+                                            <span class="font-medium">{{ payment.created_at|date:"M d, Y" }}</span>
+                                            <span class="text-xs text-gray-500">{{ payment.created_at|time:"H:i" }}</span>
+                                            {% if payment.completed_at %}
+                                                <span class="text-xs text-green-600 mt-1">
+                                                    <i class="fas fa-check mr-1"></i>
+                                                    Completed: {{ payment.completed_at|date:"M d, H:i" }}
+                                                </span>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        <div class="flex flex-col">
+                                            <span class="font-mono text-xs bg-gray-100 px-2 py-1 rounded">{{ payment.transaction_id }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        <div class="flex items-center">
+                                            <div class="w-8 h-8 bg-fbc-green-100 rounded-full flex items-center justify-center mr-3">
+                                                <i class="fas fa-user text-fbc-green-600 text-xs"></i>
+                                            </div>
+                                            <div>
+                                                <span class="font-medium">{{ payment.user.get_full_name }}</span>
+                                                <div class="text-xs text-gray-500">{{ payment.user.email }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                            {% if payment.payment_type == 'subscription' %}bg-blue-100 text-blue-800
+                                            {% elif payment.payment_type == 'fine' %}bg-red-100 text-red-800
+                                            {% elif payment.payment_type == 'membership' %}bg-purple-100 text-purple-800
+                                            {% elif payment.payment_type == 'deposit' %}bg-yellow-100 text-yellow-800
+                                            {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                            <i class="fas 
+                                                {% if payment.payment_type == 'subscription' %}fa-calendar-alt
+                                                {% elif payment.payment_type == 'fine' %}fa-exclamation-triangle
+                                                {% elif payment.payment_type == 'membership' %}fa-id-card
+                                                {% elif payment.payment_type == 'deposit' %}fa-shield-alt
+                                                {% else %}fa-credit-card{% endif %} mr-1"></i>
+                                            {{ payment.get_payment_type_display }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                                            <i class="fas 
+                                                {% if payment.payment_method == 'stripe' %}fa-cc-stripe
+                                                {% elif payment.payment_method == 'paypal' %}fa-cc-paypal
+                                                {% elif payment.payment_method == 'orange_money' %}fa-mobile-alt
+                                                {% elif payment.payment_method == 'bank_transfer' %}fa-university
+                                                {% elif payment.payment_method == 'cash' %}fa-money-bill
+                                                {% else %}fa-credit-card{% endif %} mr-1"></i>
+                                            {{ payment.get_payment_method_display }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
+                                        <div class="flex flex-col">
+                                            <span class="text-lg">Le {{ payment.amount|floatformat:2 }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                            {% if payment.status == 'completed' %}bg-green-100 text-green-800
+                                            {% elif payment.status == 'pending' %}bg-yellow-100 text-yellow-800
+                                            {% elif payment.status == 'failed' %}bg-red-100 text-red-800
+                                            {% elif payment.status == 'refunded' %}bg-blue-100 text-blue-800
+                                            {% elif payment.status == 'cancelled' %}bg-gray-100 text-gray-800
+                                            {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                            <i class="fas 
+                                                {% if payment.status == 'completed' %}fa-check
+                                                {% elif payment.status == 'pending' %}fa-clock
+                                                {% elif payment.status == 'failed' %}fa-times
+                                                {% elif payment.status == 'refunded' %}fa-undo
+                                                {% elif payment.status == 'cancelled' %}fa-ban
+                                                {% else %}fa-question{% endif %} mr-1"></i>
+                                            {{ payment.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <div class="flex items-center space-x-2">
+                                            {% if payment.status == 'pending' %}
+                                                <div class="flex space-x-1">
+                                                    <a href="{% url 'complete_payment' payment.payment_type %}?transaction_id={{ payment.transaction_id }}" 
+                                                       class="inline-flex items-center px-2 py-1 bg-green-600 text-white text-xs font-medium rounded hover:bg-green-700 transition-colors duration-200">
+                                                        <i class="fas fa-check text-xs mr-1"></i>Complete
+                                                    </a>
+                                                    <a href="{% url 'cancel_payment' payment.payment_type %}?transaction_id={{ payment.transaction_id }}" 
+                                                       class="inline-flex items-center px-2 py-1 bg-red-600 text-white text-xs font-medium rounded hover:bg-red-700 transition-colors duration-200">
+                                                        <i class="fas fa-times text-xs mr-1"></i>Cancel
+                                                    </a>
+                                                </div>
+                                            {% else %}
+                                                <!-- Payment Details -->
+                                                {% if payment.details.exists %}
+                                                    <button type="button" class="inline-flex items-center px-2 py-1 bg-blue-600 text-white text-xs font-medium rounded hover:bg-blue-700 transition-colors duration-200" 
+                                                            data-bs-toggle="modal" data-bs-target="#paymentDetails{{ payment.pk }}">
+                                                        <i class="fas fa-info-circle text-xs mr-1"></i>Details
+                                                    </button>
+                                                {% endif %}
+                                                
+                                                <button onclick="printReceipt({{ payment.pk }})" class="inline-flex items-center px-2 py-1 bg-gray-600 text-white text-xs font-medium rounded hover:bg-gray-700 transition-colors duration-200">
+                                                    <i class="fas fa-print text-xs mr-1"></i>Print
+                                                </button>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Enhanced Payment Details Modals -->
+                {% for payment in payments %}
+                    {% if payment.details.exists %}
+                        <div class="modal fade" id="paymentDetails{{ payment.pk }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header bg-gradient-to-r from-fbc-green-500 to-fbc-green-600 text-white">
+                                        <h5 class="modal-title">
+                                            <i class="fas fa-info-circle mr-2"></i>
+                                            Payment Details - {{ payment.transaction_id }}
+                                        </h5>
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="row mb-4">
+                                            <div class="col-md-6">
+                                                <h6 class="font-semibold text-gray-900 mb-2">Payment Information</h6>
+                                                <div class="bg-gray-50 p-3 rounded-lg">
+                                                    <p class="mb-1"><strong>Amount:</strong> Le {{ payment.amount|floatformat:2 }}</p>
+                                                    <p class="mb-1"><strong>Type:</strong> {{ payment.get_payment_type_display }}</p>
+                                                    <p class="mb-1"><strong>Method:</strong> {{ payment.get_payment_method_display }}</p>
+                                                    <p class="mb-0"><strong>Status:</strong> {{ payment.get_status_display }}</p>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <h6 class="font-semibold text-gray-900 mb-2">Transaction Timeline</h6>
+                                                <div class="bg-gray-50 p-3 rounded-lg">
+                                                    <p class="mb-1"><strong>Created:</strong> {{ payment.created_at|date:"M d, Y H:i" }}</p>
+                                                    {% if payment.completed_at %}
+                                                        <p class="mb-0"><strong>Completed:</strong> {{ payment.completed_at|date:"M d, Y H:i" }}</p>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <h6 class="font-semibold text-gray-900 mb-3">Payment Details</h6>
+                                        {% for detail in payment.details.all %}
+                                            <div class="border rounded-lg p-4 mb-3">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <p class="mb-2"><strong>Reference:</strong> <code class="bg-gray-100 px-2 py-1 rounded">{{ detail.reference }}</code></p>
+                                                        {% if detail.borrowing %}
+                                                            <p class="mb-2">
+                                                                <strong>Related Book:</strong> 
+                                                                <a href="#" class="text-fbc-green-600 hover:underline">
+                                                                    {{ detail.borrowing.book.title }}
+                                                                </a>
+                                                            </p>
+                                                        {% endif %}
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        {% if detail.details %}
+                                                            <p class="mb-2"><strong>Additional Details:</strong></p>
+                                                            <div class="bg-gray-100 p-2 rounded text-sm">
+                                                                <pre class="mb-0">{{ detail.details|pprint }}</pre>
+                                                            </div>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        <button type="button" onclick="printReceipt({{ payment.pk }})" class="btn btn-fbc-green">
+                                            <i class="fas fa-print mr-1"></i>Print Receipt
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+
+                <!-- Pagination -->
+                {% if is_paginated %}
+                    <div class="px-6 py-4 bg-gray-50 border-t border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <p class="text-sm text-gray-700">
+                                    Showing page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                                    ({{ page_obj.paginator.count }} total entries)
+                                </p>
+                            </div>
+                            <div class="flex space-x-2">
+                                {% if page_obj.has_previous %}
+                                    <a href="?page={{ page_obj.previous_page_number }}&{{ request.GET.urlencode }}" 
+                                       class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200">
+                                        <i class="fas fa-chevron-left mr-1"></i>Previous
+                                    </a>
+                                {% endif %}
+
+                                {% for num in page_obj.paginator.page_range %}
+                                    {% if page_obj.number == num %}
+                                        <span class="inline-flex items-center px-3 py-2 border border-fbc-green-500 text-sm font-medium rounded-md text-fbc-green-600 bg-fbc-green-50">
+                                            {{ num }}
+                                        </span>
+                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                        <a href="?page={{ num }}&{{ request.GET.urlencode }}" 
+                                           class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200">
+                                            {{ num }}
+                                        </a>
+                                    {% endif %}
+                                {% endfor %}
+
+                                {% if page_obj.has_next %}
+                                    <a href="?page={{ page_obj.next_page_number }}&{{ request.GET.urlencode }}" 
+                                       class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200">
+                                        Next<i class="fas fa-chevron-right ml-1"></i>
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            {% else %}
+                <div class="px-6 py-12 text-center">
+                    <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                        <i class="fas fa-wallet text-gray-400 text-3xl"></i>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">No payment history found</h3>
+                    <p class="text-gray-500 mb-4">There are no payment records matching your current filters.</p>
+                    <a href="{% url 'fbc_payments:payment_history' %}" 
+                       class="inline-flex items-center px-4 py-2 bg-fbc-green-600 text-white font-medium rounded-lg hover:bg-fbc-green-700 transition-colors duration-200">
+                        <i class="fas fa-refresh mr-2"></i>
+                        Clear Filters
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript for Enhanced Functionality -->
+<script>
+// Export payments functionality
+function exportPayments() {
+    // In a real implementation, this would generate and download a CSV/Excel file
+    alert('Export functionality will be implemented to generate CSV/Excel reports.');
+}
+
+// Refresh data functionality
+function refreshData() {
+    window.location.reload();
+}
+
+// Print receipt functionality
+function printReceipt(paymentId) {
+    // In a real implementation, this would generate a printable receipt
+    alert('Print receipt functionality for payment ID: ' + paymentId);
+    // window.open('/payments/receipt/' + paymentId + '/', '_blank');
+}
+
+// Enhanced search functionality
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-submit form on filter change
+    const filterSelects = document.querySelectorAll('#payment_type, #payment_method, #status');
+    filterSelects.forEach(select => {
+        select.addEventListener('change', function() {
+            // Optional: Auto-submit on change
+            // this.form.submit();
+        });
+    });
+
+    // Add loading states to buttons
+    const submitButton = document.querySelector('button[type="submit"]');
+    if (submitButton) {
+        submitButton.addEventListener('click', function() {
+            this.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Filtering...';
+        });
+    }
+});
+
+// Bootstrap modal functionality
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Bootstrap modals if not already initialized
+    const modals = document.querySelectorAll('.modal');
+    modals.forEach(modal => {
+        new bootstrap.Modal(modal);
+    });
+});
+</script>
+
+<!-- Custom CSS for enhanced styling -->
+<style>
+.btn-fbc-green {
+    background-color: #22c55e;
+    border-color: #22c55e;
+    color: white;
+}
+
+.btn-fbc-green:hover {
+    background-color: #16a34a;
+    border-color: #16a34a;
+    color: white;
+}
+
+.table-responsive {
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.modal-content {
+    border: none;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.modal-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.modal-footer {
+    border-top: 1px solid #e5e7eb;
+}
+
+pre {
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+/* Loading animation */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.fa-spinner {
+    animation: spin 1s linear infinite;
+}
+
+/* Hover effects for table rows */
+.hover\:bg-gray-50:hover {
+    background-color: #f9fafb;
+}
+
+/* Custom scrollbar for modal */
+.modal-body {
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.modal-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+    background: #22c55e;
+    border-radius: 3px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+    background: #16a34a;
+}
+</style>
+{% endblock %}
+

@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    /* Dashboard specific styles */
+    .dashboard-page {
+        /* Mark this as a dashboard page for sidebar detection */
+    }
+    
+    /* Sidebar transition styles */
+    .sidebar-open .main-content {
+        margin-left: 16rem; /* 256px / 16 = 16rem */
+        transition: margin-left 0.3s ease-in-out;
+    }
+    
+    .main-content {
+        transition: margin-left 0.3s ease-in-out;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 1024px) {
+        .sidebar-open .main-content {
+            margin-left: 0;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-page">
+    <!-- Main Dashboard Content -->
+    <div class="main-content">
+        <!-- Dashboard Header -->
+        <div class="mb-8">
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900">{% block dashboard_title %}Dashboard{% endblock %}</h1>
+                        <p class="text-gray-600 mt-1">{% block dashboard_subtitle %}Welcome to your personalized dashboard{% endblock %}</p>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        {% if user.user_type == 'student' and user.subscription_end_date %}
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                            {% if user.is_subscription_active %}
+                                bg-green-100 text-green-800 border border-green-200
+                            {% else %}
+                                bg-red-100 text-red-800 border border-red-200
+                            {% endif %}">
+                            <i class="fas fa-graduation-cap mr-2"></i>
+                            {% if user.is_subscription_active %}
+                                Subscription Active
+                            {% else %}
+                                Subscription Expired
+                            {% endif %}
+                        </span>
+                        {% endif %}
+                        <div class="text-right">
+                            <p class="text-sm text-gray-500">{{ user.get_user_type_display }}</p>
+                            <p class="text-lg font-semibold text-gray-900">{{ user.get_full_name|default:user.username }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Dashboard Content Area -->
+        {% block dashboard_content %}
+        {% endblock %}
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+});
+
+// Update current time
+function updateTime() {
+    const now = new Date();
+    const timeString = now.toLocaleTimeString();
+    const dateString = now.toLocaleDateString();
+    document.getElementById('current-time').textContent = `${timeString} | ${dateString}`;
+}
+
+// Update time every second
+setInterval(updateTime, 1000);
+updateTime(); // Initial call
+</script>
+{% endblock %}

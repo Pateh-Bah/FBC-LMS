@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="card">
+        <div class="card-header">
+            <h2>Fine Details</h2>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h4>Book Information</h4>
+                    <p><strong>Title:</strong> {{ fine.book.title }}</p>
+                    <p><strong>Author:</strong> {{ fine.book.author }}</p>
+                    
+                    <h4 class="mt-4">Fine Information</h4>
+                    <p><strong>Type:</strong> {{ fine.get_fine_type_display }}</p>
+                    <p><strong>Amount:</strong> ${{ fine.amount }}</p>
+                    <p><strong>Status:</strong> 
+                        <span class="badge {% if fine.status == 'paid' %}bg-success{% elif fine.status == 'pending' %}bg-warning{% else %}bg-secondary{% endif %}">
+                            {{ fine.get_status_display }}
+                        </span>
+                    </p>
+                    <p><strong>Issue Date:</strong> {{ fine.date_issued|date:"M d, Y H:i" }}</p>
+                    <p><strong>Due Date:</strong> {{ fine.due_date|date:"M d, Y H:i" }}</p>
+                </div>
+                
+                <div class="col-md-6">
+                    {% if fine.status == 'paid' %}
+                        <h4>Payment Information</h4>
+                        <p><strong>Payment Date:</strong> {{ fine.payment_date|date:"M d, Y H:i" }}</p>
+                        <p><strong>Payment Method:</strong> {{ fine.payment_method }}</p>
+                        {% if fine.payment_reference %}
+                        <p><strong>Reference:</strong> {{ fine.payment_reference }}</p>
+                        {% endif %}
+                    {% endif %}
+                    
+                    {% if fine.notes %}
+                    <h4 class="mt-4">Additional Notes</h4>
+                    <p>{{ fine.notes|linebreaks }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="mt-4">
+                <a href="{% url 'fbc_fines:fine_list' %}" class="btn btn-secondary">Back to Fines</a>
+                {% if fine.status == 'pending' %}
+                <a href="{% url 'fbc_fines:pay_fine' fine.pk %}" class="btn btn-success">Pay Fine</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

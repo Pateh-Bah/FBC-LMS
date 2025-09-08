@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Simulate PayPal Payment{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Simulate PayPal Payment</h2>
+    <p>You will be "redirected" to a PayPal-like interface to complete your payment.</p>
+    <p><strong>Amount to Pay:</strong> GMD {{ amount }} (will be converted by PayPal)</p>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post" action="{% url 'fbc_payments:complete_simulated_payment' %}" class="border p-4 rounded bg-light">
+        {% csrf_token %}
+        <input type="hidden" name="payment_id" value="{{ payment_id }}">
+        <input type="hidden" name="payment_method" value="paypal">
+
+        <h4 class="mb-3">PayPal Checkout (Simulation)</h4>
+        
+        <div class="mb-3">
+            <label for="paypal_email" class="form-label">PayPal Email</label>
+            <input type="email" class="form-control" id="paypal_email" name="paypal_email" value="{{ request.user.email|default:'' }}" placeholder="Enter your PayPal email" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="paypal_password" class="form-label">PayPal Password (Simulated)</label>
+            <input type="password" class="form-control" id="paypal_password" name="paypal_password" placeholder="Enter any password for simulation" required>
+        </div>
+        
+        <hr class="my-4">
+
+        <p>You are paying <strong>GMD {{ amount }}</strong> to FBC Library.</p>
+        
+        <button type="submit" class="btn btn-primary w-100">Log In & Pay Now (Simulated)</button>
+        <div class="text-center mt-2">
+            <a href="{% url 'fbc_payments:process_payment' %}" class="btn btn-link btn-sm">Cancel and return to merchant</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

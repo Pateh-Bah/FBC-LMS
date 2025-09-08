@@ -1,0 +1,306 @@
+{% extends "admin/admin_base.html" %}
+{% load static %}
+
+{% block page_title %}Staff Dashboard{% endblock %}
+
+{% block content %}
+<!-- Welcome Banner -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="dashboard-card p-4" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none;">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <h1 class="h3 mb-2">
+                        <i class="fas fa-users-cog me-2"></i>
+                        Staff Dashboard
+                    </h1>
+                    <p class="mb-0 opacity-90">Library operations and patron assistance</p>
+                </div>
+                <div class="text-end">
+                    <div class="glass-effect px-3 py-2 rounded">
+                        <small class="d-block">Staff Access</small>
+                        <strong>{{ user.get_user_type_display }}</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="dashboard-card stat-card info p-4">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="stat-number">{{ total_books }}</div>
+                    <div class="stat-label">Total Books</div>
+                </div>
+                <div class="stat-icon">
+                    <i class="fas fa-book"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="dashboard-card stat-card success p-4">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="stat-number">{{ active_borrowings }}</div>
+                    <div class="stat-label">Active Borrowings</div>
+                </div>
+                <div class="stat-icon">
+                    <i class="fas fa-exchange-alt"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="dashboard-card stat-card warning p-4">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="stat-number">{{ overdue_books }}</div>
+                    <div class="stat-label">Overdue Books</div>
+                </div>
+                <div class="stat-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="dashboard-card stat-card p-4" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="stat-number">{{ daily_visitors }}</div>
+                    <div class="stat-label">Today's Visitors</div>
+                </div>
+                <div class="stat-icon">
+                    <i class="fas fa-user-friends"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions Grid -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="dashboard-card p-4">
+            <h5 class="mb-4">
+                <i class="fas fa-bolt me-2 text-gradient"></i>
+                Quick Actions
+            </h5>
+            <div class="row">
+                <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
+                    <a href="{% url 'fbc_books:manage_books' %}" class="quick-action">
+                        <i class="fas fa-book text-primary"></i>
+                        <div>
+                            <div class="fw-semibold">Manage Books</div>
+                            <small class="text-muted">Add, edit books</small>
+                        </div>
+                    </a>
+                </div>
+                
+                <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
+                    <a href="{% url 'fbc_books:manage_borrowings' %}" class="quick-action">
+                        <i class="fas fa-exchange-alt text-info"></i>
+                        <div>
+                            <div class="fw-semibold">Borrowings</div>
+                            <small class="text-muted">Track loans</small>
+                        </div>
+                    </a>
+                </div>
+                
+                <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
+                    <a href="{% url 'fbc_fines:manage_fines' %}" class="quick-action">
+                        <i class="fas fa-money-bill-wave text-warning"></i>
+                        <div>
+                            <div class="fw-semibold">Fines</div>
+                            <small class="text-muted">Manage penalties</small>
+                        </div>
+                    </a>
+                </div>
+                
+                <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
+                    <a href="{% url 'fbc_payments:payment_history' %}" class="quick-action">
+                        <i class="fas fa-credit-card text-secondary"></i>
+                        <div>
+                            <div class="fw-semibold">Payments</div>
+                            <small class="text-muted">View payments</small>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="row">
+    <div class="col-lg-8 mb-4">
+        <div class="dashboard-card">
+            <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-clock me-2 text-success"></i>
+                    Recent Borrowings
+                </h5>
+                <a href="{% url 'fbc_books:manage_borrowings' %}" class="btn btn-sm btn-outline-success">
+                    <i class="fas fa-eye me-1"></i>View All
+                </a>
+            </div>
+            <div class="card-body p-0">
+                {% if recent_borrowings %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="border-0 fw-semibold">User</th>
+                                    <th class="border-0 fw-semibold">Book</th>
+                                    <th class="border-0 fw-semibold">Due Date</th>
+                                    <th class="border-0 fw-semibold">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for borrowing in recent_borrowings %}
+                                <tr>
+                                    <td class="border-0 py-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-success rounded-circle d-flex align-items-center justify-content-center text-white me-2" style="width: 32px; height: 32px; font-size: 0.8rem;">
+                                                {{ borrowing.user.get_full_name|default:borrowing.user.username|first|upper }}
+                                            </div>
+                                            <div>
+                                                <div class="fw-medium">{{ borrowing.user.get_full_name|default:borrowing.user.username }}</div>
+                                                <small class="text-muted">{{ borrowing.user.email }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="border-0 py-3">
+                                        <div class="fw-medium">{{ borrowing.book.title }}</div>
+                                        <small class="text-muted">{{ borrowing.book.isbn }}</small>
+                                    </td>
+                                    <td class="border-0 py-3">
+                                        <div class="fw-medium">{{ borrowing.due_date|date:"M d, Y" }}</div>
+                                        <small class="text-muted">{{ borrowing.due_date|timeuntil }}</small>
+                                    </td>
+                                    <td class="border-0 py-3">
+                                        {% if borrowing.due_date < today %}
+                                            <span class="badge bg-danger">Overdue</span>
+                                        {% else %}
+                                            <span class="badge bg-success">On Time</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No recent borrowings found.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4 mb-4">
+        <div class="dashboard-card">
+            <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-money-bill-wave me-2 text-warning"></i>
+                    Recent Fines
+                </h5>
+                <a href="{% url 'fbc_fines:manage_fines' %}" class="btn btn-sm btn-outline-warning">
+                    <i class="fas fa-eye me-1"></i>View All
+                </a>
+            </div>
+            <div class="card-body p-0">
+                {% if recent_fines %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="border-0 fw-semibold">User</th>
+                                    <th class="border-0 fw-semibold">Amount</th>
+                                    <th class="border-0 fw-semibold">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for fine in recent_fines %}
+                                <tr>
+                                    <td class="border-0 py-3">
+                                        <div class="fw-medium">{{ fine.user.get_full_name|default:fine.user.username }}</div>
+                                        <small class="text-muted">{{ fine.get_fine_type_display }}</small>
+                                    </td>
+                                    <td class="border-0 py-3">
+                                        <div class="fw-medium">Le {{ fine.amount|floatformat:2 }}</div>
+                                        <small class="text-muted">{{ fine.date_issued|date:"M d" }}</small>
+                                    </td>
+                                    <td class="border-0 py-3">
+                                        {% if fine.status == 'paid' %}
+                                            <span class="badge bg-success">{{ fine.get_status_display }}</span>
+                                        {% elif fine.status == 'pending' %}
+                                            <span class="badge bg-warning">{{ fine.get_status_display }}</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">{{ fine.get_status_display }}</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-hand-holding-usd fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No recent fines found.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Staff Tools -->
+<div class="row">
+    <div class="col-12">
+        <div class="dashboard-card p-4">
+            <h5 class="mb-4">
+                <i class="fas fa-tools me-2 text-success"></i>
+                Staff Tools
+            </h5>
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <div class="text-center">
+                        <div class="h4 text-success">{{ available_books }}</div>
+                        <div class="text-muted">Available Books</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="text-center">
+                        <div class="h4 text-info">{{ total_borrowings }}</div>
+                        <div class="text-muted">Total Borrowings</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="text-center">
+                        <div class="h4 text-warning">{{ pending_returns }}</div>
+                        <div class="text-muted">Pending Returns</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="text-center">
+                        <div class="h4 text-primary">{{ daily_visitors|default:0 }}</div>
+                        <div class="text-muted">Today's Visitors</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
