@@ -1,14 +1,31 @@
 {
   "version": 2,
   "builds": [
-    { "src": "Dockerfile", "use": "@vercel/docker" }
+    {
+      "src": "api/index.py",
+      "use": "@vercel/python"
+    }
   ],
   "routes": [
-    { "src": "/static/(.*)", "dest": "/static/$1" },
-    { "src": "/media/(.*)", "dest": "/media/$1" },
-    { "src": "/(.*)", "dest": "/" }
+    {
+      "src": "/static/(.*)",
+      "dest": "/static/$1"
+    },
+    {
+      "src": "/media/(.*)",
+      "dest": "/media/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/api/index.py"
+    }
   ],
   "env": {
-    "DJANGO_SETTINGS_MODULE": "library_system.settings_vercel"
+    "DJANGO_SETTINGS_MODULE": "library_system.settings"
+  },
+  "functions": {
+    "api/index.py": {
+      "maxDuration": 30
+    }
   }
 }

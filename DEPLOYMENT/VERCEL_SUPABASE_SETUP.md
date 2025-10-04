@@ -107,13 +107,19 @@ Vercel: connect repository and add environment variables
    - Output Directory: staticfiles
    - Environment: set to "Production" variables as shown above
 
-Note on running Django on Vercel (options)
-------------------------------------------
-- Vercel is primarily for serverless deployments; long-lived Gunicorn processes are not directly supported.
-- Recommended options:
-  1. Deploy Django using Docker on Vercel (Vercel supports building Docker images): create a Dockerfile and add it to repo; Vercel will use Docker to run your app. This is the cleanest approach for a full Django app.
-  2. Use an alternative hosting provider (Render, Railway, Fly, Heroku, or a VPS) that supports persistent web processes if Docker on Vercel is not desired.
-  3. If you still want to use Vercel serverless functions, you must adapt Django to run under a serverless adapter (advanced).
+Note on running Django on Vercel (and alternatives)
+--------------------------------------------------
+Vercel is optimized for serverless and frontend frameworks. It supports Docker-based deployments for full Django apps, but if you do not want to use Docker there are two practical approaches:
+
+1) Use a hosting provider that supports persistent Python web processes (recommended if you are not using Docker):
+  - Render (render.com), Railway (railway.app), Fly (fly.io), or Heroku are excellent choices and can run Gunicorn directly from your Git repo using a `Procfile` or a `render.yaml` manifest.
+  - I added a `Procfile` and a `render.yaml` manifest to this repo to make deploying to Render or Heroku straightforward.
+
+2) Use Vercel only for your frontend (Next.js/React) and host Django on Render/Railway/Heroku. Keep the frontend and backend separated; the frontend uses `NEXT_PUBLIC_SUPABASE_*` to talk to Supabase or calls your Django API hosted elsewhere.
+
+3) Advanced: Convert Django into serverless functions for Vercel (requires substantial refactor and a WSGI-to-serverless adapter). Not recommended unless you want to invest in serverless migration.
+
+Given you prefer not to use Docker, I updated the repo to include a `Procfile` and a `render.yaml` so you can deploy to Render or Heroku with minimal changes.
 
 Sample Dockerfile (recommended for Vercel Docker deployment)
 -----------------------------------------------------------

@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: fbc-lms
+    env: python
+    plan: free
+    repo: https://github.com/Pateh-Bah/FBC-LMS
+    branch: main
+  buildCommand: pip install -r requirements.txt && python manage.py migrate --noinput && python manage.py collectstatic --noinput
+  startCommand: gunicorn library_system.wsgi:application --bind 0.0.0.0:$PORT --workers 3
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: library_system.settings_vercel
+      - key: DATABASE_URL
+        fromServiceSecret: DATABASE_URL
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        fromServiceSecret: SUPABASE_SERVICE_ROLE_KEY
