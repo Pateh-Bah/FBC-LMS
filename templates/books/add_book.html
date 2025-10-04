@@ -77,6 +77,24 @@
                         </select>
                     </div>
 
+                    <!-- E-Book File (PDF) -->
+                    <div id="pdf_file_group" class="md:col-span-2 hidden">
+                        <label for="pdf_file" class="block text-sm font-semibold text-fbc-navy-800 mb-2">
+                            <i class="fas fa-file-pdf mr-1 text-fbc-green-500"></i>E-Book File (PDF)
+                        </label>
+                        <div class="flex items-center justify-center w-full">
+                            <label for="pdf_file" class="flex flex-col items-center justify-center w-full h-32 border-2 border-fbc-green-300 border-dashed rounded-lg cursor-pointer bg-fbc-green-50 hover:bg-fbc-green-100 transition-colors duration-200">
+                                <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                    <i class="fas fa-cloud-upload-alt text-3xl text-fbc-green-500 mb-2"></i>
+                                    <p class="mb-2 text-sm text-fbc-green-600 font-body"><span class="font-semibold">Click to upload</span> ebook PDF</p>
+                                    <p class="text-xs text-fbc-green-500">PDF only (MAX. 50MB)</p>
+                                </div>
+                                <input id="pdf_file" name="pdf_file" type="file" class="hidden" accept="application/pdf,.pdf" />
+                            </label>
+                        </div>
+                    </div>
+
+
                     <!-- Book Type -->
                     <div>
                         <label for="book_type" class="block text-sm font-semibold text-fbc-navy-800 mb-2">
@@ -88,6 +106,24 @@
                             <option value="ebook">E-Book</option>
                         </select>
                     </div>
+
+                    <!-- E-Book File (PDF) -->
+                    <div id="pdf_file_group" class="md:col-span-2 hidden">
+                        <label for="pdf_file" class="block text-sm font-semibold text-fbc-navy-800 mb-2">
+                            <i class="fas fa-file-pdf mr-1 text-fbc-green-500"></i>E-Book File (PDF)
+                        </label>
+                        <div class="flex items-center justify-center w-full">
+                            <label for="pdf_file" class="flex flex-col items-center justify-center w-full h-32 border-2 border-fbc-green-300 border-dashed rounded-lg cursor-pointer bg-fbc-green-50 hover:bg-fbc-green-100 transition-colors duration-200">
+                                <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                    <i class="fas fa-cloud-upload-alt text-3xl text-fbc-green-500 mb-2"></i>
+                                    <p class="mb-2 text-sm text-fbc-green-600 font-body"><span class="font-semibold">Click to upload</span> ebook PDF</p>
+                                    <p class="text-xs text-fbc-green-500">PDF only (MAX. 50MB)</p>
+                                </div>
+                                <input id="pdf_file" name="pdf_file" type="file" class="hidden" accept="application/pdf,.pdf" />
+                            </label>
+                        </div>
+                    </div>
+
 
                     <!-- Total Copies -->
                     <div>
@@ -197,6 +233,29 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
         }
     });
+
+    
+
+    // Show/hide ebook file field based on book type
+    function toggleEbookFieldAdd() {
+        const typeSel = document.getElementById('book_type');
+        const group = document.getElementById('pdf_file_group');
+        if (!typeSel || !group) return;
+        if (typeSel.value === 'ebook') {
+            group.classList.remove('hidden');
+            const pdfInput = document.getElementById('pdf_file');
+            if (pdfInput) pdfInput.required = true;
+        } else {
+            group.classList.add('hidden');
+            const pdfInput = document.getElementById('pdf_file');
+            if (pdfInput) { pdfInput.value = ''; pdfInput.required = false; }
+        }
+    }
+    const typeSelAdd = document.getElementById('book_type');
+    if (typeSelAdd) {
+        typeSelAdd.addEventListener('change', toggleEbookFieldAdd);
+        toggleEbookFieldAdd(); // init
+    }
 
     // Auto-sync total and available copies
     document.getElementById('total_copies').addEventListener('input', function() {

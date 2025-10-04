@@ -117,7 +117,7 @@ def verify_payment(request, pk):
     )
 
     messages.success(request, f'Payment of Le {fine.amount} verified successfully.')
-    return redirect('fbc_books:admin_dashboard')
+    return redirect('fbc_users:admin_dashboard')
 
 @login_required
 @user_passes_test(is_staff_or_admin)
@@ -326,6 +326,78 @@ def my_fines(request):
     return render(request, 'fbc_fines/my_fines.html', context)
 
 @login_required
+def process_fine_payment(request, fine_id):
+    """Process the fine payment"""
+    if request.method != 'POST':
+        return redirect('fbc_fines:my_fines')
+
+    fine = get_object_or_404(Fine, id=fine_id, user=request.user, status='pending')
+
+    payment_method = request.POST.get('payment_method')
+    amount = fine.amount
+    payment_successful = False
+    transaction_id = ""
+    payment_details = {}
+
+    if payment_method in ['orange_money', 'afrimoney', 'qmoney']:
+        phone_number = request.POST.get('phone_number')
+        password = request.POST.get('password')
+        # Simulate mobile money payment processing
+        if phone_number and password: # Basic validation
+            payment_successful = True
+            transaction_id = f"MM-{timezone.now().timestamp()}"
+            payment_details = {
+                'payment_type': 'Mobile Money',
+                'provider': payment_method,
+                'phone_number': phone_number,
+                'transaction_reference': transaction_id
+            }
+        else:
+            messages.error(request, 'Please provide phone number and password for Mobile Money.')
+
+    elif payment_method == 'paypal':
+        card_number = request.POST.get('card_number')
+        expiry_date = request.POST.get('expiry_date')
+        cvc = request.POST.get('cvc')
+        cardholder_name = request.POST.get('cardholder_name')
+        # Simulate PayPal/Credit Card payment processing
+        if card_number and expiry_date and cvc and cardholder_name: # Basic validation
+            payment_successful = True
+            transaction_id = f"CC-{timezone.now().timestamp()}"
+            last_four = card_number[-4:] if len(card_number) >= 4 else card_number
+            payment_details = {
+                'payment_type': 'Credit Card',
+                'last_four_digits': last_four,
+                'expiry_date': expiry_date,
+                'cardholder_name': cardholder_name,
+                'transaction_reference': transaction_id
+            }
+        else:
+            messages.error(request, 'Please provide all credit card details including cardholder name.')
+
+    if payment_successful:
+        fine.status = 'paid'
+        fine.payment_date = timezone.now()
+        fine.save()
+
+        # Record the payment
+        from fbc_payments.models import Payment
+        Payment.objects.create(
+            user=request.user,
+            amount=amount,
+            payment_type='fine',
+            payment_method=payment_method,
+            transaction_id=transaction_id,
+            status='completed',
+            details=payment_details
+        )
+        messages.success(request, f'Fine of Le {fine.amount} paid successfully!')
+        return redirect('fbc_fines:my_fines')
+    else:
+        messages.error(request, 'Payment failed. Please check your details and try again.')
+        return redirect('fbc_fines:my_fines')
+
+@login_required
 @user_passes_test(is_staff_or_admin)
 def mark_fine_paid(request, fine_id):
     """AJAX view to mark a fine as paid"""
@@ -401,3 +473,4 @@ def export_fines(request):
         ])
     
     return response
+

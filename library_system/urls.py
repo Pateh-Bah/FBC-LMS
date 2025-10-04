@@ -35,3 +35,6 @@ urlpatterns = [
     path('payments/', include('fbc_payments.urls')),  # namespace already defined in urls.py
     path('', include('fbc_books.urls')),  # Root URLs handled by fbc_books
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

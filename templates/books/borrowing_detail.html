@@ -5,7 +5,7 @@
 <div class="container-fluid">
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'fbc_books:admin_dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'fbc_users:admin_dashboard' %}">Dashboard</a></li>
             <li class="breadcrumb-item"><a href="{% url 'fbc_books:manage_borrowings' %}">Manage Borrowings</a></li>
             <li class="breadcrumb-item active">{{ borrowing.book.title }}</li>
         </ol>

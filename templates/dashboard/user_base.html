@@ -1,0 +1,459 @@
+{% load admin_tags %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}User Dashboard - {{ system_name|default:"FBC Library" }}{% endblock %}</title>
+    
+    {% if system_favicon %}
+    <link rel="icon" href="{{ system_favicon }}" type="image/x-icon">
+    {% endif %}
+    
+    <!-- Google Fonts - Premium Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        // FBC Green Color Scheme
+                        'fbc-green': {
+                            50: '#f0fdf4',
+                            100: '#dcfce7', 
+                            200: '#bbf7d0',
+                            300: '#86efac',
+                            400: '#4ade80',
+                            500: '#22c55e', // Primary FBC Green
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                        },
+                        'fbc-navy': {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        },
+                        primary: '{{ primary_color|default:"#22c55e" }}',
+                        sidebar: '{{ sidebar_color|default:"#0f172a" }}',
+                        header: '{{ header_color|default:"#1e293b" }}',
+                        footer: '{{ footer_color|default:"#334155" }}',
+                    },
+                    fontFamily: {
+                        'serif': ['Playfair Display', 'serif'],
+                        'body': ['Crimson Text', 'serif'],
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.6s ease-out',
+                        'slide-in': 'slideIn 0.4s ease-out',
+                        'bounce-in': 'bounceIn 0.8s ease-out',
+                        'glow': 'glow 3s ease-in-out infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* FBC Green Color Palette */
+        :root {
+            --fbc-green: #22c55e;
+            --fbc-green-dark: #16a34a;
+            --fbc-green-light: #4ade80;
+            --fbc-navy: #0f172a;
+            --fbc-navy-light: #1e293b;
+            --fbc-gray: #64748b;
+        }
+
+        /* Premium Typography */
+        .font-serif {
+            font-family: 'Playfair Display', serif;
+        }
+        
+        .font-body {
+            font-family: 'Crimson Text', serif;
+        }
+        
+        .font-sans {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Enhanced Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(-100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes glow {
+            0%, 100% { 
+                box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+            }
+            50% { 
+                box-shadow: 0 0 30px rgba(34, 197, 94, 0.6), 0 0 40px rgba(34, 197, 94, 0.4);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% { 
+                transform: translateY(0px);
+            }
+            50% { 
+                transform: translateY(-8px);
+            }
+        }
+        
+        /* FBC Green Gradient Backgrounds */
+        .gradient-bg {
+            background: linear-gradient(135deg, var(--fbc-green), var(--fbc-green-dark));
+        }
+        
+        .gradient-sidebar {
+            background: linear-gradient(180deg, var(--fbc-navy), var(--fbc-navy-light));
+        }
+        
+        /* Glass Effect with FBC Colors */
+        .glass-effect {
+            backdrop-filter: blur(16px);
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+        }
+        
+        /* Enhanced Transitions */
+        .sidebar-transition {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* Custom Scrollbar with FBC Colors */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.3);
+            border-radius: 3px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: linear-gradient(to bottom, var(--fbc-green), var(--fbc-green-dark));
+            border-radius: 3px;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(to bottom, var(--fbc-green-light), var(--fbc-green));
+        }
+
+        /* Enhanced Card Effects */
+        .admin-card {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .admin-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(34, 197, 94, 0.1), transparent);
+            transition: left 0.6s;
+        }
+
+        .admin-card:hover::before {
+            left: 100%;
+        }
+
+        .admin-card:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(34, 197, 94, 0.2);
+        }
+
+        /* Text Visibility Enhancements */
+        .text-contrast {
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .bg-contrast {
+            background: rgba(255, 255, 255, 1);
+            backdrop-filter: blur(10px);
+        }
+
+        /* Navigation Active States */
+        .nav-active {
+            background: rgba(34, 197, 94, 0.2) !important;
+            border-left: 4px solid var(--fbc-green) !important;
+            color: white !important;
+        }
+
+        /* Enhanced Button Styling */
+        .btn-fbc {
+            background: linear-gradient(135deg, var(--fbc-green), var(--fbc-green-dark));
+            border: 2px solid var(--fbc-green);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-fbc:hover {
+            background: linear-gradient(135deg, var(--fbc-green-light), var(--fbc-green));
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(34, 197, 94, 0.3);
+        }
+
+        /* Ensure white background for content areas */
+        .content-area {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Additional FBC Green accents */
+        .accent-green {
+            color: var(--fbc-green);
+        }
+
+        .border-green {
+            border-color: var(--fbc-green);
+        }
+
+        .bg-green-light {
+            background-color: rgba(34, 197, 94, 0.1);
+        }
+    </style>
+</head>
+<body class="font-sans bg-white min-h-screen">
+    <!-- Sidebar -->
+    <nav class="fixed top-0 left-0 h-screen w-72 z-50 sidebar-transition transform custom-scrollbar overflow-y-auto shadow-2xl gradient-sidebar border-r-4 border-fbc-green-500" id="sidebar">
+        {% include 'admin/includes/sidebar.html' %}
+    </nav>
+
+    <!-- Main Content -->
+    <div class="ml-72 min-h-screen transition-all duration-300 ease-in-out" id="mainContent">
+        <!-- Top Navigation -->
+        {% include 'admin/includes/top_nav.html' %}
+
+        {% comment %} /* Page Content */ {% endcomment %}
+        <main class="p-8 animate-fade-in bg-white min-h-screen">
+            {% block content %}
+            {% endblock %}
+        </main>
+    </div>
+
+    <!-- Enhanced Footer -->
+    <footer class="ml-72 transition-all duration-300 shadow-xl border-t-4 border-fbc-green-500 bg-gradient-to-r from-fbc-navy-700 to-fbc-navy-600" id="footer">
+        <div class="px-8 py-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-6">
+                    <div class="flex items-center space-x-3">
+                        {% if system_logo %}
+                        <img src="{{ system_logo }}" alt="{{ system_name }}" class="h-8 w-auto">
+                        {% else %}
+                        <i class="fas fa-university text-fbc-green-400 text-2xl"></i>
+                        {% endif %}
+                        <div>
+                            <span class="text-white text-base font-serif font-semibold">
+                                &copy; {% now "Y" %} {{ system_name|default:"FBC Library System" }}
+                            </span>
+                            <p class="text-fbc-green-200 text-sm font-body">User Panel</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </footer>
+
+    <!-- Alpine.js for interactive components -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script>
+        // Sidebar toggle functionality with enhanced animations
+        const toggleButtons = document.querySelectorAll('.sidebar-toggle');
+        console.log('Found', toggleButtons.length, 'sidebar toggle buttons');
+        
+        toggleButtons.forEach((button, index) => {
+            console.log('Adding event listener to button', index + 1);
+            button.addEventListener('click', function() {
+                console.log('Sidebar toggle clicked! Button', index + 1);
+                const sidebar = document.getElementById('sidebar');
+                const mainContent = document.getElementById('mainContent');
+                const footer = document.getElementById('footer');
+                
+                if (window.innerWidth > 1024) {
+                    // Desktop behavior
+                    console.log('Desktop mode - toggling sidebar');
+                    sidebar.classList.toggle('-translate-x-full');
+                    if (sidebar.classList.contains('-translate-x-full')) {
+                        mainContent.classList.remove('ml-72');
+                        mainContent.classList.add('ml-0');
+                        footer.classList.remove('ml-72');
+                        footer.classList.add('ml-0');
+                        console.log('Sidebar hidden');
+                    } else {
+                        mainContent.classList.remove('ml-0');
+                        mainContent.classList.add('ml-72');
+                        footer.classList.remove('ml-0');
+                        footer.classList.add('ml-72');
+                        console.log('Sidebar shown');
+                    }
+                } else {
+                    // Mobile behavior
+                    console.log('Mobile mode - toggling sidebar');
+                    sidebar.classList.toggle('-translate-x-full');
+                }
+            });
+        });
+
+        // Close sidebar on mobile when clicking outside
+        document.addEventListener('click', function(event) {
+            if (window.innerWidth <= 1024) {
+                const sidebar = document.getElementById('sidebar');
+                const sidebarToggleButtons = document.querySelectorAll('.sidebar-toggle');
+                
+                // Check if click is outside sidebar and not on any toggle button
+                let clickedOnToggle = false;
+                sidebarToggleButtons.forEach(button => {
+                    if (button.contains(event.target)) {
+                        clickedOnToggle = true;
+                    }
+                });
+                
+                if (!sidebar.contains(event.target) && !clickedOnToggle) {
+                    sidebar.classList.add('-translate-x-full');
+                }
+            }
+        });
+
+        // Handle window resize with smooth transitions
+        window.addEventListener('resize', function() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            const footer = document.getElementById('footer');
+            
+            if (window.innerWidth > 1024) {
+                // Reset to desktop layout
+                sidebar.classList.remove('-translate-x-full');
+                mainContent.classList.add('ml-72');
+                mainContent.classList.remove('ml-0');
+                footer.classList.add('ml-72');
+                footer.classList.remove('ml-0');
+            } else {
+                // Reset to mobile layout
+                sidebar.classList.add('-translate-x-full');
+                mainContent.classList.remove('ml-72');
+                mainContent.classList.add('ml-0');
+                footer.classList.remove('ml-72');
+                footer.classList.add('ml-0');
+            }
+        });
+
+        // Enhanced dropdown functionality with smooth animations
+        function toggleDropdown(element) {
+            const dropdown = element.nextElementSibling;
+            const arrow = element.querySelector('.arrow');
+            const allDropdowns = document.querySelectorAll('.nav-dropdown');
+            const allArrows = document.querySelectorAll('.arrow');
+            
+            // Close other dropdowns
+            allDropdowns.forEach((dd, index) => {
+                if (dd !== dropdown) {
+                    dd.style.maxHeight = '0px';
+                    dd.classList.remove('show');
+                    allArrows[index].style.transform = 'rotate(0deg)';
+                }
+            });
+            
+            // Toggle current dropdown with smooth animation
+            if (dropdown.classList.contains('show')) {
+                dropdown.style.maxHeight = '0px';
+                dropdown.classList.remove('show');
+                arrow.style.transform = 'rotate(0deg)';
+            } else {
+                dropdown.style.maxHeight = dropdown.scrollHeight + 'px';
+                dropdown.classList.add('show');
+                arrow.style.transform = 'rotate(90deg)';
+            }
+        }
+
+        // Initialize mobile layout on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.innerWidth <= 1024) {
+                const sidebar = document.getElementById('sidebar');
+                const mainContent = document.getElementById('mainContent');
+                const footer = document.getElementById('footer');
+                
+                sidebar.classList.add('-translate-x-full');
+                mainContent.classList.remove('ml-72');
+                mainContent.classList.add('ml-0');
+                footer.classList.remove('ml-72');
+                footer.classList.add('ml-0');
+            }
+        });
+
+        // Add smooth scrolling to all anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add loading states for form submissions
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', function() {
+                const submitBtn = form.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner animate-spin mr-2"></i>Processing...';
+                }
+            });
+        });
+    </script>
+
+    {% block extra_js %}
+    {% endblock %}
+</body>
+</html>

@@ -1,0 +1,53 @@
+## System Setup Instructions
+
+### 1. Installation
+
+1.  **Create a virtual environment:**
+    ```bash
+    python -m venv venv
+    ```
+
+2.  **Activate the virtual environment:**
+    -   On Windows:
+        ```bash
+        venv\Scripts\activate
+        ```
+    -   On macOS/Linux:
+        ```bash
+        source venv/bin/activate
+        ```
+
+3.  **Install dependencies:**
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+4.  **Run database migrations:**
+    ```bash
+    python manage.py migrate
+    ```
+
+5.  **Run the development server:**
+    ```bash
+    python manage.py runserver
+    ```
+
+### 2. User Credentials
+
+Here are the default login credentials for the different user roles:
+
+*   **Admin:**
+    *   **Username:** `fbcadmin`
+    *   **Password:** `1234`
+
+*   **Staff:**
+    *   **Username:** `fbcstaff`
+    *   **Password:** `1234`
+
+*   **Student:**
+    *   **Username:** `student`
+    *   **Password:** `student123`
+
+*   **Lecturer:**
+    *   **Username:** `lecturer`
+    *   **Password:** `lecturer1`

@@ -1,0 +1,266 @@
+{% load admin_tags %}
+
+<!-- Sidebar Header -->
+<div class="p-6 border-b border-fbc-green-500 border-opacity-30 bg-gradient-to-r from-fbc-green-600 to-fbc-green-500">
+    <a href="{% url 'fbc_users:admin_dashboard' %}" 
+       class="flex items-center text-white hover:text-fbc-green-100 transition-colors duration-300 group">
+        <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-white bg-opacity-20 group-hover:bg-opacity-30 transition-all duration-300 mr-4 animate-glow">
+            {% if system_logo %}
+            <img src="{{ system_logo }}" alt="{{ system_name }}" class="h-8 w-auto">
+            {% else %}
+            <i class="fas fa-university text-xl text-white"></i>
+            {% endif %}
+        </div>
+        <div>
+            <h1 class="text-xl font-serif font-bold tracking-tight text-contrast">{{ system_name|default:"FBC Library" }}</h1>
+            <p class="text-sm text-fbc-green-100 mt-1 font-body">
+                {% if user.user_type == 'admin' %}
+                    Administrative Dashboard
+                {% elif user.user_type == 'staff' %}
+                    Staff Dashboard
+                {% elif user.user_type == 'lecturer' %}
+                    Lecturer Dashboard
+                {% elif user.user_type == 'student' %}
+                    Student Dashboard
+                {% endif %}
+            </p>
+        </div>
+    </a>
+</div>
+
+<!-- Navigation -->
+<div class="p-4 space-y-6">
+    <!-- Dashboard Section -->
+    <div class="space-y-2">
+        <h3 class="text-xs font-sans font-semibold text-fbc-green-300 uppercase tracking-wider px-3 mb-3">Dashboard</h3>
+        {% if user.user_type == 'admin' %}
+            <a href="{% url 'fbc_users:admin_dashboard' %}" 
+               class="flex items-center px-4 py-3 text-gray-300 hover:text-white hover:bg-fbc-green-600 hover:bg-opacity-30 rounded-lg transition-all duration-300 group {% if request.resolver_match.url_name == 'admin_dashboard' %}nav-active{% endif %}">
+                <div class="flex items-center justify-center w-6 h-6 mr-4">
+                    <i class="fas fa-crown text-lg text-fbc-green-400 group-hover:text-fbc-green-300"></i>
+                </div>
+                <span class="font-body font-semibold text-base">Administrative Overview</span>
+                <div class="ml-auto w-2 h-2 bg-fbc-green-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-pulse"></div>
+            </a>
+        {% elif user.user_type == 'staff' %}
+            <a href="{% url 'fbc_users:staff_dashboard' %}" 
+               class="flex items-center px-4 py-3 text-gray-300 hover:text-white hover:bg-fbc-green-600 hover:bg-opacity-30 rounded-lg transition-all duration-300 group {% if request.resolver_match.url_name == 'staff_dashboard' %}nav-active{% endif %}">
+                <div class="flex items-center justify-center w-6 h-6 mr-4">
+                    <i class="fas fa-user-tie text-lg text-fbc-green-400 group-hover:text-fbc-green-300"></i>
+                </div>
+                <span class="font-body font-semibold text-base">Staff Overview</span>
+                <div class="ml-auto w-2 h-2 bg-fbc-green-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-pulse"></div>
+            </a>
+        {% elif user.user_type == 'lecturer' %}
+            <a href="{% url 'fbc_users:lecturer_dashboard' %}" 
+               class="flex items-center px-4 py-3 text-gray-300 hover:text-white hover:bg-fbc-green-600 hover:bg-opacity-30 rounded-lg transition-all duration-300 group {% if request.resolver_match.url_name == 'lecturer_dashboard' %}nav-active{% endif %}">
+                <div class="flex items-center justify-center w-6 h-6 mr-4">
+                    <i class="fas fa-chalkboard-teacher text-lg text-fbc-green-400 group-hover:text-fbc-green-300"></i>
+                </div>
+                <span class="font-body font-semibold text-base">Lecturer Dashboard</span>
+                <div class="ml-auto w-2 h-2 bg-fbc-green-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-pulse"></div>
+            </a>
+        {% elif user.user_type == 'student' %}
+            <a href="{% url 'fbc_users:student_dashboard' %}" 
+               class="flex items-center px-4 py-3 text-gray-300 hover:text-white hover:bg-fbc-green-600 hover:bg-opacity-30 rounded-lg transition-all duration-300 group {% if request.resolver_match.url_name == 'student_dashboard' %}nav-active{% endif %}">
+                <div class="flex items-center justify-center w-6 h-6 mr-4">
+                    <i class="fas fa-graduation-cap text-lg text-fbc-green-400 group-hover:text-fbc-green-300"></i>
+                </div>
+                <span class="font-body font-semibold text-base">Student Dashboard</span>
+                <div class="ml-auto w-2 h-2 bg-fbc-green-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-pulse"></div>
+            </a>
+        {% endif %}
+    </div>
+
+    <!-- Library Management -->
+    {% if user.user_type in 'admin,staff' %}
+    <div class="space-y-2">
+        <h3 class="text-xs font-sans font-semibold text-fbc-green-300 uppercase tracking-wider px-3 mb-3">Library Management</h3>
+        
+        <!-- Books Dropdown -->
+        <div class="nav-item">
+            <button onclick="toggleDropdown(this)" 
+                    class="flex items-center w-full px-4 py-3 text-gray-300 hover:text-white hover:bg-fbc-green-600 hover:bg-opacity-30 rounded-lg transition-all duration-300 group">
+                <div class="flex items-center justify-center w-6 h-6 mr-4">
+                    <i class="fas fa-book text-lg text-fbc-green-400 group-hover:text-fbc-green-300"></i>
+                </div>
+                <span class="font-body font-semibold text-base flex-1 text-left">Literary Collection</span>
+                <i class="fas fa-chevron-right text-sm transition-transform duration-300 arrow text-fbc-green-400"></i>
+            </button>
+            <div class="nav-dropdown ml-6 mt-2 space-y-1 overflow-hidden transition-all duration-300 max-h-0">
+                <a href="{% url 'fbc_books:manage_books' %}" 
+                   class="flex items-center px-4 py-2 text-gray-400 hover:text-white hover:bg-fbc-green-600 hover:bg-opacity-20 rounded-lg transition-all duration-300 text-sm font-body">
+                    <i class="fas fa-list text-xs mr-3 w-4 text-fbc-green-500"></i>
+                    Manage Books
+                </a>
+                <a href="{% url 'fbc_books:book_list' %}" 
+                   class="flex items-center px-4 py-2 text-gray-400 hover:text-white hover:bg-fbc-green-600 hover:bg-opacity-20 rounded-lg transition-all duration-300 text-sm font-body">
+                    <i class="fas fa-eye text-xs mr-3 w-4 text-fbc-green-500"></i>
+                    Browse Catalog
+                </a>
+            </div>
+        </div>
+        
+        <!-- Borrowings -->
+        <a href="{% url 'fbc_books:manage_borrowings' %}" 
+           class="flex items-center px-4 py-3 text-gray-300 hover:text-white hover:bg-fbc-green-600 hover:bg-opacity-30 rounded-lg transition-all duration-300 group">
+            <div class="flex items-center justify-center w-6 h-6 mr-4">
+                <i class="fas fa-exchange-alt text-lg text-fbc-green-400 group-hover:text-fbc-green-300"></i>
+            </div>
+            <span class="font-body font-semibold text-base">Circulation Records</span>
+            <div class="ml-auto w-2 h-2 bg-fbc-green-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-pulse"></div>
+        </a>
+    </div>
+    {% endif %}
+
+    <!-- User Management (Admin Only) -->
+    {% if user.is_superuser %}
+    <div class="space-y-2">
+        <h3 class="text-xs font-sans font-semibold text-fbc-green-300 uppercase tracking-wider px-3 mb-3">User Management</h3>
+        <div class="nav-item">
+            <button onclick="toggleDropdown(this)" 
+                    class="flex items-center w-full px-4 py-3 text-gray-300 hover:text-white hover:bg-fbc-green-600 hover:bg-opacity-30 rounded-lg transition-all duration-300 group">
+                <div class="flex items-center justify-center w-6 h-6 mr-4">
+                    <i class="fas fa-users text-lg text-fbc-green-400 group-hover:text-fbc-green-300"></i>
+                </div>
+                <span class="font-body font-semibold text-base flex-1 text-left">Library Members</span>
+                <i class="fas fa-chevron-right text-sm transition-transform duration-300 arrow text-fbc-green-400"></i>
+            </button>
+            <div class="nav-dropdown ml-6 mt-2 space-y-1 overflow-hidden transition-all duration-300 max-h-0">
+                <a href="{% url 'fbc_books:manage_users' %}" 
+                   class="flex items-center px-4 py-2 text-gray-400 hover:text-white hover:bg-fbc-green-600 hover:bg-opacity-20 rounded-lg transition-all duration-300 text-sm font-body">
+                    <i class="fas fa-list text-xs mr-3 w-4 text-fbc-green-500"></i>
+                    All Members
+                </a>
+                <a href="{% url 'fbc_users:add_user' %}" 
+                   class="flex items-center px-4 py-2 text-gray-400 hover:text-white hover:bg-fbc-green-600 hover:bg-opacity-20 rounded-lg transition-all duration-300 text-sm font-body">
+                    <i class="fas fa-user-plus text-xs mr-3 w-4 text-fbc-green-500"></i>
+                    Add New Member
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Library Resources (for students and lecturers) -->
+    {% if user.user_type in 'student,lecturer' %}
+    <div class="space-y-2">
+        <h3 class="text-xs font-sans font-semibold text-fbc-green-300 uppercase tracking-wider px-3 mb-3">Library Resources</h3>
+        
+        <!-- Browse Books -->
+        <a href="{% url 'fbc_books:book_list' %}" 
+           class="flex items-center px-4 py-3 text-gray-300 hover:text-white hover:bg-fbc-green-600 hover:bg-opacity-30 rounded-lg transition-all duration-300 group">
+            <div class="flex items-center justify-center w-6 h-6 mr-4">
+                <i class="fas fa-search text-lg text-fbc-green-400 group-hover:text-fbc-green-300"></i>
+            </div>
+            <span class="font-body font-semibold text-base">Browse Catalog</span>
+            <div class="ml-auto w-2 h-2 bg-fbc-green-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-pulse"></div>
+        </a>
+        
+        <!-- My Borrowings -->
+        <a href="{% url 'fbc_books:my_books' %}" 
+           class="flex items-center px-4 py-3 text-gray-300 hover:text-white hover:bg-fbc-green-600 hover:bg-opacity-30 rounded-lg transition-all duration-300 group">
+            <div class="flex items-center justify-center w-6 h-6 mr-4">
+                <i class="fas fa-book-reader text-lg text-fbc-green-400 group-hover:text-fbc-green-300"></i>
+            </div>
+            <span class="font-body font-semibold text-base">My Borrowings</span>
+            <div class="ml-auto w-2 h-2 bg-fbc-green-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-pulse"></div>
+        </a>
+        
+        <!-- Profile -->
+        <a href="{% url 'fbc_users:profile' %}" 
+           class="flex items-center px-4 py-3 text-gray-300 hover:text-white hover:bg-fbc-green-600 hover:bg-opacity-30 rounded-lg transition-all duration-300 group">
+            <div class="flex items-center justify-center w-6 h-6 mr-4">
+                <i class="fas fa-user-cog text-lg text-fbc-green-400 group-hover:text-fbc-green-300"></i>
+            </div>
+            <span class="font-body font-semibold text-base">My Profile</span>
+            <div class="ml-auto w-2 h-2 bg-fbc-green-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-pulse"></div>
+        </a>
+        
+        <!-- Subscription (students only) -->
+        {% if user.user_type == 'student' %}
+        <a href="{% url 'fbc_users:my_subscription' %}" 
+           class="flex items-center px-4 py-3 text-gray-300 hover:text-white hover:bg-fbc-green-600 hover:bg-opacity-30 rounded-lg transition-all duration-300 group">
+            <div class="flex items-center justify-center w-6 h-6 mr-4">
+                <i class="fas fa-credit-card text-lg text-fbc-green-400 group-hover:text-fbc-green-300"></i>
+            </div>
+            <span class="font-body font-semibold text-base">My Subscription</span>
+            <div class="ml-auto w-2 h-2 bg-fbc-green-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-pulse"></div>
+        </a>
+        {% endif %}
+        <!-- My Fines -->
+        <a href="{% url 'fbc_fines:my_fines' %}" 
+           class="flex items-center px-4 py-3 text-gray-300 hover:text-white hover:bg-fbc-green-600 hover:bg-opacity-30 rounded-lg transition-all duration-300 group">
+            <div class="flex items-center justify-center w-6 h-6 mr-4">
+                <i class="fas fa-money-bill-wave text-lg text-fbc-green-400 group-hover:text-fbc-green-300"></i>
+            </div>
+            <span class="font-body font-semibold text-base">My Fines</span>
+            <div class="ml-auto w-2 h-2 bg-fbc-green-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-pulse"></div>
+        </a>
+    </div>
+    {% endif %}
+
+    <!-- Financial Management -->
+    {% if user.user_type in 'admin,staff' %}
+    <div class="space-y-2">
+        <h3 class="text-xs font-sans font-semibold text-fbc-green-300 uppercase tracking-wider px-3 mb-3">Financial Management</h3>
+        <div class="nav-item">
+            <button onclick="toggleDropdown(this)" 
+                    class="flex items-center w-full px-4 py-3 text-gray-300 hover:text-white hover:bg-fbc-green-600 hover:bg-opacity-30 rounded-lg transition-all duration-300 group">
+                <div class="flex items-center justify-center w-6 h-6 mr-4">
+                    <i class="fas fa-money-bill-wave text-lg text-fbc-green-400 group-hover:text-fbc-green-300"></i>
+                </div>
+                <span class="font-body font-semibold text-base flex-1 text-left">Financial Records</span>
+                <i class="fas fa-chevron-right text-sm transition-transform duration-300 arrow text-fbc-green-400"></i>
+            </button>
+            <div class="nav-dropdown ml-6 mt-2 space-y-1 overflow-hidden transition-all duration-300 max-h-0">
+                <a href="{% url 'fbc_fines:manage_fines' %}" 
+                   class="flex items-center px-4 py-2 text-gray-400 hover:text-white hover:bg-fbc-green-600 hover:bg-opacity-20 rounded-lg transition-all duration-300 text-sm font-body">
+                    <i class="fas fa-receipt text-xs mr-3 w-4 text-fbc-green-500"></i>
+                    Manage Fines
+                </a>
+                <a href="{% url 'fbc_payments:payment_history' %}" 
+                   class="flex items-center px-4 py-2 text-gray-400 hover:text-white hover:bg-fbc-green-600 hover:bg-opacity-20 rounded-lg transition-all duration-300 text-sm font-body">
+                    <i class="fas fa-credit-card text-xs mr-3 w-4 text-fbc-green-500"></i>
+                    Payment History
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- System Settings -->
+    {% if request.user.user_type == 'admin' %}
+    <div class="space-y-2">
+        <h3 class="text-xs font-sans font-semibold text-fbc-green-300 uppercase tracking-wider px-3 mb-3">System Administration</h3>
+        <div class="nav-item">
+            <button onclick="toggleDropdown(this)" 
+                    class="flex items-center w-full px-4 py-3 text-gray-300 hover:text-white hover:bg-fbc-green-600 hover:bg-opacity-30 rounded-lg transition-all duration-300 group">
+                <div class="flex items-center justify-center w-6 h-6 mr-4">
+                    <i class="fas fa-cogs text-lg text-fbc-green-400 group-hover:text-fbc-green-300"></i>
+                </div>
+                <span class="font-body font-semibold text-base flex-1 text-left">System Settings</span>
+                <i class="fas fa-chevron-right text-sm transition-transform duration-300 arrow text-fbc-green-400"></i>
+            </button>
+            <div class="nav-dropdown ml-6 mt-2 space-y-1 overflow-hidden transition-all duration-300 max-h-0">
+                <a href="{% url 'fbc_notifications:manage_notifications' %}" 
+                   class="flex items-center px-4 py-2 text-gray-400 hover:text-white hover:bg-fbc-green-600 hover:bg-opacity-20 rounded-lg transition-all duration-300 text-sm font-body">
+                    <i class="fas fa-bell text-xs mr-3 w-4 text-fbc-green-500"></i>
+                    Notifications
+                </a>
+                <a href="{% url 'fbc_users:system_settings' %}" 
+                   class="flex items-center px-4 py-2 text-gray-400 hover:text-white hover:bg-fbc-green-600 hover:bg-opacity-20 rounded-lg transition-all duration-300 text-sm font-body">
+                    <i class="fas fa-palette text-xs mr-3 w-4 text-fbc-green-500"></i>
+                    Appearance Settings
+                </a>
+                <div class="border-t border-fbc-green-600 border-opacity-30 my-2"></div>
+                <a href="{% url 'fbc_users:logout' %}" 
+                   class="flex items-center px-4 py-2 text-gray-400 hover:text-red-300 hover:bg-red-600 hover:bg-opacity-20 rounded-lg transition-all duration-300 text-sm font-body">
+                    <i class="fas fa-sign-out-alt text-xs mr-3 w-4 text-red-400"></i>
+                    Logout
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>

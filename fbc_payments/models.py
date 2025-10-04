@@ -33,6 +33,7 @@ class Payment(models.Model):
     payment_method = models.CharField(max_length=20, choices=PAYMENT_METHODS)
     status = models.CharField(max_length=20, choices=PAYMENT_STATUS, default="pending")
     transaction_id = models.CharField(max_length=100, unique=True)
+    details = models.JSONField(default=dict, blank=True, help_text="Store payment details like cardholder name")  # Store payment details
     created_at = models.DateTimeField(auto_now_add=True)
     completed_at = models.DateTimeField(null=True, blank=True)
 
@@ -60,7 +61,7 @@ class Payment(models.Model):
 
         elif self.payment_type == "fine":
             try:
-                payment_detail = self.details.first()
+                payment_detail = self.payment_details.first()
                 if payment_detail and payment_detail.fine:
                     payment_detail.fine.status = "paid"
                     payment_detail.fine.save(update_fields=["status"])
@@ -72,7 +73,7 @@ class Payment(models.Model):
 
 class PaymentDetail(models.Model):
     payment = models.ForeignKey(
-        Payment, on_delete=models.CASCADE, related_name="details"
+        Payment, on_delete=models.CASCADE, related_name="payment_details"
     )
     borrowing = models.ForeignKey(
         "fbc_books.BookBorrowing",

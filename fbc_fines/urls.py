@@ -9,6 +9,7 @@ urlpatterns = [
     path('create/', views.create_fine, name='create_fine'),
     path('<int:pk>/', views.fine_detail, name='fine_detail'),
     path('<int:pk>/pay/', views.pay_fine, name='pay_fine'),
+    path('process-fine-payment/<int:fine_id>/', views.process_fine_payment, name='process_fine_payment'),
     path('<int:pk>/verify/', views.verify_payment, name='verify_payment'),
     path('manage/', views.manage_fines, name='manage_fines'),
     path('add/', views.add_fine, name='add_fine'),

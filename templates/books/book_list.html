@@ -226,7 +226,7 @@
                             
                             <!-- Book Type Badge -->
                             <div class="absolute top-3 left-3">
-                                {% if book.is_ebook %}
+                                {% if book.book_type == 'ebook' %}
                                     <span class="bg-purple-500 text-white px-2 py-1 rounded-full text-xs font-semibold shadow-lg">
                                         <i class="fas fa-tablet-alt mr-1"></i>E-Book
                                     </span>

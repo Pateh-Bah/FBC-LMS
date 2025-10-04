@@ -16,8 +16,7 @@ urlpatterns = [
     path('books/delete/<int:book_id>/', views.delete_book, name='delete_book'),
     path('books/details/<int:book_id>/', views.book_detail, name='book_details'),  # Fixed view name
     path('faq/', views.faq_view, name='faq'),
-    path('dashboard/admin/', views.admin_dashboard, name='admin_dashboard'),
-    path('dashboard/', views.user_dashboard, name='dashboard'),
+
     path('manage/books/', views.manage_books, name='manage_books'),
     path('manage/books/export/', views.export_books, name='export_books'),
     path('manage/users/', views.manage_users, name='manage_users'),  # This redirects to fbc_users

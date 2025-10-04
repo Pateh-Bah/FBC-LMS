@@ -49,7 +49,7 @@ def user_login(request):
     if request.user.is_authenticated:
         # Redirect based on user type to appropriate dashboards
         if request.user.user_type == 'admin':
-            return redirect('fbc_books:admin_dashboard')
+            return redirect('fbc_users:admin_dashboard')
         elif request.user.user_type == 'staff':
             return redirect('fbc_users:staff_dashboard_beautiful')
         elif request.user.user_type == 'lecturer':
@@ -57,7 +57,7 @@ def user_login(request):
         elif request.user.user_type == 'student':
             return redirect('fbc_users:student_dashboard')
         else:
-            return redirect('fbc_books:dashboard')
+            return redirect('fbc_users:student_dashboard')  # Default fallback
             
     # Clear any existing messages for GET requests to prevent showing admin action messages on login page
     # But preserve logout messages from the logout redirect
@@ -119,7 +119,7 @@ def user_login(request):
                     
                     # Redirect based on user type to custom dashboards
                     if db_user.user_type == 'admin':
-                        return redirect('fbc_books:admin_dashboard')
+                        return redirect('fbc_users:admin_dashboard')
                     elif db_user.user_type == 'staff':
                         return redirect('fbc_users:staff_dashboard_beautiful')
                     elif db_user.user_type == 'lecturer':
@@ -887,7 +887,7 @@ def my_subscription(request):
     """Display user's subscription information"""
     if request.user.user_type != 'student':
         messages.error(request, 'Subscription is only available for students.')
-        return redirect('fbc_users:dashboard')
+        return redirect('fbc_users:student_dashboard')
 
     context = {
         'user': request.user,
@@ -895,16 +895,98 @@ def my_subscription(request):
     }
     return render(request, 'users/my_subscription.html', context)
 
+
 @login_required
-def dashboard_redirect(request):
-    """Redirect users to their appropriate dashboard based on user type"""
-    if request.user.user_type == 'student':
+def renew_subscription(request):
+    """Display subscription renewal page with payment options"""
+    if request.user.user_type != 'student':
+        messages.error(request, 'Subscription is only available for students.')
         return redirect('fbc_users:student_dashboard')
-    elif request.user.user_type == 'lecturer':
-        return redirect('fbc_users:lecturer_dashboard')
-    elif request.user.user_type == 'staff':
-        return redirect('fbc_users:staff_dashboard')
-    elif request.user.user_type == 'admin':
-        return redirect('fbc_users:admin_dashboard')
+
+    # For now, we'll just render the template.
+    # In a real application, you would fetch subscription plans and prices here.
+    context = {
+        'title': 'Renew Subscription',
+        'subscription_price': 500  # Example price
+    }
+    return render(request, 'users/renew_subscription.html', context)
+
+
+@login_required
+def process_subscription_payment(request):
+    """Process the subscription payment"""
+    if request.method != 'POST':
+        return redirect('fbc_users:renew_subscription')
+
+    payment_method = request.POST.get('payment_method')
+    amount = 500  # Assuming a fixed subscription price for now
+    payment_successful = False
+    transaction_id = ""
+    payment_details = {}
+
+    if payment_method in ['orange_money', 'afrimoney', 'qmoney']:
+        phone_number = request.POST.get('phone_number')
+        password = request.POST.get('password')
+        # Simulate mobile money payment processing
+        if phone_number and password: # Basic validation
+            payment_successful = True
+            transaction_id = f"MM-{timezone.now().timestamp()}"
+            payment_details = {
+                'payment_type': 'Mobile Money',
+                'provider': payment_method,
+                'phone_number': phone_number,
+                'transaction_reference': transaction_id
+            }
+        else:
+            messages.error(request, 'Please provide phone number and password for Mobile Money.')
+
+    elif payment_method == 'paypal':
+        card_number = request.POST.get('card_number')
+        expiry_date = request.POST.get('expiry_date')
+        cvc = request.POST.get('cvc')
+        cardholder_name = request.POST.get('cardholder_name')
+        # Simulate PayPal/Credit Card payment processing
+        if card_number and expiry_date and cvc and cardholder_name: # Basic validation
+            # In a real scenario, send these to a payment gateway (e.g., Stripe, PayPal API)
+            # and get a token or confirmation. NEVER store raw card details.
+            payment_successful = True
+            transaction_id = f"CC-{timezone.now().timestamp()}"
+            # Store only last 4 digits for reference
+            last_four = card_number[-4:] if len(card_number) >= 4 else card_number
+            payment_details = {
+                'payment_type': 'Credit Card',
+                'last_four_digits': last_four,
+                'expiry_date': expiry_date,
+                'cardholder_name': cardholder_name,
+                'transaction_reference': transaction_id
+            }
+        else:
+            messages.error(request, 'Please provide all credit card details including cardholder name.')
+
+    if payment_successful:
+        user = request.user
+        # Update user's subscription
+        if user.subscription_end_date and user.subscription_end_date > timezone.now():
+            user.subscription_end_date += timezone.timedelta(days=365)
+        else:
+            user.subscription_end_date = timezone.now() + timezone.timedelta(days=365)
+        user.is_subscription_active = True
+        user.save()
+
+        # Record the payment
+        Payment.objects.create(
+            user=user,
+            amount=amount,
+            payment_type='subscription',
+            payment_method=payment_method,
+            transaction_id=transaction_id,
+            status='completed',
+            details=payment_details
+        )
+        messages.success(request, 'Your subscription has been successfully renewed!')
+        return redirect('fbc_users:my_subscription')
     else:
-        return redirect('fbc_books:home')
+        # If payment was not successful due to missing fields, messages are already set.
+        # If there was a simulated payment gateway error, you'd set a message here.
+        messages.error(request, 'Payment failed. Please check your details and try again.')
+        return redirect('fbc_users:renew_subscription')

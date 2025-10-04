@@ -320,7 +320,7 @@ def faq_view(request):
 @user_passes_test(is_admin_or_staff)
 def return_book(request, pk):
     if request.method != "POST":
-        return redirect("fbc_books:admin_dashboard")
+        return redirect("fbc_users:admin_dashboard")
 
     borrowing = get_object_or_404(
         BookBorrowing.objects.select_related("book", "user"),
@@ -336,7 +336,7 @@ def return_book(request, pk):
     borrowing.mark_as_returned(condition=condition)
 
     messages.success(request, f"Book '{borrowing.book.title}' has been successfully returned by {borrowing.user.get_full_name()}.")
-    return redirect("fbc_books:admin_dashboard")
+    return redirect("fbc_users:admin_dashboard")
 
 
 @login_required
@@ -432,7 +432,7 @@ def manage_borrowings(request):
 def process_return(request, borrowing_id):
     """Process a book return with condition assessment"""
     if request.method != 'POST':
-        return redirect('fbc_books:admin_dashboard')
+        return redirect('fbc_users:admin_dashboard')
 
     borrowing = get_object_or_404(
         BookBorrowing.objects.select_related('book', 'user'),
@@ -474,7 +474,7 @@ def process_return(request, borrowing_id):
             f'Book marked as {condition}. Fine of Le {penalty_amount} issued to {borrowing.user.get_full_name()}.',
         )
 
-    return redirect('fbc_books:admin_dashboard')
+    return redirect('fbc_users:admin_dashboard')
 
 @login_required
 @user_passes_test(is_admin_or_staff)
@@ -600,9 +600,16 @@ def add_book(request):
             publication_year = request.POST.get('publication_year')
             description = request.POST.get('description', '')
             cover_image = request.FILES.get('cover_image')
+            pdf_file = request.FILES.get('pdf_file')
             
             # Get category
             category = get_object_or_404(Category, id=category_id)
+
+            # Validate ebook requires a PDF file
+            if book_type == 'ebook' and not pdf_file:
+                messages.error(request, 'Please upload an E-Book PDF file when selecting E-Book type.')
+                categories = Category.objects.all()
+                return render(request, 'books/add_book.html', {'categories': categories})
             
             # Create the book
             book = Book.objects.create(
@@ -615,6 +622,7 @@ def add_book(request):
                 publication_year=int(publication_year) if publication_year else None,
                 description=description,
                 cover_image=cover_image,
+                pdf_file=pdf_file if book_type == 'ebook' else None,
                 status='available'
             )
             
@@ -672,6 +680,14 @@ def edit_book(request, book_id):
             cover_image = request.FILES.get('cover_image')
             if cover_image:
                 book.cover_image = cover_image
+
+            pdf_file = request.FILES.get('pdf_file')
+            # If book type is ebook and a new pdf is provided, update it
+            if book.book_type == 'ebook' and pdf_file:
+                book.pdf_file = pdf_file
+            # If switched to physical, clear any existing pdf_file
+            elif book.book_type == 'physical':
+                book.pdf_file = None
             
             book.save()
             

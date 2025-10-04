@@ -27,7 +27,7 @@ NOT shown on: home, login, public book browsing, etc.
         <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
             <!-- Main Dashboard -->
             {% if user.user_type == 'admin' %}
-                <a href="{% url 'fbc_books:admin_dashboard' %}" class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-fbc-green-50 hover:text-fbc-green-700 rounded-lg transition-all duration-200 group {% if request.resolver_match.url_name == 'admin_dashboard' %}bg-fbc-green-100 text-fbc-green-800 border-l-4 border-fbc-green-600{% endif %}">
+                <a href="{% url 'fbc_users:admin_dashboard' %}" class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-fbc-green-50 hover:text-fbc-green-700 rounded-lg transition-all duration-200 group {% if request.resolver_match.url_name == 'admin_dashboard' %}bg-fbc-green-100 text-fbc-green-800 border-l-4 border-fbc-green-600{% endif %}">
                     <i class="fas fa-crown w-5 group-hover:text-fbc-green-600"></i>
                     <span class="font-medium">Admin Dashboard</span>
                 </a>

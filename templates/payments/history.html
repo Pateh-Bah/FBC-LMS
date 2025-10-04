@@ -23,7 +23,7 @@
                     <nav class="flex mt-4" aria-label="Breadcrumb">
                         <ol class="inline-flex items-center space-x-1 md:space-x-3">
                             <li class="inline-flex items-center">
-                                <a href="{% url 'fbc_books:admin_dashboard' %}" class="inline-flex items-center text-sm font-medium text-gray-500 hover:text-fbc-green-600">
+                                <a href="{% url 'fbc_users:admin_dashboard' %}" class="inline-flex items-center text-sm font-medium text-gray-500 hover:text-fbc-green-600">
                                     <i class="fas fa-home mr-2"></i>
                                     Dashboard
                                 </a>
@@ -262,6 +262,28 @@
                                                 {% else %}fa-credit-card{% endif %} mr-1"></i>
                                             {{ payment.get_payment_method_display }}
                                         </span>
+                                        {% if payment.details %}
+                                            <div class="mt-1 text-xs text-gray-600">
+                                                {% if payment.details.cardholder_name %}
+                                                    <div class="flex items-center">
+                                                        <i class="fas fa-user text-gray-400 mr-1"></i>
+                                                        <span class="font-medium">{{ payment.details.cardholder_name }}</span>
+                                                    </div>
+                                                {% endif %}
+                                                {% if payment.details.last_four_digits %}
+                                                    <div class="flex items-center mt-1">
+                                                        <i class="fas fa-credit-card text-gray-400 mr-1"></i>
+                                                        <span class="font-mono">**** {{ payment.details.last_four_digits }}</span>
+                                                    </div>
+                                                {% endif %}
+                                                {% if payment.details.phone_number %}
+                                                    <div class="flex items-center mt-1">
+                                                        <i class="fas fa-mobile-alt text-gray-400 mr-1"></i>
+                                                        <span class="font-mono">{{ payment.details.phone_number }}</span>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        {% endif %}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
                                         <div class="flex flex-col">

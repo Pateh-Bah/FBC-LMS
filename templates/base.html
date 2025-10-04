@@ -293,7 +293,7 @@
                     <div class="flex space-x-6">
                         {% if user.is_authenticated %}
                             {% if user.user_type == 'admin' %}
-                                <a href="{% url 'fbc_books:admin_dashboard' %}" class="px-4 py-2 rounded-lg text-base font-serif font-semibold text-white hover:bg-white hover:bg-opacity-20 hover:text-white transition-all duration-300">
+                                <a href="{% url 'fbc_users:admin_dashboard' %}" class="px-4 py-2 rounded-lg text-base font-serif font-semibold text-white hover:bg-white hover:bg-opacity-20 hover:text-white transition-all duration-300">
                                     <i class="fas fa-crown mr-2"></i>Admin Dashboard
                                 </a>
                                 <!-- Classical Manage Dropdown -->
@@ -323,7 +323,7 @@
                                 <a href="{% url 'fbc_books:book_list' %}" class="px-4 py-2 rounded-lg text-base font-serif font-semibold text-white hover:bg-white hover:bg-opacity-20 hover:text-white transition-all duration-300">
                                     <i class="fas fa-books mr-2"></i>Library
                                 </a>
-                                <a href="{% url 'fbc_books:dashboard' %}" class="px-4 py-2 rounded-lg text-base font-serif font-semibold text-white hover:bg-white hover:bg-opacity-20 hover:text-white transition-all duration-300">
+                                <a href="{% if user.user_type == 'student' %}{% url 'fbc_users:student_dashboard' %}{% elif user.user_type == 'lecturer' %}{% url 'fbc_users:lecturer_dashboard' %}{% elif user.user_type == 'staff' %}{% url 'fbc_users:staff_dashboard_beautiful' %}{% else %}{% url 'fbc_users:admin_dashboard' %}{% endif %}" class="px-4 py-2 rounded-lg text-base font-serif font-semibold text-white hover:bg-white hover:bg-opacity-20 hover:text-white transition-all duration-300">
                                     <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
                                 </a>
                             {% endif %}
@@ -410,7 +410,7 @@
                 <div class="px-4 pt-4 pb-6 space-y-3 bg-gradient-to-br from-fbc-green-700 via-fbc-green-600 to-fbc-green-800">
                     {% if user.is_authenticated %}
                         {% if user.user_type == 'admin' %}
-                            <a href="{% url 'fbc_books:admin_dashboard' %}" class="block px-4 py-3 rounded-lg text-base font-serif font-semibold text-white hover:bg-white hover:bg-opacity-20 transition-all duration-300">
+                            <a href="{% url 'fbc_users:admin_dashboard' %}" class="block px-4 py-3 rounded-lg text-base font-serif font-semibold text-white hover:bg-white hover:bg-opacity-20 transition-all duration-300">
                                 <i class="fas fa-crown mr-3"></i>Administrative Dashboard
                             </a>
                             <div class="px-4 py-2 text-white font-serif font-bold text-sm uppercase tracking-wider">Management</div>

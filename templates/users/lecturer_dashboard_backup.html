@@ -1,0 +1,808 @@
+{% extends 'admin/admin_base.html' %}
+{% load static %}
+
+{% block title %}Lecturer Dashboard - {{ system_name|default:"FBC Library System" }}{% endblock %}
+
+{% block page_title %}Faculty Portal{% endblock %}
+
+{% block content %}
+<!-- Classic Library Header -->
+<div class="relative bg-gradient-to-r from-library-navy via-library-burgundy to-library-navy rounded-none shadow-2xl mb-12">
+    <div class="absolute inset-0 bg-black opacity-10"></div>
+    <div class="absolute inset-0" style="background-image: url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1000 100\" fill=\"none\"><path d=\"M0,50 Q250,20 500,50 T1000,50 L1000,100 L0,100 Z\" fill=\"%23ffffff\" fill-opacity=\"0.03\"/></svg>');"></div>
+    
+    <div class="relative z-10 px-8 py-16">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-6">
+                    <!-- Classical Library Icon -->
+                    <div class="w-20 h-20 bg-library-gold rounded-full flex items-center justify-center shadow-lg animate-glow">
+                        <i class="fas fa-chalkboard-teacher text-2xl text-library-navy"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-serif text-5xl font-bold text-white mb-2 tracking-wide">
+                            Faculty 
+                            <span class="text-library-gold">Portal</span>
+                        </h1>
+                        <p class="text-library-cream text-xl font-body italic">
+                            "Teaching is the profession that creates all others" - Welcome, {{ user.get_full_name|default:user.username }}
+                        </p>
+                        <div class="flex items-center space-x-6 mt-4">
+                            <div class="flex items-center space-x-2 bg-white bg-opacity-10 rounded-lg px-4 py-2 backdrop-blur-sm">
+                                <i class="fas fa-user-tie text-library-gold"></i>
+                                <span class="text-library-cream font-semibold">Lecturer</span>
+                            </div>
+                            <div class="flex items-center space-x-2 bg-white bg-opacity-10 rounded-lg px-4 py-2 backdrop-blur-sm">
+                                <i class="fas fa-calendar-alt text-library-gold"></i>
+                                <span class="text-library-cream">{% now "F j, Y" %}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Classical Decorative Element -->
+                <div class="hidden xl:block">
+                    <div class="w-40 h-40 relative">
+                        <div class="absolute inset-0 border-4 border-library-gold rounded-full animate-float opacity-30"></div>
+                        <div class="absolute inset-4 border-2 border-library-cream rounded-full animate-float opacity-50" style="animation-delay: 1s;"></div>
+                        <div class="absolute inset-8 bg-library-gold rounded-full flex items-center justify-center shadow-xl">
+                            <i class="fas fa-graduation-cap text-3xl text-library-navy"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Classical Statistics Section -->
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-12">
+    <!-- Books Borrowed Card -->
+    <div class="group relative bg-white rounded-2xl shadow-xl border-l-4 border-library-navy overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
+        <div class="absolute top-0 right-0 w-20 h-20 bg-library-navy opacity-5 rounded-bl-full"></div>
+        <div class="relative p-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <div class="w-12 h-12 bg-library-navy bg-opacity-10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-opacity-20 transition-colors">
+                        <i class="fas fa-book text-xl text-library-navy"></i>
+                    </div>
+                    <h3 class="font-serif text-3xl font-bold text-library-navy mb-2">{{ books_borrowed|default:0 }}</h3>
+                    <p class="text-gray-600 font-body">Research Materials</p>
+                    <div class="mt-3 flex items-center text-green-600 text-sm font-semibold">
+                        <i class="fas fa-book-open mr-1"></i>
+                        <span>{{ active_borrowings|default:0 }} Currently Reading</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Research Hours Card -->
+    <div class="group relative bg-white rounded-2xl shadow-xl border-l-4 border-library-burgundy overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
+        <div class="absolute top-0 right-0 w-20 h-20 bg-library-burgundy opacity-5 rounded-bl-full"></div>
+        <div class="relative p-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <div class="w-12 h-12 bg-library-burgundy bg-opacity-10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-opacity-20 transition-colors">
+                        <i class="fas fa-microscope text-xl text-library-burgundy"></i>
+                    </div>
+                    <h3 class="font-serif text-3xl font-bold text-library-burgundy mb-2">{{ research_hours|default:0 }}</h3>
+                    <p class="text-gray-600 font-body">Research Hours</p>
+                    <div class="mt-3 flex items-center text-blue-600 text-sm font-semibold">
+                        <i class="fas fa-clock mr-1"></i>
+                        <span>This Month</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- E-books Accessed Card -->
+    <div class="group relative bg-white rounded-2xl shadow-xl border-l-4 border-library-gold overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
+        <div class="absolute top-0 right-0 w-20 h-20 bg-library-gold opacity-5 rounded-bl-full"></div>
+        <div class="relative p-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <div class="w-12 h-12 bg-library-gold bg-opacity-10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-opacity-20 transition-colors">
+                        <i class="fas fa-tablet-alt text-xl text-yellow-700"></i>
+                    </div>
+                    <h3 class="font-serif text-3xl font-bold text-yellow-700 mb-2">{{ ebooks_accessed|default:0 }}</h3>
+                    <p class="text-gray-600 font-body">Digital Resources</p>
+                    <div class="mt-3 flex items-center text-purple-600 text-sm font-semibold">
+                        <i class="fas fa-download mr-1"></i>
+                        <span>Academic Library</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Faculty Privileges Card -->
+    <div class="group relative bg-white rounded-2xl shadow-xl border-l-4 border-library-sage overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
+        <div class="absolute top-0 right-0 w-20 h-20 bg-library-sage opacity-5 rounded-bl-full"></div>
+        <div class="relative p-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <div class="w-12 h-12 bg-library-sage bg-opacity-10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-opacity-20 transition-colors">
+                        <i class="fas fa-award text-xl text-library-sage"></i>
+                    </div>
+                    <h3 class="font-serif text-3xl font-bold text-library-sage mb-2">Premium</h3>
+                    <p class="text-gray-600 font-body">Faculty Access</p>
+                    <div class="mt-3 flex items-center text-green-600 text-sm font-semibold">
+                        <i class="fas fa-check-circle mr-1"></i>
+                        <span>Full Access</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content Grid -->
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-8 mb-12">
+    <!-- Teaching Hub -->
+    <div class="xl:col-span-2 bg-white rounded-2xl shadow-xl overflow-hidden">
+        <!-- Classical Header -->
+        <div class="bg-gradient-to-r from-library-parchment to-library-cream border-b border-warm-gray-200 p-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="w-14 h-14 bg-library-navy rounded-xl flex items-center justify-center shadow-lg">
+                        <i class="fas fa-chalkboard-teacher text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-serif text-2xl font-bold text-library-navy mb-1">Teaching Hub</h2>
+                        <p class="text-gray-600 font-body">Your academic workspace at a glance</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <p class="text-sm text-gray-500 font-body">Last accessed</p>
+                    <p class="text-library-navy font-semibold">{% now "M j, Y" %}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Cards Grid -->
+        <div class="p-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Browse Books -->
+                <a href="{% url 'fbc_books:book_list' %}" class="group flex items-center p-6 bg-library-parchment rounded-xl hover:bg-library-cream transition-all duration-300 border border-warm-gray-100 hover:border-library-gold">
+                    <div class="w-12 h-12 bg-library-navy bg-opacity-10 rounded-lg flex items-center justify-center mr-4 group-hover:bg-opacity-20 transition-colors">
+                        <i class="fas fa-search text-library-navy text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-serif font-semibold text-library-navy group-hover:text-library-burgundy transition-colors">Browse Collection</h3>
+                        <p class="text-gray-600 text-sm font-body">Research and teaching materials</p>
+                    </div>
+                    <i class="fas fa-arrow-right text-library-gold ml-auto group-hover:translate-x-1 transition-transform"></i>
+                </a>
+
+                <!-- My Books -->
+                <a href="{% url 'fbc_books:my_books' %}" class="group flex items-center p-6 bg-library-parchment rounded-xl hover:bg-library-cream transition-all duration-300 border border-warm-gray-100 hover:border-library-gold">
+                    <div class="w-12 h-12 bg-library-burgundy bg-opacity-10 rounded-lg flex items-center justify-center mr-4 group-hover:bg-opacity-20 transition-colors">
+                        <i class="fas fa-bookmark text-library-burgundy text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-serif font-semibold text-library-navy group-hover:text-library-burgundy transition-colors">My Library</h3>
+                        <p class="text-gray-600 text-sm font-body">Borrowed and reserved materials</p>
+                    </div>
+                    <i class="fas fa-arrow-right text-library-gold ml-auto group-hover:translate-x-1 transition-transform"></i>
+                </a>
+
+                <!-- Profile Settings -->
+                <a href="{% url 'fbc_users:profile' %}" class="group flex items-center p-6 bg-library-parchment rounded-xl hover:bg-library-cream transition-all duration-300 border border-warm-gray-100 hover:border-library-gold">
+                    <div class="w-12 h-12 bg-library-sage bg-opacity-10 rounded-lg flex items-center justify-center mr-4 group-hover:bg-opacity-20 transition-colors">
+                        <i class="fas fa-user-cog text-library-sage text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-serif font-semibold text-library-navy group-hover:text-library-burgundy transition-colors">Profile Settings</h3>
+                        <p class="text-gray-600 text-sm font-body">Update your faculty information</p>
+                    </div>
+                    <i class="fas fa-arrow-right text-library-gold ml-auto group-hover:translate-x-1 transition-transform"></i>
+                </a>
+
+                <!-- Change Password -->
+                <a href="{% url 'fbc_users:change_password' %}" class="group flex items-center p-6 bg-library-parchment rounded-xl hover:bg-library-cream transition-all duration-300 border border-warm-gray-100 hover:border-library-gold">
+                    <div class="w-12 h-12 bg-yellow-600 bg-opacity-10 rounded-lg flex items-center justify-center mr-4 group-hover:bg-opacity-20 transition-colors">
+                        <i class="fas fa-lock text-yellow-600 text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-serif font-semibold text-library-navy group-hover:text-library-burgundy transition-colors">Change Password</h3>
+                        <p class="text-gray-600 text-sm font-body">Update your security credentials</p>
+                    </div>
+                    <i class="fas fa-arrow-right text-library-gold ml-auto group-hover:translate-x-1 transition-transform"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Faculty Resources -->
+    <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+        <!-- Classical Header -->
+        <div class="bg-gradient-to-r from-library-navy to-library-burgundy p-6">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-university text-white text-lg"></i>
+                </div>
+                <div>
+                    <h3 class="font-serif text-xl font-bold text-white">Faculty Resources</h3>
+                    <p class="text-library-cream text-sm font-body">Teaching & research tools</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resources List -->
+        <div class="p-6 space-y-4">
+            <div class="flex items-center p-4 bg-library-parchment rounded-xl hover:bg-library-cream transition-colors">
+                <div class="w-10 h-10 bg-library-navy bg-opacity-10 rounded-lg flex items-center justify-center mr-4">
+                    <i class="fas fa-book-reader text-library-navy"></i>
+                </div>
+                <div class="flex-1">
+                    <h4 class="font-serif font-semibold text-library-navy">Research Journals</h4>
+                    <p class="text-gray-600 text-sm font-body">Peer-reviewed publications</p>
+                </div>
+                <i class="fas fa-external-link-alt text-library-gold"></i>
+            </div>
+
+            <div class="flex items-center p-4 bg-library-parchment rounded-xl hover:bg-library-cream transition-colors">
+                <div class="w-10 h-10 bg-library-burgundy bg-opacity-10 rounded-lg flex items-center justify-center mr-4">
+                    <i class="fas fa-chalkboard text-library-burgundy"></i>
+                </div>
+                <div class="flex-1">
+                    <h4 class="font-serif font-semibold text-library-navy">Teaching Materials</h4>
+                    <p class="text-gray-600 text-sm font-body">Curriculum resources</p>
+                </div>
+                <i class="fas fa-external-link-alt text-library-gold"></i>
+            </div>
+
+            <div class="flex items-center p-4 bg-library-parchment rounded-xl hover:bg-library-cream transition-colors">
+                <div class="w-10 h-10 bg-library-sage bg-opacity-10 rounded-lg flex items-center justify-center mr-4">
+                    <i class="fas fa-microscope text-library-sage"></i>
+                </div>
+                <div class="flex-1">
+                    <h4 class="font-serif font-semibold text-library-navy">Research Databases</h4>
+                    <p class="text-gray-600 text-sm font-body">Academic databases</p>
+                </div>
+                <i class="fas fa-external-link-alt text-library-gold"></i>
+            </div>
+
+            <div class="flex items-center p-4 bg-library-parchment rounded-xl hover:bg-library-cream transition-colors">
+                <div class="w-10 h-10 bg-yellow-600 bg-opacity-10 rounded-lg flex items-center justify-center mr-4">
+                    <i class="fas fa-calendar-check text-yellow-600"></i>
+                </div>
+                <div class="flex-1">
+                    <h4 class="font-serif font-semibold text-library-navy">Academic Calendar</h4>
+                    <p class="text-gray-600 text-sm font-body">Important academic dates</p>
+                </div>
+                <i class="fas fa-external-link-alt text-library-gold"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Enhanced faculty dashboard interactions
+document.addEventListener('DOMContentLoaded', function() {
+    // Animate statistics counters
+    const counters = document.querySelectorAll('.group h3');
+    counters.forEach(counter => {
+        const target = parseInt(counter.textContent);
+        if (!isNaN(target)) {
+            let current = 0;
+            const increment = target / 50;
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    counter.textContent = target;
+                    clearInterval(timer);
+                } else {
+                    counter.textContent = Math.floor(current);
+                }
+            }, 20);
+        }
+    });
+
+    // Add smooth hover effects
+    const cards = document.querySelectorAll('.group');
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-8px) scale(1.02)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0) scale(1)';
+        });
+    });
+});
+</script>
+
+<style>
+@keyframes glow {
+    0%, 100% { box-shadow: 0 0 20px rgba(218, 165, 32, 0.3); }
+    50% { box-shadow: 0 0 30px rgba(218, 165, 32, 0.5); }
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-10px) rotate(180deg); }
+}
+
+.animate-glow {
+    animation: glow 3s ease-in-out infinite;
+}
+
+.animate-float {
+    animation: float 6s ease-in-out infinite;
+}
+
+.nav-active {
+    background: rgba(34, 197, 94, 0.1);
+    border-left: 4px solid #22c55e;
+    color: #22c55e;
+}
+
+:root {
+    --library-navy: #1e3a8a;
+    --library-burgundy: #7c2d12;
+    --library-gold: #eab308;
+    --library-sage: #059669;
+    --library-parchment: #fef7ed;
+    --library-cream: #fefcf8;
+}
+
+.bg-library-navy { background-color: var(--library-navy); }
+.bg-library-burgundy { background-color: var(--library-burgundy); }
+.bg-library-gold { background-color: var(--library-gold); }
+.bg-library-sage { background-color: var(--library-sage); }
+.bg-library-parchment { background-color: var(--library-parchment); }
+.bg-library-cream { background-color: var(--library-cream); }
+
+.text-library-navy { color: var(--library-navy); }
+.text-library-burgundy { color: var(--library-burgundy); }
+.text-library-gold { color: var(--library-gold); }
+.text-library-sage { color: var(--library-sage); }
+.text-library-cream { color: var(--library-cream); }
+
+.border-library-navy { border-color: var(--library-navy); }
+.border-library-burgundy { border-color: var(--library-burgundy); }
+.border-library-gold { border-color: var(--library-gold); }
+.border-library-sage { border-color: var(--library-sage); }
+</style>
+{% endblock %}
+{% load static %}
+
+{% block title %}Lecturer Dashboard - FBC Library{% endblock %}
+{% block page_title %}Lecturer Dashboard{% endblock %}
+
+{% block content %}
+<!-- Classical Library Header for Lecturers -->
+<div class="relative bg-gradient-to-r from-library-navy via-library-burgundy to-library-navy rounded-none shadow-2xl mb-12">
+    <div class="absolute inset-0 bg-black opacity-10"></div>
+    <div class="absolute inset-0" style="background-image: url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1000 100\" fill=\"none\"><path d=\"M0,50 Q250,20 500,50 T1000,50 L1000,100 L0,100 Z\" fill=\"%23ffffff\" fill-opacity=\"0.03\"/></svg>');"></div>
+    
+    <div class="relative z-10 px-8 py-16">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-6">
+                    <!-- Classical Faculty Icon -->
+                    <div class="w-20 h-20 bg-library-gold rounded-full flex items-center justify-center shadow-lg animate-glow">
+                        <i class="fas fa-chalkboard-teacher text-2xl text-library-navy"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-serif text-5xl font-bold text-white mb-2 tracking-wide">
+                            Faculty 
+                            <span class="text-library-gold">Portal</span>
+                        </h1>
+                        <p class="text-library-cream text-xl font-body italic">
+                            "Teaching is the highest form of understanding" - Welcome, {{ user.get_full_name|default:user.username }}
+                        </p>
+                        <div class="flex items-center space-x-6 mt-4">
+                            <div class="flex items-center space-x-2 bg-white bg-opacity-10 rounded-lg px-4 py-2 backdrop-blur-sm">
+                                <i class="fas fa-university text-library-gold"></i>
+                                <span class="text-library-cream font-semibold">Faculty Member</span>
+                            </div>
+                            <div class="flex items-center space-x-2 bg-white bg-opacity-10 rounded-lg px-4 py-2 backdrop-blur-sm">
+                                <i class="fas fa-infinity text-library-gold"></i>
+                                <span class="text-library-cream font-semibold">Unlimited Access</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Classical Decorative Element -->
+                <div class="hidden xl:block">
+                    <div class="w-40 h-40 relative">
+                        <div class="absolute inset-0 border-4 border-library-gold rounded-full animate-float opacity-30"></div>
+                        <div class="absolute inset-4 border-2 border-library-cream rounded-full animate-float opacity-50" style="animation-delay: 1s;"></div>
+                        <div class="absolute inset-8 bg-library-gold rounded-full flex items-center justify-center shadow-xl">
+                            <i class="fas fa-scroll text-3xl text-library-navy"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- Faculty Performance Statistics -->
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-12">
+        <!-- Research Materials Card -->
+        <div class="group relative bg-white rounded-2xl shadow-xl border-l-4 border-library-navy overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
+            <div class="absolute top-0 right-0 w-20 h-20 bg-library-navy opacity-5 rounded-bl-full"></div>
+            <div class="relative p-8">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="w-12 h-12 bg-library-navy bg-opacity-10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-opacity-20 transition-colors">
+                            <i class="fas fa-microscope text-xl text-library-navy"></i>
+                        </div>
+                        <h3 class="font-serif text-3xl font-bold text-library-navy mb-2">{{ research_materials|default:0 }}</h3>
+                        <p class="text-gray-600 font-body">Research Materials</p>
+                        <div class="mt-3 flex items-center text-blue-600 text-sm font-semibold">
+                            <i class="fas fa-database mr-1"></i>
+                            <span>Academic Access</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Course Resources Card -->
+        <div class="group relative bg-white rounded-2xl shadow-xl border-l-4 border-library-burgundy overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
+            <div class="absolute top-0 right-0 w-20 h-20 bg-library-burgundy opacity-5 rounded-bl-full"></div>
+            <div class="relative p-8">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="w-12 h-12 bg-library-burgundy bg-opacity-10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-opacity-20 transition-colors">
+                            <i class="fas fa-chalkboard text-xl text-library-burgundy"></i>
+                        </div>
+                        <h3 class="font-serif text-3xl font-bold text-library-burgundy mb-2">{{ course_materials|default:0 }}</h3>
+                        <p class="text-gray-600 font-body">Course Materials</p>
+                        <div class="mt-3 flex items-center text-green-600 text-sm font-semibold">
+                            <i class="fas fa-book-open mr-1"></i>
+                            <span>Teaching Resources</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Current Borrowings Card -->
+        <div class="group relative bg-white rounded-2xl shadow-xl border-l-4 border-library-gold overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
+            <div class="absolute top-0 right-0 w-20 h-20 bg-library-gold opacity-5 rounded-bl-full"></div>
+            <div class="relative p-8">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="w-12 h-12 bg-library-gold bg-opacity-10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-opacity-20 transition-colors">
+                            <i class="fas fa-book-reader text-xl text-yellow-700"></i>
+                        </div>
+                        <h3 class="font-serif text-3xl font-bold text-yellow-700 mb-2">{{ faculty_borrowings|default:0 }}</h3>
+                        <p class="text-gray-600 font-body">Current Borrowings</p>
+                        <div class="mt-3 flex items-center text-orange-600 text-sm font-semibold">
+                            <i class="fas fa-clock mr-1"></i>
+                            <span>Extended Periods</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Faculty Status Card -->
+        <div class="group relative bg-white rounded-2xl shadow-xl border-l-4 border-library-sage overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
+            <div class="absolute top-0 right-0 w-20 h-20 bg-library-sage opacity-5 rounded-bl-full"></div>
+            <div class="relative p-8">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="w-12 h-12 bg-library-sage bg-opacity-10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-opacity-20 transition-colors">
+                            <i class="fas fa-crown text-xl text-library-sage"></i>
+                        </div>
+                        <h3 class="font-serif text-lg font-bold text-library-sage mb-2">Premium</h3>
+                        <p class="text-gray-600 font-body">Faculty Access</p>
+                        <div class="mt-3 flex items-center text-green-600 text-sm font-semibold">
+                            <i class="fas fa-infinity mr-1"></i>
+                            <span>Unlimited</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-8 mb-12">
+        <!-- Faculty Quick Actions -->
+        <div class="xl:col-span-2 bg-white rounded-2xl shadow-xl overflow-hidden">
+            <!-- Classical Header -->
+            <div class="bg-gradient-to-r from-library-parchment to-library-cream border-b border-warm-gray-200 p-8">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-14 h-14 bg-library-navy rounded-xl flex items-center justify-center shadow-lg">
+                            <i class="fas fa-university text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-serif text-2xl font-bold text-library-navy">Faculty Research Hub</h3>
+                            <p class="text-warm-gray-600 font-body italic">Advanced academic resources and tools</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Action Cards Grid -->
+            <div class="p-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <a href="{% url 'fbc_books:book_list' %}?category=research" class="group flex items-center p-6 bg-library-parchment rounded-xl hover:bg-library-cream transition-all duration-300 border border-warm-gray-100 hover:border-library-gold">
+                        <div class="w-12 h-12 bg-library-burgundy bg-opacity-10 rounded-lg flex items-center justify-center group-hover:bg-opacity-20 transition-colors">
+                            <i class="fas fa-microscope text-library-burgundy text-xl"></i>
+                        </div>
+                        <div class="ml-4 flex-1">
+                            <h4 class="font-serif font-semibold text-library-navy text-lg group-hover:text-library-burgundy transition-colors">Research Materials</h4>
+                            <p class="text-warm-gray-600 font-body text-sm">Academic journals and papers</p>
+                        </div>
+                        <i class="fas fa-chevron-right text-warm-gray-400 group-hover:text-library-gold transition-colors"></i>
+                    </a>
+
+                    <a href="{% url 'fbc_books:book_list' %}?category=textbooks" class="group flex items-center p-6 bg-library-parchment rounded-xl hover:bg-library-cream transition-all duration-300 border border-warm-gray-100 hover:border-library-gold">
+                        <div class="w-12 h-12 bg-library-sage bg-opacity-10 rounded-lg flex items-center justify-center group-hover:bg-opacity-20 transition-colors">
+                            <i class="fas fa-chalkboard text-library-sage text-xl"></i>
+                        </div>
+                        <div class="ml-4 flex-1">
+                            <h4 class="font-serif font-semibold text-library-navy text-lg group-hover:text-library-sage transition-colors">Course Resources</h4>
+                            <p class="text-warm-gray-600 font-body text-sm">Textbooks and teaching materials</p>
+                        </div>
+                        <i class="fas fa-chevron-right text-warm-gray-400 group-hover:text-library-gold transition-colors"></i>
+                    </a>
+
+                    <a href="{% url 'fbc_books:book_list' %}" class="group flex items-center p-6 bg-library-parchment rounded-xl hover:bg-library-cream transition-all duration-300 border border-warm-gray-100 hover:border-library-gold">
+                        <div class="w-12 h-12 bg-library-navy bg-opacity-10 rounded-lg flex items-center justify-center group-hover:bg-opacity-20 transition-colors">
+                            <i class="fas fa-book-reader text-library-navy text-xl"></i>
+                        </div>
+                        <div class="ml-4 flex-1">
+                            <h4 class="font-serif font-semibold text-library-navy text-lg group-hover:text-library-navy transition-colors">My Borrowings</h4>
+                            <p class="text-warm-gray-600 font-body text-sm">Manage borrowed materials</p>
+                        </div>
+                        <i class="fas fa-chevron-right text-warm-gray-400 group-hover:text-library-gold transition-colors"></i>
+                    </a>
+
+                    <a href="{% url 'users:profile' %}" class="group flex items-center p-6 bg-library-parchment rounded-xl hover:bg-library-cream transition-all duration-300 border border-warm-gray-100 hover:border-library-gold">
+                        <div class="w-12 h-12 bg-yellow-600 bg-opacity-10 rounded-lg flex items-center justify-center group-hover:bg-opacity-20 transition-colors">
+                            <i class="fas fa-user-cog text-yellow-700 text-xl"></i>
+                        </div>
+                        <div class="ml-4 flex-1">
+                            <h4 class="font-serif font-semibold text-library-navy text-lg group-hover:text-yellow-700 transition-colors">Faculty Profile</h4>
+                            <p class="text-warm-gray-600 font-body text-sm">Update faculty information</p>
+                        </div>
+                        <i class="fas fa-chevron-right text-warm-gray-400 group-hover:text-library-gold transition-colors"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Academic Resources & Teaching Tools -->
+        <div class="space-y-8">
+            <!-- Academic Resources -->
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+                <div class="bg-gradient-to-r from-library-navy to-library-burgundy p-6">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-library-gold rounded-lg flex items-center justify-center shadow-md">
+                            <i class="fas fa-university text-library-navy text-sm"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-serif text-lg font-bold text-white">Academic Resources</h3>
+                            <p class="text-library-cream text-sm font-body italic">Research and scholarship tools</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6 space-y-4">
+                    <div class="flex items-center p-4 rounded-xl hover:bg-library-parchment transition-all duration-300 border border-transparent hover:border-library-gold">
+                        <div class="w-10 h-10 bg-library-burgundy bg-opacity-10 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-journal-whills text-library-burgundy text-sm"></i>
+                        </div>
+                        <div class="ml-4">
+                            <span class="font-body font-semibold text-library-navy">Research Journals</span>
+                            <p class="text-warm-gray-600 text-sm">Peer-reviewed academic publications</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center p-4 rounded-xl hover:bg-library-parchment transition-all duration-300 border border-transparent hover:border-library-gold">
+                        <div class="w-10 h-10 bg-library-sage bg-opacity-10 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-database text-library-sage text-sm"></i>
+                        </div>
+                        <div class="ml-4">
+                            <span class="font-body font-semibold text-library-navy">Academic Databases</span>
+                            <p class="text-warm-gray-600 text-sm">Comprehensive research collections</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center p-4 rounded-xl hover:bg-library-parchment transition-all duration-300 border border-transparent hover:border-library-gold">
+                        <div class="w-10 h-10 bg-library-navy bg-opacity-10 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-microscope text-library-navy text-sm"></i>
+                        </div>
+                        <div class="ml-4">
+                            <span class="font-body font-semibold text-library-navy">Research Tools</span>
+                            <p class="text-warm-gray-600 text-sm">Digital analysis and methodology</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Teaching Tools -->
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+                <div class="bg-gradient-to-r from-library-sage to-library-navy p-6">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-library-gold rounded-lg flex items-center justify-center shadow-md">
+                            <i class="fas fa-chalkboard text-library-navy text-sm"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-serif text-lg font-bold text-white">Teaching Resources</h3>
+                            <p class="text-library-cream text-sm font-body italic">Pedagogical support materials</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6 space-y-6">
+                    <div class="flex items-center justify-between p-4 bg-library-parchment rounded-xl">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-book text-orange-600 text-sm"></i>
+                            </div>
+                            <span class="font-body font-semibold text-library-navy">Course Materials</span>
+                        </div>
+                        <span class="text-library-burgundy font-bold font-serif">Available</span>
+                    </div>
+                    
+                    <div class="flex items-center justify-between p-4 bg-library-parchment rounded-xl">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-presentation text-red-600 text-sm"></i>
+                            </div>
+                            <span class="font-body font-semibold text-library-navy">Presentation Tools</span>
+                        </div>
+                        <span class="text-library-sage font-bold font-serif">Access</span>
+                    </div>
+                    
+                    <div class="flex items-center justify-between p-4 bg-library-parchment rounded-xl">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-users text-indigo-600 text-sm"></i>
+                            </div>
+                            <span class="font-body font-semibold text-library-navy">Student Resources</span>
+                        </div>
+                        <span class="text-library-navy font-bold font-serif">Share</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Faculty Privileges Information -->
+    <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+        <div class="bg-gradient-to-r from-library-sage to-library-navy p-6">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-library-gold rounded-lg flex items-center justify-center shadow-md">
+                    <i class="fas fa-star text-library-navy text-sm"></i>
+                </div>
+                <div>
+                    <h3 class="font-serif text-lg font-bold text-white">Faculty Privileges & Benefits</h3>
+                    <p class="text-library-cream text-sm font-body italic">Exclusive academic access rights</p>
+                </div>
+            </div>
+        </div>
+        <div class="p-6 bg-emerald-50">
+            <div class="flex items-start space-x-4">
+                <div class="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                    <i class="fas fa-crown text-emerald-600 text-sm"></i>
+                </div>
+                <div class="flex-1">
+                    <p class="text-emerald-700 font-body mb-4">
+                        As a faculty member, you have unlimited access to all library resources without subscription fees.
+                        Enjoy extended borrowing periods, priority access to new acquisitions, and exclusive academic databases.
+                    </p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="flex items-center space-x-3 p-3 bg-white rounded-lg border border-emerald-200">
+                            <i class="fas fa-infinity text-emerald-600"></i>
+                            <span class="text-emerald-800 font-semibold text-sm">Unlimited Borrowing Privileges</span>
+                        </div>
+                        <div class="flex items-center space-x-3 p-3 bg-white rounded-lg border border-emerald-200">
+                            <i class="fas fa-clock text-emerald-600"></i>
+                            <span class="text-emerald-800 font-semibold text-sm">Extended Loan Periods</span>
+                        </div>
+                        <div class="flex items-center space-x-3 p-3 bg-white rounded-lg border border-emerald-200">
+                            <i class="fas fa-graduation-cap text-emerald-600"></i>
+                            <span class="text-emerald-800 font-semibold text-sm">Faculty-Only Resources</span>
+                        </div>
+                        <div class="flex items-center space-x-3 p-3 bg-white rounded-lg border border-emerald-200">
+                            <i class="fas fa-handshake text-emerald-600"></i>
+                            <span class="text-emerald-800 font-semibold text-sm">Inter-Library Loan Services</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<style>
+/* Additional Classical Styling for Faculty */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: #f7f3e9;
+    border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #8b4513;
+    border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #654321;
+}
+
+.animate-glow {
+    animation: glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+    from {
+        box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+    }
+    to {
+        box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+    }
+}
+
+.animate-float {
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-20px);
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Enhanced faculty dashboard interactions
+document.addEventListener('DOMContentLoaded', function() {
+    // Animated counters with classical easing
+    const counters = document.querySelectorAll('.font-serif.text-3xl.font-bold');
+    counters.forEach(counter => {
+        const target = parseInt(counter.textContent);
+        if (!isNaN(target)) {
+            let current = 0;
+            const increment = target / 50;
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    counter.textContent = target;
+                    clearInterval(timer);
+                } else {
+                    counter.textContent = Math.ceil(current);
+                }
+            }, 80);
+        }
+    });
+    
+    // Add elegant hover effects to cards
+    const cards = document.querySelectorAll('.group');
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-8px) scale(1.02)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0) scale(1)';
+        });
+    });
+});
+</script>
+{% endblock %}
+

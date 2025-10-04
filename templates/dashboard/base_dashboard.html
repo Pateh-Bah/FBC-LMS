@@ -93,7 +93,7 @@
                 <!-- Navigation Menu -->
                 <nav class="space-y-2">
                     {% if user.user_type == 'admin' %}
-                        <a href="{% url 'fbc_books:admin_dashboard' %}" class="flex items-center px-4 py-3 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition-colors duration-200">
+                        <a href="{% url 'fbc_users:admin_dashboard' %}" class="flex items-center px-4 py-3 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition-colors duration-200">
                             <i class="fas fa-home mr-3"></i>Dashboard
                         </a>
                         <a href="{% url 'fbc_books:manage_books' %}" class="flex items-center px-4 py-3 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition-colors duration-200">

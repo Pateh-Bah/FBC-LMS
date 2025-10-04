@@ -7,9 +7,9 @@
 
 {% block content %}
 <!-- Classic Library Header -->
-<div class="relative bg-gradient-to-r from-library-navy via-library-burgundy to-library-navy rounded-none shadow-2xl mb-12">
+<div class="relative bg-fbc-green-500 rounded-none shadow-2xl mb-12">
     <div class="absolute inset-0 bg-black opacity-10"></div>
-    <div class="absolute inset-0" style="background-image: url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1000 100\" fill=\"none\"><path d=\"M0,50 Q250,20 500,50 T1000,50 L1000,100 L0,100 Z\" fill=\"%23ffffff\" fill-opacity=\"0.03\"/></svg>');"></div>
+        
     
     <div class="relative z-10 px-8 py-16">
         <div class="max-w-7xl mx-auto">
@@ -24,17 +24,17 @@
                             Staff 
                             <span class="text-library-gold">Dashboard</span>
                         </h1>
-                        <p class="text-library-cream text-xl font-body italic">
+                        <p class="text-white text-xl font-body italic">
                             "Serving knowledge, empowering minds" - Welcome, {{ user.get_full_name|default:user.username }}
                         </p>
                         <div class="flex items-center space-x-6 mt-4">
                             <div class="flex items-center space-x-2 bg-white bg-opacity-10 rounded-lg px-4 py-2 backdrop-blur-sm">
                                 <i class="fas fa-user-tie text-library-gold"></i>
-                                <span class="text-library-cream font-semibold">Staff Member</span>
+                                <span class="text-white font-semibold">Staff Member</span>
                             </div>
                             <div class="flex items-center space-x-2 bg-white bg-opacity-10 rounded-lg px-4 py-2 backdrop-blur-sm">
                                 <i class="fas fa-calendar-alt text-library-gold"></i>
-                                <span class="text-library-cream">{% now "F j, Y" %}</span>
+                                <span class="text-white">{% now "F j, Y" %}</span>
                             </div>
                         </div>
                     </div>
@@ -275,7 +275,7 @@
                 </a>
 
                 <!-- Reports -->
-                <a href="{% url 'fbc_books:admin_dashboard' %}" class="group flex items-center p-4 rounded-xl hover:bg-library-parchment transition-all duration-300 border border-transparent hover:border-library-gold">
+                <a href="{% url 'fbc_users:staff_dashboard' %}" class="group flex items-center p-4 rounded-xl hover:bg-library-parchment transition-all duration-300 border border-transparent hover:border-library-gold">
                     <div class="w-12 h-12 bg-green-600 bg-opacity-10 rounded-lg flex items-center justify-center mr-4 group-hover:bg-green-600 group-hover:bg-opacity-20 transition-all duration-300">
                         <i class="fas fa-chart-bar text-green-600 text-xl"></i>
                     </div>
