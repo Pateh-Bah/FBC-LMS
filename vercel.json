@@ -8,20 +8,12 @@
   ],
   "routes": [
     {
-      "src": "/static/(.*)",
-      "dest": "/static/$1"
-    },
-    {
-      "src": "/media/(.*)",
-      "dest": "/media/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/api/index.py"
+      "src": "\\/(.*)",
+      "dest": "api/index.py"
     }
   ],
   "env": {
-    "DJANGO_SETTINGS_MODULE": "library_system.settings"
+    "DJANGO_SETTINGS_MODULE": "library_system.settings_vercel"
   },
   "functions": {
     "api/index.py": {
