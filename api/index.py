@@ -28,16 +28,25 @@ def handler(request):
     Vercel serverless function handler
     """
     try:
+        # Basic request diagnostics to help debug routing issues on Vercel
+        method = request.get('method', 'GET')
+        path = request.get('path', '/')
+        print(f"[vercel-serverless] Received request method={method} path={path}")
+
+        # Simple health-check endpoint to confirm the serverless function is reachable
+        if path in ['/__health', '/__alive']:
+            return {
+                'statusCode': 200,
+                'headers': {'Content-Type': 'application/json'},
+                'body': '{"ok": true, "path": "%s", "method": "%s"}' % (path, method)
+            }
+
         # Import necessary Django components
         from django.test import Client
         from django.conf import settings
-        
+
         # Create Django test client
         client = Client()
-        
-        # Get request method and path
-        method = request.get('method', 'GET')
-        path = request.get('path', '/')
         
         # Handle different HTTP methods
         if method == 'GET':
