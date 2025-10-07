@@ -1,8 +1,8 @@
 # Quick Setup Guide - Django LMS to Vercel + Supabase
 
 ## Your Supabase Details
-- **Project URL**: https://vkpbbepkwqenegbkxxli.supabase.co
-- **API Key**: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZrcGJiZXBrd3FlbmVnYmt4eGxpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk0Mjc2OTEsImV4cCI6MjA3NTAwMzY5MX0.VnGYd0ITYLET6FHGWZ5vebuoPs2WsrGkqLPy0C1FnIQ
+- **Project URL**: https://your-project.supabase.co
+- **API Key**: <your-anon-key>
 
 ## Step 1: Get Database Connection String
 
@@ -23,8 +23,8 @@ DEBUG=False
 DJANGO_SETTINGS_MODULE=library_system.settings_vercel
 
 # Supabase Configuration
-SUPABASE_URL=https://vkpbbepkwqenegbkxxli.supabase.co
-SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZrcGJiZXBrd3FlbmVnYmt4eGxpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk0Mjc2OTEsImV4cCI6MjA3NTAwMzY5MX0.VnGYd0ITYLET6FHGWZ5vebuoPs2WsrGkqLPy0C1FnIQ
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_ANON_KEY=your-anon-key
 
 # Database Configuration (Replace [YOUR-PASSWORD] with your actual password)
 DATABASE_URL=postgresql://postgres:[YOUR-PASSWORD]@db.vkpbbepkwqenegbkxxli.supabase.co:5432/postgres
