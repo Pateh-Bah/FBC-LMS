@@ -105,7 +105,7 @@ Vercel: connect repository and add environment variables
 
 Note on running Django on Vercel (and alternatives)
 --------------------------------------------------
-Vercel is optimized for serverless and frontend frameworks. It supports Docker-based deployments for full Django apps, but if you do not want to use Docker there are two practical approaches:
+Vercel is optimized for serverless and frontend frameworks. It can support container-based deployments for full Django apps, but this repository does not include container configuration by default. If you do not use containers there are two practical approaches:
 
 1) Use a hosting provider that supports persistent Python web processes (recommended if you are not using Docker):
   - Render (render.com), Railway (railway.app), Fly (fly.io), or Heroku are excellent choices and can run Gunicorn directly from your Git repo using a `Procfile` or a `render.yaml` manifest.
@@ -119,7 +119,7 @@ Given you prefer not to use Docker, this repository no longer includes a Dockerf
 
 1. Host Django on a platform that supports persistent Python processes (Render, Railway, Fly, Heroku). A `Procfile` or `render.yaml` is included for those providers.
 2. Use Vercel only for frontend and host the Django backend separately.
-3. If you need a Dockerfile later, generate one locally and do not commit it with secrets embedded. Add it to `.gitignore` or keep it out of the repo.
+3. If you need containerization later, generate configuration locally and do not commit secrets or configuration files with embedded secrets.
 
 Running migrations & database setup
 ----------------------------------
@@ -187,12 +187,12 @@ Final notes
 - After adding environment variables to Vercel and connecting the repo, you can trigger a production deployment.
 - For production, set DEBUG=False and ensure SECRET_KEY and SERVICE_ROLE_KEY values are stored securely in Vercel.
 - If you want, I can:
-  - Add a Dockerfile to the repo and create a Vercel-ready deployment configuration.
+  - Container-based Vercel deployments are no longer part of the default repository workflow. Use the recommended alternatives (Render/Heroku/Railway) or create container configuration locally for private use only.
   - Create a GitHub Action to run migrations automatically on deploy.
   - Provide the exact Vercel CLI commands to add environment variables if you want to automate that step.
 
 If you'd like, I can now:
-- Create the Dockerfile in the repo and commit it.
+  - Docker-based Vercel deployments are no longer part of the default repository workflow. Use the recommended alternatives (Render/Heroku/Railway) or create a local Dockerfile for private use only.
 - Create a GitHub Action workflow file to run migrations.
 - Provide exact Vercel CLI commands to add the listed environment variables (you'll need to be logged in with the Vercel CLI).
 

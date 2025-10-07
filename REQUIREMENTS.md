@@ -1,21 +1,9 @@
 # FBC Library Management System - Requirements Documentation
 
-## 📋 Project Overview
-
-**FBC Library Management System** is a comprehensive Django-based web application designed for Fourah Bay College Library to manage books, users, borrowing, fines, notifications, and payment processing with role-based access control.
-
-**Version**: 1.0.0  
-**Last Updated**: June 2025  
-**Framework**: Django 5.2.1+  
 **Python Version**: 3.8+  
 
 ## 🛠️ Technical Requirements
 
-### Core Dependencies
-
-```txt
-Django>=5.2.1
-waitress>=2.1.2
 whitenoise>=6.9.0
 dj-database-url>=2.3.0
 psycopg2-binary>=2.9.10
@@ -27,31 +15,10 @@ django-allauth>=0.58.0
 ```
 
 ### Technology Stack
-- **Backend Framework**: Django 5.2.1+
-- **Database**: SQLite (Development) / PostgreSQL (Production)
-- **Web Server**: Waitress (Production)
-- **Static Files**: WhiteNoise
-- **Cloud Storage**: AWS S3 (Optional)
-- **Frontend**: HTML5, CSS3, JavaScript (ES6+)
-- **CSS Framework**: Tailwind CSS (CDN)
-- **Icons**: Font Awesome 6.0.0
-- **Responsive Design**: Mobile-first approach
 
 ## 🏗️ System Architecture
-
-### Django Apps Structure
-```
-library_system/           # Main project settings
-├── fbc_books/           # Book management (CRUD, e-books)
-├── fbc_users/           # User management & authentication
-├── fbc_fines/           # Fine management system
-├── fbc_payments/        # Payment processing & simulation
-├── fbc_notifications/   # Notification system
-├── accounts/            # Extended user authentication
-├── library_users/       # User profile management
-└── payments/            # Additional payment features
-```
-
+### Containerization (optional)
+Containerization is optional for deployments. This repository intentionally omits any default container configuration—if you require containers, create local configuration and ensure secrets are never committed.
 ## 👥 User Roles & Access Control
 
 ### 🔐 Authentication System
