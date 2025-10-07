@@ -67,8 +67,8 @@ def create_env_file():
         print(f"✅ {env_file} already exists")
         return True
     
-    # Copy from template
-    template_files = ['env.local', 'env.example', 'vercel.env']
+    # Copy from template (use env.example only; do not store real secrets in the repo)
+    template_files = ['env.example']
     for template in template_files:
         if os.path.exists(template):
             shutil.copy(template, env_file)
@@ -144,15 +144,16 @@ def show_environment_variables():
     print("=" * 60)
     
     env_vars = [
-        ("SECRET_KEY", "django-insecure-change-this-to-a-secure-secret-key-in-production-2024"),
+        ("SECRET_KEY", "<REDACTED - SET IN VERCEL/GITHUB SECRETS>"),
         ("DEBUG", "False"),
         ("DJANGO_SETTINGS_MODULE", "library_system.settings_vercel"),
-        ("SUPABASE_URL", "https://vkpbbepkwqenegbkxxli.supabase.co"),
-        ("SUPABASE_ANON_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZrcGJiZXBrd3FlbmVnYmt4eGxpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk0Mjc2OTEsImV4cCI6MjA3NTAwMzY5MX0.VnGYd0ITYLET6FHGWZ5vebuoPs2WsrGkqLPy0C1FnIQ"),
-        ("DATABASE_URL", "postgresql://postgres:[YOUR-PASSWORD]@db.vkpbbepkwqenegbkxxli.supabase.co:5432/postgres"),
+        ("SUPABASE_URL", "https://<your-project-id>.supabase.co"),
+        ("SUPABASE_ANON_KEY", "<REDACTED_SUPABASE_ANON_KEY>"),
+        ("SUPABASE_SERVICE_ROLE_KEY", "<REDACTED_SUPABASE_SERVICE_ROLE_KEY>"),
+        ("DATABASE_URL", "postgresql://postgres:<REDACTED_PASSWORD>@db.<your-project-id>.supabase.co:5432/postgres"),
         ("ANNUAL_SUBSCRIPTION_FEE", "100000"),
         ("FINE_PER_DAY", "5000"),
-        ("ALLOWED_HOSTS", "localhost,127.0.0.1,*.vercel.app,*.vercel.app.,vkpbbepkwqenegbkxxli.supabase.co"),
+        ("ALLOWED_HOSTS", "localhost,127.0.0.1,*.vercel.app"),
     ]
     
     for key, value in env_vars:

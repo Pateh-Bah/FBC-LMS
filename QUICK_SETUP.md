@@ -10,7 +10,7 @@
 2. Select your project
 3. Go to **Settings** → **Database**
 4. Copy the **Connection string** (URI format)
-5. It should look like: `postgresql://postgres:[YOUR-PASSWORD]@db.vkpbbepkwqenegbkxxli.supabase.co:5432/postgres`
+5. It should look like: `postgresql://postgres:<REDACTED_PASSWORD>@db.<your-project-id>.supabase.co:5432/postgres`
 
 ## Step 2: Set Environment Variables
 
@@ -27,7 +27,7 @@ SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_ANON_KEY=your-anon-key
 
 # Database Configuration (Replace [YOUR-PASSWORD] with your actual password)
-DATABASE_URL=postgresql://postgres:[YOUR-PASSWORD]@db.vkpbbepkwqenegbkxxli.supabase.co:5432/postgres
+DATABASE_URL=postgresql://postgres:<REDACTED_PASSWORD>@db.<your-project-id>.supabase.co:5432/postgres
 
 # Email Configuration (Optional)
 EMAIL_HOST=smtp.gmail.com
