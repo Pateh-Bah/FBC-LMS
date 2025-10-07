@@ -1,0 +1,8 @@
+{
+  "name": "fbc-lms",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "vercel-build": "bash build.sh"
+  }
+}

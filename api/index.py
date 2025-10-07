@@ -25,8 +25,15 @@ django.setup()
 # Get WSGI application
 application = get_wsgi_application()
 
-# Debug flag
+# Try to use vercel_wsgi adapter for better compatibility/performance
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
+try:
+    from vercel_wsgi import make_handler
+    wsgi_handler = make_handler(application)
+    print("[vercel-serverless] Using vercel_wsgi handler")
+except Exception:
+    wsgi_handler = None
+    print("[vercel-serverless] vercel_wsgi not available; using fallback handler")
 
 def handler(request):
     """
@@ -47,6 +54,10 @@ def handler(request):
             print(f"[vercel-serverless] Headers: {headers}")
             print(f"[vercel-serverless] Query: {query}")
             print(f"[vercel-serverless] Cookies: {cookies}")
+
+        # If vercel_wsgi is available, delegate all requests directly to it
+        if wsgi_handler is not None:
+            return wsgi_handler(request)
 
         # Health check endpoints
         if path in ['/__health', '/__alive', '/api/health']:
