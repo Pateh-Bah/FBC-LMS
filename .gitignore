@@ -28,6 +28,8 @@ env.local
 env.development
 env.test
 env.production
+vercel.env
+vercel.*
 
 # Local development settings
 */settings/local.py
