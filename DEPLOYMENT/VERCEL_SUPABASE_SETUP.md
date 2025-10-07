@@ -11,13 +11,13 @@ IMPORTANT SECURITY NOTE
 
 Supabase project details you provided
 ------------------------------------
-- Supabase Project ID: vkpbbepkwqenegbkxxli
-- Supabase DB host: db.vkpbbepkwqenegbkxxli.supabase.co
-- Supabase DB port: 5432
-- Database name: postgres
-- DB username: postgres
-- DB password (raw): Fbc-lms@2205
-- Supabase base URL: https://vkpbbepkwqenegbkxxli.supabase.co
+-- Supabase Project ID: <your-project-id>
+-- Supabase DB host: db.<your-project-id>.supabase.co
+-- Supabase DB port: 5432
+-- Database name: postgres
+-- DB username: postgres
+-- DB password (raw): <REDACTED - DO NOT COMMIT>
+-- Supabase base URL: https://<your-project-id>.supabase.co
 
 Constructing DATABASE_URL (percent-encode password)
 ---------------------------------------------------
@@ -29,11 +29,7 @@ To percent-encode the password (example using Python):
 
 python -c "import urllib.parse; print(urllib.parse.quote('Fbc-lms@2205', safe=''))"
 
-The encoded password for your DB password "Fbc-lms@2205" is: Fbc-lms%402205
-
-Therefore the exact DATABASE_URL you can use (DO NOT COMMIT this into the repo; paste into Vercel or GitHub Secrets):
-
-postgresql://postgres:Fbc-lms%402205@db.vkpbbepkwqenegbkxxli.supabase.co:5432/postgres?sslmode=require
+The exact DATABASE_URL should be created using your own (secret) DB password and percent-encoding as needed. DO NOT commit this into the repo. Use Vercel or GitHub Secrets to store the value.
 
 Environment variables to set
 ---------------------------
@@ -55,7 +51,7 @@ Client-side / NEXT_PUBLIC_ variables (for frontend apps)
 If you have a frontend (for example Next.js) that needs to talk directly to Supabase from the browser, use `NEXT_PUBLIC_` environment variables so the values are available to client-side code.
 
 - NEXT_PUBLIC_SUPABASE_URL (public): https://vkpbbepkwqenegbkxxli.supabase.co
-- NEXT_PUBLIC_SUPABASE_ANON_KEY (public): eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZrcGJiZXBrd3FlbmVnYmt4eGxpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk0Mjc2OTEsImV4cCI6MjA3NTAwMzY5MX0.VnGYd0ITYLET6FHGWZ5vebuoPs2WsrGkqLPy0C1FnIQ
+-- NEXT_PUBLIC_SUPABASE_ANON_KEY (public): <your-anon-key>
 
 Notes and caution:
 - The `NEXT_PUBLIC` ANON key is intended for client-side usage and is safe to expose; it has the permissions of the Supabase anon role only. Do NOT use the Service Role key here.
@@ -119,36 +115,11 @@ Vercel is optimized for serverless and frontend frameworks. It supports Docker-b
 
 3) Advanced: Convert Django into serverless functions for Vercel (requires substantial refactor and a WSGI-to-serverless adapter). Not recommended unless you want to invest in serverless migration.
 
-Given you prefer not to use Docker, I updated the repo to include a `Procfile` and a `render.yaml` so you can deploy to Render or Heroku with minimal changes.
+Given you prefer not to use Docker, this repository no longer includes a Dockerfile in the root. Use one of the recommended approaches instead:
 
-Sample Dockerfile (recommended for Vercel Docker deployment)
------------------------------------------------------------
-# Sample Dockerfile (copy to project root as Dockerfile)
-# Use a small Python base
-FROM python:3.11-slim
-
-WORKDIR /app
-
-# Install system dependencies
-RUN apt-get update && apt-get install -y build-essential libpq-dev --no-install-recommends && rm -rf /var/lib/apt/lists/*
-
-# Copy requirements and install
-COPY requirements-vercel.txt ./requirements-vercel.txt
-RUN pip install --upgrade pip && pip install -r requirements-vercel.txt
-
-# Copy project
-COPY . /app
-
-# Collect static files
-ENV DJANGO_SETTINGS_MODULE=library_system.settings_vercel
-RUN python manage.py collectstatic --noinput
-
-# Run migrations at container start (optional entrypoint can run them)
-# Expose port
-EXPOSE 8000
-
-# Start server with Gunicorn
-CMD ["gunicorn", "library_system.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3"]
+1. Host Django on a platform that supports persistent Python processes (Render, Railway, Fly, Heroku). A `Procfile` or `render.yaml` is included for those providers.
+2. Use Vercel only for frontend and host the Django backend separately.
+3. If you need a Dockerfile later, generate one locally and do not commit it with secrets embedded. Add it to `.gitignore` or keep it out of the repo.
 
 Running migrations & database setup
 ----------------------------------

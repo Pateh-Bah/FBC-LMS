@@ -3,10 +3,32 @@ name: Deploy to Vercel
 on:
   push:
     branches: [ main ]
+  workflow_dispatch: {}
 
 jobs:
-  deploy:
+  sanity:
+    name: Sanity check
     runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Show basic info
+        run: |
+          echo "Repository: $GITHUB_REPOSITORY"
+          echo "Ref: $GITHUB_REF"
+          echo "Event: $GITHUB_EVENT_NAME"
+      - name: Report Vercel token presence
+        run: |
+          if [ -z "${{ secrets.VERCEL_TOKEN }}" ]; then
+            echo "VERCEL_TOKEN is NOT configured (automatic deploys disabled)."
+          else
+            echo "VERCEL_TOKEN is configured. Automatic deploys enabled."
+          fi
+
+  deploy:
+    name: Deploy to Vercel
+    runs-on: ubuntu-latest
+    needs: sanity
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -14,16 +36,16 @@ jobs:
           fetch-depth: 0
 
       - name: Deploy to Vercel (if VERCEL_TOKEN present)
-        if: secrets.VERCEL_TOKEN != ''
+        if: ${{ secrets.VERCEL_TOKEN != '' }}
         run: |
           echo "VERCEL token found - deploying to Vercel..."
-          npm install -g vercel@25 || true
+          npm install -g vercel@25
           vercel --prod --token ${{ secrets.VERCEL_TOKEN }} --confirm
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
       - name: Skip deploy when no token
-        if: secrets.VERCEL_TOKEN == ''
+        if: ${{ secrets.VERCEL_TOKEN == '' }}
         run: |
           echo "No VERCEL_TOKEN secret configured. Skipping automatic Vercel deploy."
