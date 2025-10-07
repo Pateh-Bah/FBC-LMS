@@ -27,7 +27,9 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG", "True") == "True"
 
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "127.0.0.1,localhost,.vercel.app").split(",")
+if os.getenv("VERCEL_URL"):
+    ALLOWED_HOSTS.append(os.getenv("VERCEL_URL"))
 
 # Basic security settings for development
 SECURE_BROWSER_XSS_FILTER = False
@@ -101,15 +103,25 @@ TEMPLATES = [
 WSGI_APPLICATION = "library_system.wsgi.application"
 
 # Database
-DATABASES = {
-    "default": dj_database_url.config(
-        default=os.getenv(
-            "DATABASE_URL", "sqlite:///" + os.path.join(BASE_DIR, "db.sqlite3")
-        ),
-        conn_max_age=600,
-        conn_health_checks=True,
-    )
-}
+DATABASE_URL = os.getenv("DATABASE_URL")
+if DATABASE_URL and DATABASE_URL.startswith("postgresql://"):
+    # Use Supabase/Postgres
+    DATABASES = {
+        "default": dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
+    }
+else:
+    # Fallback to SQLite for local/dev
+    DATABASES = {
+        "default": dj_database_url.config(
+            default="sqlite:///" + os.path.join(BASE_DIR, "db.sqlite3"),
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
+    }
 
 # Cache
 CACHES = {
