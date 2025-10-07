@@ -192,7 +192,7 @@ Final notes
   - Provide the exact Vercel CLI commands to add environment variables if you want to automate that step.
 
 If you'd like, I can now:
-  - Docker-based Vercel deployments are no longer part of the default repository workflow. Use the recommended alternatives (Render/Heroku/Railway) or create a local Dockerfile for private use only.
+  - Container-based Vercel deployments are no longer part of the default repository workflow. Use the recommended alternatives (Render/Heroku/Railway) or create container configuration locally for private use only.
 - Create a GitHub Action workflow file to run migrations.
 - Provide exact Vercel CLI commands to add the listed environment variables (you'll need to be logged in with the Vercel CLI).
 

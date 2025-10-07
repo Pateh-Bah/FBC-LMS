@@ -426,7 +426,7 @@ Containerization is optional for deployments. This repository intentionally omit
 - **Database**: PostgreSQL 12+
 - **Static Files**: WhiteNoise static file serving
 - **File Storage**: AWS S3 or local file system
-- **Process Management**: Systemd or Docker containers
+**Process Management**: Systemd (containerization optional)
 
 ### Environment Configuration:
 ```env
