@@ -160,10 +160,12 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # Custom user model
 AUTH_USER_MODEL = "fbc_users.CustomUser"
 
-# Supabase configuration (production)
-SUPABASE_URL = os.getenv('SUPABASE_URL')
-SUPABASE_ANON_KEY = os.getenv('SUPABASE_ANON_KEY')
-SUPABASE_SERVICE_ROLE_KEY = os.getenv('SUPABASE_SERVICE_ROLE_KEY')
+# Supabase was removed from this deployment configuration. Set DATABASE_URL
+# to your chosen Postgres provider if needed. Supabase variables removed
+# to prevent accidental use/exposure.
+SUPABASE_URL = None
+SUPABASE_ANON_KEY = None
+SUPABASE_SERVICE_ROLE_KEY = None
 
 # Authentication settings
 LOGIN_REDIRECT_URL = "fbc_books:home"

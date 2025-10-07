@@ -175,11 +175,12 @@ else:
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# Supabase configuration (optional)
-# Set these in your environment when using Supabase as backend/storage
-SUPABASE_URL = os.getenv('SUPABASE_URL')
-SUPABASE_ANON_KEY = os.getenv('SUPABASE_ANON_KEY')
-SUPABASE_SERVICE_ROLE_KEY = os.getenv('SUPABASE_SERVICE_ROLE_KEY')
+# Supabase was removed from this deployment. Keep the DATABASE_URL set to
+# your chosen Postgres provider (if any). The Supabase-specific variables
+# were intentionally removed to avoid accidental exposure.
+SUPABASE_URL = None
+SUPABASE_ANON_KEY = None
+SUPABASE_SERVICE_ROLE_KEY = None
 
 # File upload settings
 FILE_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5MB

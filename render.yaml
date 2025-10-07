@@ -12,5 +12,4 @@ services:
         value: library_system.settings_vercel
       - key: DATABASE_URL
         fromServiceSecret: DATABASE_URL
-      - key: SUPABASE_SERVICE_ROLE_KEY
-        fromServiceSecret: SUPABASE_SERVICE_ROLE_KEY
+      # Supabase service role key removed

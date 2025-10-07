@@ -30,17 +30,14 @@ $varsToPush = @(
     'DEBUG',
     'DJANGO_SETTINGS_MODULE',
     'DATABASE_URL',
-    'SUPABASE_URL',
-    'SUPABASE_ANON_KEY',
-    'SUPABASE_SERVICE_ROLE_KEY',
+    # Supabase variables removed from automatic push
     'ALLOWED_HOSTS',
     'ANNUAL_SUBSCRIPTION_FEE',
     'FINE_PER_DAY'
 )
 
 $publicVars = @(
-    'NEXT_PUBLIC_SUPABASE_URL',
-    'NEXT_PUBLIC_SUPABASE_ANON_KEY'
+    # No public Supabase variables to push
 )
 
 if ($PushPublicOnly) {

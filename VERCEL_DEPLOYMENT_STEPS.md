@@ -34,17 +34,11 @@ copy env.local .env
 
 ## Step 2: Database Setup
 
-### 2.1 Get Your Supabase Database Password
-1. Go to [Supabase Dashboard](https://supabase.com/dashboard)
-2. Select your project (`vkpbbepkwqenegbkxxli`)
-3. Go to **Settings** → **Database**
-4. Copy your database password
-
-### 2.2 Update Environment Variables
-Edit your `.env` file and replace `[YOUR-PASSWORD]` with your actual password:
+### 2.1 Database password (provider-agnostic)
+If you use a hosted Postgres provider, obtain the database password from that provider's dashboard and set the `DATABASE_URL` environment variable accordingly. Example format (do not commit real secrets):
 
 ```bash
-DATABASE_URL=postgresql://postgres:YOUR_ACTUAL_PASSWORD@db.vkpbbepkwqenegbkxxli.supabase.co:5432/postgres
+DATABASE_URL=postgresql://postgres:<YOUR_PASSWORD>@db.your-db-host:5432/postgres
 ```
 
 ### 2.3 Run Database Migrations
@@ -65,7 +59,7 @@ python manage.py collectstatic --noinput
 
 ## Step 3: Test Locally
 
-### 3.1 Test with Supabase
+### 3.1 Test Locally
 ```bash
 python manage.py runserver
 ```
@@ -109,9 +103,7 @@ Follow the prompts:
 | `SECRET_KEY` | `django-insecure-change-this-to-a-secure-secret-key-in-production-2024` |
 | `DEBUG` | `False` |
 | `DJANGO_SETTINGS_MODULE` | `library_system.settings_vercel` |
-| `SUPABASE_URL` | `https://vkpbbepkwqenegbkxxli.supabase.co` |
-| `SUPABASE_ANON_KEY` | `<REDACTED - PLACE YOUR PROD ANON KEY HERE>` |
-| `DATABASE_URL` | `postgresql://postgres:<REDACTED_PASSWORD>@db.<your-project-id>.supabase.co:5432/postgres` |
+| `DATABASE_URL` | `postgresql://postgres:<REDACTED_PASSWORD>@db.your-db-host:5432/postgres` |
 | `ANNUAL_SUBSCRIPTION_FEE` | `100000` |
 | `FINE_PER_DAY` | `5000` |
 | `ALLOWED_HOSTS` | `localhost,127.0.0.1,*.vercel.app,*.vercel.app.,vkpbbepkwqenegbkxxli.supabase.co` |
