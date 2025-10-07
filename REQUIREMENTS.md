@@ -457,20 +457,8 @@ CSRF_COOKIE_SECURE=True
 SECURE_SSL_REDIRECT=True
 ```
 
-### Docker Deployment:
-```dockerfile
-FROM python:3.11-slim
-
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-
-COPY . .
-RUN python manage.py collectstatic --noinput
-
-EXPOSE 8000
-CMD ["waitress-serve", "--host=0.0.0.0", "--port=8000", "library_system.wsgi:application"]
-```
+### Containerization (optional)
+Containerization is optional; the repository no longer includes a default container configuration. If you need to run the app in containers, create container configuration locally and avoid committing secrets or configuration files into the repository.
 
 ## 📋 Testing Requirements
 

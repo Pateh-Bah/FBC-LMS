@@ -107,7 +107,7 @@ Note on running Django on Vercel (and alternatives)
 --------------------------------------------------
 Vercel is optimized for serverless and frontend frameworks. It can support container-based deployments for full Django apps, but this repository does not include container configuration by default. If you do not use containers there are two practical approaches:
 
-1) Use a hosting provider that supports persistent Python web processes (recommended if you are not using Docker):
+1) Use a hosting provider that supports persistent Python web processes (recommended if you are not using containerization):
   - Render (render.com), Railway (railway.app), Fly (fly.io), or Heroku are excellent choices and can run Gunicorn directly from your Git repo using a `Procfile` or a `render.yaml` manifest.
   - I added a `Procfile` and a `render.yaml` manifest to this repo to make deploying to Render or Heroku straightforward.
 
@@ -115,7 +115,7 @@ Vercel is optimized for serverless and frontend frameworks. It can support conta
 
 3) Advanced: Convert Django into serverless functions for Vercel (requires substantial refactor and a WSGI-to-serverless adapter). Not recommended unless you want to invest in serverless migration.
 
-Given you prefer not to use Docker, this repository no longer includes a Dockerfile in the root. Use one of the recommended approaches instead:
+Given you prefer not to use containerization by default, this repository no longer includes container configuration in the root. Use one of the recommended approaches instead:
 
 1. Host Django on a platform that supports persistent Python processes (Render, Railway, Fly, Heroku). A `Procfile` or `render.yaml` is included for those providers.
 2. Use Vercel only for frontend and host the Django backend separately.
