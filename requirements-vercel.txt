@@ -1,4 +1,4 @@
-# Core Django requirements for Vercel deployment
+# Core Django requirements
 Django>=5.2.1
 whitenoise>=6.9.0
 dj-database-url>=2.3.0
@@ -10,3 +10,10 @@ reportlab>=4.2.0
 
 # Vercel-specific requirements
 vercel>=0.5.0
+python-jose[cryptography]>=3.3.0
+httpx>=0.24.0
+mangum>=0.17.0
+
+# AWS for static/media files
+boto3>=1.26.0
+django-storages>=1.13.2
