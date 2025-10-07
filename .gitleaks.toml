@@ -1,0 +1,29 @@
+title = "FBC-LMS Gitleaks Configuration"
+
+[allowlist]
+  description = "Allowlisted files and paths"
+  paths = [
+    '''env\.example''',
+    '''.*\.md$''',
+    '''requirements.*\.txt$'''
+  ]
+
+[[rules]]
+  id = "django-secret-key"
+  description = "Django Secret Key"
+  regex = '''SECRET_KEY.*['"][^'"]*['"]'''
+
+[[rules]]
+  id = "supabase-url"
+  description = "Supabase URL"
+  regex = '''supabase.*\.co'''
+
+[[rules]]
+  id = "supabase-key"
+  description = "Supabase API Key"
+  regex = '''eyJ[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*'''
+
+[[rules]]
+  id = "database-url"
+  description = "Database Connection String"
+  regex = '''postgres(ql)?:\/\/[A-Za-z0-9-]+:[A-Za-z0-9-]+@[A-Za-z0-9-]+\.[A-Za-z0-9-]+:[0-9]+\/[A-Za-z0-9-]+'''
