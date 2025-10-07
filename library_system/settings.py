@@ -15,15 +15,11 @@ from pathlib import Path
 from dotenv import load_dotenv
 import dj_database_url
 
+# Load environment variables
+load_dotenv()
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-# Load environment variables from .env.local if it exists, otherwise load .env
-dotenv_path = BASE_DIR / '.env.local'
-if dotenv_path.is_file():
-    load_dotenv(dotenv_path=dotenv_path)
-else:
-    load_dotenv()
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("SECRET_KEY")
@@ -105,16 +101,15 @@ TEMPLATES = [
 WSGI_APPLICATION = "library_system.wsgi.application"
 
 # Database
-# The default database is configured using the DATABASE_URL environment variable (Supabase).
-# A secondary 'sqlite' database is also configured for local use.
 DATABASES = {
-    'default': dj_database_url.config(conn_max_age=600),
-    'sqlite': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    "default": dj_database_url.config(
+        default=os.getenv(
+            "DATABASE_URL", "sqlite:///" + os.path.join(BASE_DIR, "db.sqlite3")
+        ),
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
 }
-
 
 # Cache
 CACHES = {
