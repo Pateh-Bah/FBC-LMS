@@ -14,16 +14,24 @@ sys.path.insert(0, str(project_root))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'library_system.settings_vercel')
 os.environ.setdefault('VERCEL_DEPLOYMENT', 'true')
 
-# Import Django and configure
+# Configure Django before importing
 import django
+from django.conf import settings
+
+# Only setup Django if not already configured
+if not settings.configured:
+    django.setup()
+
+# Import Django components after setup
 from django.core.wsgi import get_wsgi_application
 from django.http import HttpResponse, JsonResponse
 
-# Configure Django
-django.setup()
-
 # Get WSGI application
-application = get_wsgi_application()
+try:
+    application = get_wsgi_application()
+except Exception as e:
+    print(f"[vercel-serverless] Django setup error: {e}")
+    application = None
 
 # Try to use vercel_wsgi adapter for better compatibility/performance
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
@@ -40,6 +48,14 @@ def handler(request):
     Vercel serverless function handler
     """
     try:
+        # Check if Django application is available
+        if application is None:
+            return {
+                'statusCode': 500,
+                'headers': {'Content-Type': 'application/json'},
+                'body': '{"error": "Django application not configured"}'
+            }
+
         # Extract request details
         method = request.get('method', 'GET')
         path = request.get('path', '/')

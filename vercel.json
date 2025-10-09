@@ -30,12 +30,18 @@
   ],
   "env": {
     "DJANGO_SETTINGS_MODULE": "library_system.settings_vercel",
-    "PYTHONPATH": "$PYTHONPATH:."
+    "PYTHONPATH": "$PYTHONPATH:.",
+    "PYTHONUNBUFFERED": "1"
   },
   "functions": {
     "api/index.py": {
       "maxDuration": 60,
       "memory": 1024
+    }
+  },
+  "build": {
+    "env": {
+      "DJANGO_SETTINGS_MODULE": "library_system.settings_vercel"
     }
   }
 }
